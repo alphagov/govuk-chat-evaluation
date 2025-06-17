@@ -20,16 +20,19 @@ def run_rake_task_mock(mocker):
                     "exact_path": "/foo",
                     "plain_content": "Content for foo",
                     "weighted_score": 1.0,
+                    "original_score": 1.5,
                 },
                 {
                     "exact_path": "/bar",
                     "plain_content": "Content for bar",
                     "weighted_score": 0.8,
+                    "original_score": 0.9,
                 },
                 {
                     "exact_path": "/baz",
                     "plain_content": "Content for baz",
                     "weighted_score": 0.5,
+                    "original_score": 0.4,
                 },
             ]
         else:
@@ -38,11 +41,13 @@ def run_rake_task_mock(mocker):
                     "exact_path": "/path1",
                     "plain_content": "Content for path1",
                     "weighted_score": 1.0,
+                    "original_score": 1.1,
                 },
                 {
                     "exact_path": "/path2",
                     "plain_content": "Content for path2",
                     "weighted_score": 0.9,
+                    "original_score": 0.8,
                 },
             ]
 
@@ -71,12 +76,19 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         EvaluationResult(
             question="Question 1",
             expected_exact_paths=["/foo"],
-            actual_exact_paths_and_scores=[("/foo", 1.0), ("/bar", 0.8), ("/baz", 0.5)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/foo", "weighted_score": 1.0, "original_score": 1.5},
+                {"exact_path": "/bar", "weighted_score": 0.8, "original_score": 0.9},
+                {"exact_path": "/baz", "weighted_score": 0.5, "original_score": 0.4},
+            ],
         ),
         EvaluationResult(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 1.0), ("/path2", 0.9)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 1.0, "original_score": 1.1},
+                {"exact_path": "/path2", "weighted_score": 0.9, "original_score": 0.8},
+            ],
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results("titan", generate_inputs)

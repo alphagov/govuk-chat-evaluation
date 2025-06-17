@@ -17,7 +17,9 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2", "/path3", "/path4"],
-            actual_exact_paths_and_scores=[("/path1", 0.9)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9}
+            ],
         )
 
         np.testing.assert_equal(
@@ -25,7 +27,13 @@ class TestEvaluationResult:
             {
                 "question": "Test question",
                 "expected_exact_paths": ["/path1", "/path2", "/path3", "/path4"],
-                "actual_exact_paths_and_scores": [("/path1", 0.9)],
+                "actual_exact_paths_and_scores": [
+                    {
+                        "exact_path": "/path1",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    }
+                ],
                 "precision": 1.0,
                 "recall": 0.25,
                 "f1_score": 0.4,
@@ -44,7 +52,9 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 0.9)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9}
+            ],
         )
 
         assert result.recall() == 0.5
@@ -53,7 +63,10 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=[],
-            actual_exact_paths_and_scores=[("/path1", 0.9), ("/path3", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         )
 
         assert np.isnan(result.recall())
@@ -63,10 +76,10 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             actual_exact_paths_and_scores=[
-                ("/path1", 0.9),
-                ("/path2", 0.8),
-                ("/path3", 0.7),
-                ("/path4", 0.6),
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path2", "weighted_score": 0.8, "original_score": 0.8},
+                {"exact_path": "/path3", "weighted_score": 0.7, "original_score": 0.7},
+                {"exact_path": "/path4", "weighted_score": 0.6, "original_score": 0.6},
             ],
         )
 
@@ -86,9 +99,9 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             actual_exact_paths_and_scores=[
-                ("/path1", 0.9),
-                ("/path3", 0.8),
-                ("/path4", 0.7),
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+                {"exact_path": "/path4", "weighted_score": 0.7, "original_score": 0.7},
             ],
         )
 
@@ -107,7 +120,10 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 0.9), ("/path3", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         )
 
         assert result.f2_score() == 0.5
@@ -125,7 +141,10 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 0.9), ("/path3", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         )
 
         assert result.false_positive_cases == [{"/path3": 0.8}]
@@ -134,7 +153,10 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 0.9), ("/path3", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         )
 
         np.testing.assert_equal(result.false_negative_cases, [{"/path2": float("nan")}])
@@ -143,7 +165,10 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[("/path1", 0.9), ("/path3", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         )
 
         assert result.true_positive_cases == [{"/path1": 0.9}]
@@ -156,34 +181,81 @@ class TestAggregateResults:
             EvaluationResult(
                 question="Q1",
                 expected_exact_paths=["/path1", "/path2"],
-                actual_exact_paths_and_scores=[("/path1", 0.9), ("/path2", 0.8)],
+                actual_exact_paths_and_scores=[
+                    {
+                        "exact_path": "/path1",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    },
+                    {
+                        "exact_path": "/path2",
+                        "weighted_score": 0.8,
+                        "original_score": 0.8,
+                    },
+                ],
             ),
             EvaluationResult(
                 question="Q2",
                 expected_exact_paths=["/path1"],
-                actual_exact_paths_and_scores=[("/path3", 0.9)],
+                actual_exact_paths_and_scores=[
+                    {
+                        "exact_path": "/path3",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    }
+                ],
             ),
             EvaluationResult(
                 question="Q3",
                 expected_exact_paths=["/path1", "/path2"],
-                actual_exact_paths_and_scores=[("/path1", 0.9)],
+                actual_exact_paths_and_scores=[
+                    {
+                        "exact_path": "/path1",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    },
+                ],
             ),
             EvaluationResult(
                 question="Q4",
                 expected_exact_paths=["/path1"],
                 actual_exact_paths_and_scores=[
-                    ("/path1", 0.9),
-                    ("/path2", 0.8),
-                    ("/path3", 0.7),
+                    {
+                        "exact_path": "/path1",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    },
+                    {
+                        "exact_path": "/path2",
+                        "weighted_score": 0.8,
+                        "original_score": 0.8,
+                    },
+                    {
+                        "exact_path": "/path3",
+                        "weighted_score": 0.7,
+                        "original_score": 0.7,
+                    },
                 ],
             ),
             EvaluationResult(
                 question="Q5",
                 expected_exact_paths=["/path1", "/path2"],
                 actual_exact_paths_and_scores=[
-                    ("/path1", 0.9),
-                    ("/path2", 0.8),
-                    ("/path3", 0.7),
+                    {
+                        "exact_path": "/path1",
+                        "weighted_score": 0.9,
+                        "original_score": 0.9,
+                    },
+                    {
+                        "exact_path": "/path2",
+                        "weighted_score": 0.8,
+                        "original_score": 0.8,
+                    },
+                    {
+                        "exact_path": "/path3",
+                        "weighted_score": 0.7,
+                        "original_score": 0.7,
+                    },
                 ],
             ),
         ]
@@ -277,12 +349,17 @@ def mock_evaluation_data_file(tmp_path):
         {
             "question": "Question 1",
             "expected_exact_paths": ["/path1", "/path2"],
-            "actual_exact_paths_and_scores": [("/path1", 0.9), ("/path2", 0.8)],
+            "actual_exact_paths_and_scores": [
+                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/path2", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         },
         {
             "question": "Question 2",
             "expected_exact_paths": ["/path1"],
-            "actual_exact_paths_and_scores": [("/path3", 0.9)],
+            "actual_exact_paths_and_scores": [
+                {"exact_path": "/path3", "weighted_score": 0.9, "original_score": 0.9}
+            ],
         },
     ]
 

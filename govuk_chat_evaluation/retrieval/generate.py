@@ -35,7 +35,12 @@ def generate_inputs_to_evaluation_results(
             env,
         )
         exact_paths_and_scores = [
-            (item["exact_path"], item["weighted_score"]) for item in result
+            {
+                "exact_path": item["exact_path"],
+                "weighted_score": item["weighted_score"],
+                "original_score": item["original_score"],
+            }
+            for item in result
         ]
 
         return EvaluationResult(

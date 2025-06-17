@@ -21,11 +21,11 @@ DECIMAL_PLACES = 4
 class EvaluationResult(BaseModel):
     question: str
     expected_exact_paths: list[str]
-    actual_exact_paths_and_scores: list[tuple[str, float]]
+    actual_exact_paths_and_scores: list[dict[str, Any]]
 
     @property
     def actual_exact_paths(self) -> list[str]:
-        return [path for path, _ in self.actual_exact_paths_and_scores]
+        return [item["exact_path"] for item in self.actual_exact_paths_and_scores]
 
     @property
     def all_paths(self) -> list[str]:
@@ -42,9 +42,9 @@ class EvaluationResult(BaseModel):
     @property
     def false_positive_cases(self) -> list[dict[str, float]]:
         return [
-            {path: score}
-            for path, score in self.actual_exact_paths_and_scores
-            if path not in self.expected_exact_paths
+            {item["exact_path"]: item["weighted_score"]}
+            for item in self.actual_exact_paths_and_scores
+            if item["exact_path"] not in self.expected_exact_paths
         ]
 
     @property

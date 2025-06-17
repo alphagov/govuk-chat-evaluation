@@ -61,12 +61,17 @@ def mock_data_generation(mocker):
         EvaluationResult(
             question="Question",
             expected_exact_paths=["/foo", "/bar"],
-            actual_exact_paths_and_scores=[("/foo", 0.9), ("/bar", 0.8)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/foo", "weighted_score": 0.9, "original_score": 0.9},
+                {"exact_path": "/bar", "weighted_score": 0.8, "original_score": 0.8},
+            ],
         ),
         EvaluationResult(
             question="Question",
             expected_exact_paths=["/foo"],
-            actual_exact_paths_and_scores=[("/bar", 0.9)],
+            actual_exact_paths_and_scores=[
+                {"exact_path": "/bar", "weighted_score": 0.9, "original_score": 0.9}
+            ],
         ),
     ]
 
