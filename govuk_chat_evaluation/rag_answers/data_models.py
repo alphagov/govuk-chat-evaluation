@@ -141,14 +141,15 @@ class MetricConfig(BaseModel):
 class Config(BaseConfig):
     what: BaseConfig.GenericFields.what
     generate: BaseConfig.GenericFields.generate
-    provider: BaseConfig.GenericFields.provider_openai_or_claude
+    llm_provider: BaseConfig.GenericFields.provider_openai_or_claude
+    embedding_provider: BaseConfig.GenericFields.provider_openai_or_titan
     input_path: BaseConfig.GenericFields.input_path
     metrics: list[MetricConfig]
     n_runs: int
 
     @model_validator(mode="after")
     def run_validatons(self):
-        return self._validate_fields_required_for_generate("provider")
+        return self._validate_fields_required_for_generate("llm_provider")
 
     def metric_instances(self):
         """Return the list of runtime metric objects for evaluation."""

@@ -33,7 +33,7 @@ def main(**cli_args):
 
     if config.generate:
         evaluate_path = generate_and_write_dataset(
-            config.input_path, cast(str, config.provider), output_dir
+            config.input_path, config.llm_provider, config.embedding_provider, output_dir
         )
     else:
         evaluate_path = config.input_path

@@ -36,6 +36,11 @@ class BaseConfig(BaseModel):
             FilePath, Field(..., description="Path to the data file used to evaluate")
         ]
 
+        provider_openai_or_titan: Annotated[
+            str,
+            Field(..., pattern="^(openai|titan)$", description="Which embedding engine to use"),
+        ]
+
     def _validate_fields_required_for_generate(self, *fields) -> Self:
         if getattr(self, "generate", False):
             for field in fields:

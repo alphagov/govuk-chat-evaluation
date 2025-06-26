@@ -7,13 +7,17 @@ from .data_models import GenerateInput, EvaluationTestCase, StructuredContext
 
 
 def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):
+    llm_provider: str
+    embedding_provider: str
+    output_dir: Path
+
     models = jsonl_to_models(Path(input_path), GenerateInput)
-    generated = generate_inputs_to_evaluation_test_cases(provider, models)
+    generated = generate_inputs_to_evaluation_test_cases(llm_provider, enbedding_provider, models)
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_test_cases(
-    provider: str, generate_inputs: list[GenerateInput]
+    llm_provider: str, embedding_provider: str, generate_inputs: list[GenerateInput]
 ) -> list[EvaluationTestCase]:
     """Asynchronously run rake tasks for each GenerateInput instance to
     generate models that can be evaluated"""
@@ -21,7 +25,7 @@ def generate_inputs_to_evaluation_test_cases(
     async def generate_input_to_evaluation_test_case(input: GenerateInput):
         env = {"INPUT": input.question}
         result = await run_rake_task(
-            f"evaluation:generate_rag_structured_answer_response[{provider}]",
+            f"evaluation:generate_rag_structured_answer_response[{llm_provider},{embedding_provider}]",
             env,
         )
 
