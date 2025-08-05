@@ -27,7 +27,9 @@ jobs:
       - name: Run regular tests
         run: uv run pytest tests
 
-      - name: Run real_openai tests
+      # Don't real these tests for dependabot to avoid needing to share OpenAI API key
+      - if: github.actor != 'dependabot[bot]'
+        name: Run real_openai tests
         run: uv run pytest -m 'real_openai' tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
