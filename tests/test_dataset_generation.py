@@ -76,7 +76,9 @@ async def test_generate_dataset():
             return {"input": item, "output": f"generated-{item}"}
 
     ground_truth = ["question1", "question2", "question3"]
-    result = await generate_dataset(ground_truth, mock_generation_func)
+    result = await generate_dataset(
+        ground_truth, mock_generation_func, max_concurrent=3
+    )
 
     expected_result = [
         {"input": "question1", "output": "generated-question1"},
