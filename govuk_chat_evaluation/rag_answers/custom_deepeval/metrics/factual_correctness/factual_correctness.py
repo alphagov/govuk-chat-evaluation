@@ -61,7 +61,7 @@ class FactualCorrectnessMetric(BaseMetric):
         ):
             self.confusion_matrix = await self._a_classify_statements(
                 test_case.input,
-                test_case.actual_output,
+                test_case.actual_output or "",
                 test_case.expected_output or "",
             )
             logging.debug(
