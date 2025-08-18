@@ -19,6 +19,7 @@ class TestEvaluationResult:
             expected_outcome="genuine_rag",
             actual_outcome="greetings",
             confidence_score=0.9,
+            answer=None,
         )
 
         assert result.for_csv() == {
@@ -26,6 +27,7 @@ class TestEvaluationResult:
             "expected_outcome": "genuine_rag",
             "actual_outcome": "greetings",
             "confidence_score": 0.9,
+            "answer": None,
         }
 
 
@@ -38,30 +40,35 @@ class TestAggregateResults:
                 expected_outcome="genuine_rag",
                 actual_outcome="genuine_rag",
                 confidence_score=0.95,
+                answer=None,
             ),
             EvaluationResult(
                 question="Q2",
                 expected_outcome="about_mps",
                 actual_outcome="about_mps",
                 confidence_score=0.9,
+                answer="This is an about mps answer",
             ),
             EvaluationResult(
                 question="Q3",
                 expected_outcome="character_fun",
                 actual_outcome="genuine_rag",
                 confidence_score=0.5,
+                answer="This is a character fun answer",
             ),
             EvaluationResult(
                 question="Q4",
                 expected_outcome="character_fun",
                 actual_outcome="about_mps",
                 confidence_score=0.3,
+                answer="This is a character fun answer",
             ),
             EvaluationResult(
                 question="Q5",
                 expected_outcome="genuine_rag",
                 actual_outcome="genuine_rag",
                 confidence_score=0.5,
+                answer=None,
             ),
         ]
 
@@ -104,12 +111,14 @@ class TestAggregateResults:
             "predicted_classification": "character_fun",
             "actual_classification": "genuine_rag",
             "confidence_score": 0.5,
+            "answer": "This is a character fun answer",
         }
         assert miscategorised[1] == {
             "question": "Q4",
             "predicted_classification": "character_fun",
             "actual_classification": "about_mps",
             "confidence_score": 0.3,
+            "answer": "This is a character fun answer",
         }
 
     def test_to_dict(self, sample_results):
@@ -141,12 +150,14 @@ def mock_evaluation_data_file(tmp_path):
             "expected_outcome": "genuine_rag",
             "actual_outcome": "genuine_rag",
             "confidence_score": 0.95,
+            "answer": None,
         },
         {
             "question": "Question 2",
             "expected_outcome": "genuine_rag",
             "actual_outcome": "about_mps",
             "confidence_score": 0.95,
+            "answer": "This is an about mps answer",
         },
     ]
 
@@ -212,6 +223,7 @@ def test_evaluate_and_output_results_writes_miscategorised_cases(
         assert "question" in headers
         assert "predicted_classification" in headers
         assert "actual_classification" in headers
+        assert "answer" in headers
 
 
 def test_evaluate_and_output_results_prints_aggregates(

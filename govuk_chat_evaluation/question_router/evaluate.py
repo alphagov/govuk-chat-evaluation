@@ -25,6 +25,7 @@ class EvaluationResult(BaseModel):
     expected_outcome: str
     actual_outcome: str
     confidence_score: float
+    answer: str | None = None
 
     def for_csv(self) -> dict[str, Any]:
         return {**self.model_dump()}
@@ -97,6 +98,7 @@ class AggregateResults:
                 "predicted_classification": result.expected_outcome,
                 "actual_classification": result.actual_outcome,
                 "confidence_score": result.confidence_score,
+                "answer": result.answer,
             }
             for result in self.evaluation_results
             if result.expected_outcome != result.actual_outcome
