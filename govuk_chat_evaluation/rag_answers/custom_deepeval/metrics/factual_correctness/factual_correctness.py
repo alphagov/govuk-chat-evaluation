@@ -75,7 +75,9 @@ class FactualCorrectnessMetric(BaseMetric):
             self.score = self._calculate_score()
             self.reason = self._generate_reason()
             self.success = self.score >= self.threshold
-            capture_metric_type(self.__name__, async_mode=self.async_mode)
+            capture_metric_type(
+                self.__name__, async_mode=self.async_mode, in_component=False
+            )
             return self.score
         else:
             self.error = f"Error: no facts were classified. confusion_matrix is empty for input: {input}."
