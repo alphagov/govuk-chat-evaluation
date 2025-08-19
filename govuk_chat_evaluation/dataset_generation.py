@@ -7,6 +7,8 @@ from typing import Any, Callable, Awaitable
 from tqdm.asyncio import tqdm
 import logging
 
+MAX_CONCURRENT_TASKS = 5
+
 
 async def run_rake_task(task_name: str, env_vars: dict[str, str] | None = None) -> Any:
     """Asynchronously run a rake task on the GOV.UK Chat project expected to be
@@ -36,13 +38,15 @@ async def run_rake_task(task_name: str, env_vars: dict[str, str] | None = None) 
 
 
 async def generate_dataset(
-    ground_truth: list[Any], generator_func: Callable[[Any], Awaitable[Any]]
+    ground_truth: list[Any],
+    generator_func: Callable[[Any], Awaitable[Any]],
+    max_concurrent: int = MAX_CONCURRENT_TASKS,
 ) -> list[Any]:
     """Asynchronously generate data for each item in the ground_truth list by
     calling the generator_func with each item. Outputs a progress bar and
     cancels all jobs if one fails."""
 
-    semaphore = asyncio.Semaphore(10)
+    semaphore = asyncio.Semaphore(max_concurrent)
 
     async def run_generation_with_limited_async(item, semaphore):
         async with semaphore:
