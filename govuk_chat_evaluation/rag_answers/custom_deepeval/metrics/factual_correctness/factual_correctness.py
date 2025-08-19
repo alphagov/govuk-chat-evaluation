@@ -61,7 +61,7 @@ class FactualCorrectnessMetric(BaseMetric):
         ):
             self.confusion_matrix = await self._a_classify_statements(
                 test_case.input,
-                test_case.actual_output,
+                test_case.actual_output or "",
                 test_case.expected_output or "",
             )
             logging.debug(
@@ -75,7 +75,9 @@ class FactualCorrectnessMetric(BaseMetric):
             self.score = self._calculate_score()
             self.reason = self._generate_reason()
             self.success = self.score >= self.threshold
-            capture_metric_type(self.__name__, async_mode=self.async_mode)
+            capture_metric_type(
+                self.__name__, async_mode=self.async_mode, in_component=False
+            )
             return self.score
         else:
             self.error = f"Error: no facts were classified. confusion_matrix is empty for input: {input}."
