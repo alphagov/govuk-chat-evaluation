@@ -2,7 +2,7 @@ from deepeval.test_case import LLMTestCase
 from pydantic import BaseModel, model_validator
 from pydantic.dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 import uuid
 
 from deepeval.metrics import (
@@ -41,8 +41,7 @@ class StructuredContext(BaseModel):
 
 class GenerateInput(BaseModel):
     question: str
-    ideal_answer: str
-    # TODO: lots more data fields
+    ideal_answer: Optional[str] = None
 
 
 class EvaluationTestCase(GenerateInput):
@@ -173,6 +172,6 @@ class EvaluationResult:
     name: str
     input: str
     actual_output: str
-    expected_output: str
     retrieval_context: list[str]
     run_metric_outputs: list[RunMetricOutput]
+    expected_output: Optional[str] = None

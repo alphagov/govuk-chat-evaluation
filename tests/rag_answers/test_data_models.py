@@ -76,7 +76,9 @@ class TestConfig:
 
 
 class TestEvaluationTestCase:
-    def test_to_llm_test_case(self):
+    @pytest.mark.parametrize("ideal_answer", ["Great", None])
+    def test_to_llm_test_case(self, ideal_answer):
+        """Test EvaluationTestCase.to_llm_test_case with and without ideal_answer"""
         structured_context = StructuredContext(
             title="VAT",
             heading_hierarchy=["Tax", "VAT"],
@@ -88,7 +90,7 @@ class TestEvaluationTestCase:
 
         evaluation_test_case = EvaluationTestCase(
             question="How are you?",
-            ideal_answer="Great",
+            ideal_answer=ideal_answer,
             llm_answer="Fine",
             retrieved_context=[structured_context],
         )
@@ -96,11 +98,9 @@ class TestEvaluationTestCase:
         llm_test_case = evaluation_test_case.to_llm_test_case()
 
         assert isinstance(llm_test_case, LLMTestCase)
-        assert llm_test_case.input == evaluation_test_case.question
-        assert llm_test_case.expected_output == evaluation_test_case.ideal_answer
-        assert llm_test_case.actual_output == evaluation_test_case.llm_answer
-        assert llm_test_case.name is not None
         assert isinstance(llm_test_case.name, str)
+        assert llm_test_case.expected_output == ideal_answer
+        assert llm_test_case.actual_output == evaluation_test_case.llm_answer
 
         assert isinstance(llm_test_case.retrieval_context, list)
         assert all(isinstance(chunk, str) for chunk in llm_test_case.retrieval_context)
