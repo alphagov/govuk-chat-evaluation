@@ -37,6 +37,7 @@ def generate_inputs_to_evaluation_results(
             expected_outcome=input.expected_outcome,
             actual_outcome=result["classification"],
             confidence_score=result["confidence_score"],
+            answer=result["answer"],
         )
 
     return asyncio.run(

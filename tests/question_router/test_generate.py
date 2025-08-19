@@ -15,9 +15,17 @@ from govuk_chat_evaluation.question_router.generate import (
 def run_rake_task_mock(mocker):
     async def default_side_effect(_, env):
         if env["INPUT"] == "Question 1":
-            return {"classification": "genuine_rag", "confidence_score": 0.9}
+            return {
+                "classification": "genuine_rag",
+                "confidence_score": 0.9,
+                "answer": None,
+            }
         else:
-            return {"classification": "greetings", "confidence_score": 0.8}
+            return {
+                "classification": "greetings",
+                "confidence_score": 0.8,
+                "answer": "This is a greetings answer",
+            }
 
     mock = mocker.patch(
         "govuk_chat_evaluation.question_router.generate.run_rake_task",
@@ -46,12 +54,14 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             expected_outcome="genuine_rag",
             actual_outcome="genuine_rag",
             confidence_score=0.9,
+            answer=None,
         ),
         EvaluationResult(
             question="Question 2",
             expected_outcome="greetings",
             actual_outcome="greetings",
             confidence_score=0.8,
+            answer="This is a greetings answer",
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results("openai", generate_inputs)
