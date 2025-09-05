@@ -1,0 +1,3 @@
+what: Evaluating topic tagger
+generate: true
+input_path: data/topic_tagger.jsonl

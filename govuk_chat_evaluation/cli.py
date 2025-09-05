@@ -6,6 +6,7 @@ from . import output_guardrails
 from . import question_router
 from . import rag_answers
 from . import retrieval
+from . import topic_tagger
 
 load_dotenv()
 
@@ -20,3 +21,4 @@ main.add_command(output_guardrails.main)
 main.add_command(question_router.main)
 main.add_command(rag_answers.main)
 main.add_command(retrieval.main)
+main.add_command(topic_tagger.main)
