@@ -7,9 +7,9 @@ import uuid
 
 from deepeval.metrics import (
     FaithfulnessMetric,
-    AnswerRelevancyMetric,
     BiasMetric,
 )
+from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
 from deepeval.models.llms.openai_model import GPTModel
 
 from .custom_deepeval.metrics.factual_correctness import (
