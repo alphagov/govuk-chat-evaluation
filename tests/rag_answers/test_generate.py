@@ -8,6 +8,7 @@ from govuk_chat_evaluation.rag_answers.generate import (
     generate_and_write_dataset,
     GenerateInput,
     EvaluationTestCase,
+    StructuredContext,
 )
 
 
@@ -17,7 +18,30 @@ def run_rake_task_mock(mocker):
         "govuk_chat_evaluation.rag_answers.generate.run_rake_task",
         new_callable=AsyncMock,
     )
-    mock.side_effect = lambda *_: {"message": "An answer"}
+
+    sources = [
+        {
+            "used": True,
+            "search_score": 0.1423,
+            "weighted_score": 1.51231,
+            "chunk": {
+                "content_id": "383f0b50-e205-4695-8204-1d8b4ff19346",
+                "locale": "en",
+                "chunk_index": 0,
+                "digest": "feca7f0d1bddfde25b3627e72716f2fb91441bf8498d48d11fcb67fcc2186015",
+                "title": "Title",
+                "description": None,
+                "heading_hierarchy": ["Heading 1", "Heading 2"],
+                "base_path": "/income-tax",
+                "exact_path": "/income-tax",
+                "document_type": "guide",
+                "parent_document_type": None,
+                "html_content": "<p>Some content</p>",
+                "plain_content": "Some content",
+            },
+        }
+    ]
+    mock.side_effect = lambda *_: {"message": "An answer", "sources": sources}
     return mock
 
 
@@ -27,18 +51,26 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
         GenerateInput(question="Question 1", ideal_answer="Answer 1"),
         GenerateInput(question="Question 2", ideal_answer="Answer 2"),
     ]
+    structured_context = StructuredContext(
+        title="Title",
+        heading_hierarchy=["Heading 1", "Heading 2"],
+        html_content="<p>Some content</p>",
+        exact_path="/income-tax",
+        base_path="/income-tax",
+    )
+
     expected_results = [
         EvaluationTestCase(
             question="Question 1",
             ideal_answer="Answer 1",
             llm_answer="An answer",
-            retrieved_context=[],
+            retrieved_context=[structured_context],
         ),
         EvaluationTestCase(
             question="Question 2",
             ideal_answer="Answer 2",
             llm_answer="An answer",
-            retrieved_context=[],
+            retrieved_context=[structured_context],
         ),
     ]
     actual_results = generate_inputs_to_evaluation_test_cases("openai", generate_inputs)
@@ -51,7 +83,7 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
 def test_generate_models_to_evaluation_test_cases_runs_expected_rake_task(
     run_rake_task_mock,
 ):
-    run_rake_task_mock.side_effect = lambda *_: {"message": "An answer"}
+    run_rake_task_mock.side_effect = lambda *_: {"message": "An answer", "sources": []}
     generate_inputs = [
         GenerateInput(question="Question 1", ideal_answer="Answer"),
     ]
