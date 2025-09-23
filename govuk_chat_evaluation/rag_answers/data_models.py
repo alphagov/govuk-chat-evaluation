@@ -4,6 +4,7 @@ from pydantic.dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
 import uuid
+import os
 
 from deepeval.metrics import (
     FaithfulnessMetric,
@@ -11,6 +12,7 @@ from deepeval.metrics import (
 )
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
 from deepeval.models.llms.openai_model import GPTModel
+from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from .custom_deepeval.metrics.factual_correctness import (
     FactualCorrectnessMetric,
@@ -85,8 +87,12 @@ class LLMJudgeModelConfig(BaseModel):
         """Return the LLM judge model instance."""
         match self.model:
             case LLMJudgeModel.AMAZON_NOVA_MICRO_1:
-                raise NotImplementedError(
-                    f"Judge model {self.model} instantiation not implemented."
+                region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
+                return AmazonBedrockModel(
+                    model_id=self.model.value,
+                    region_name=region,
+                    temperature=self.temperature,
+                    generation_kwargs={"max_tokens": 6000},
                 )
                 # Placeholder for actual class instance - e.g., CustomAmazonNovaJudge(model_name=self.model.value, temperature=self.temperature)
             case LLMJudgeModel.AMAZON_NOVA_PRO_1:

@@ -5,12 +5,17 @@ from deepeval.metrics import (
     FaithfulnessMetric,
     BiasMetric,
 )
+from deepeval.models.llms.openai_model import GPTModel
+from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
     MetricConfig,
     Config,
     StructuredContext,
+    MetricName,
+    LLMJudgeModel,
+    LLMJudgeModelConfig,
 )
 
 
@@ -155,6 +160,23 @@ class TestMetricConfig:
     def test_to_metric_instance(self, config_dict, expected_class):
         metric_config = MetricConfig(**config_dict)
         assert isinstance(metric_config.to_metric_instance(), expected_class)
+
+    @pytest.mark.parametrize(
+        "judge_model, expected_llm_cls",
+        [
+            (LLMJudgeModel.GPT_4O, GPTModel),
+            (LLMJudgeModel.GPT_4O_MINI, GPTModel),
+            (LLMJudgeModel.AMAZON_NOVA_MICRO_1, AmazonBedrockModel),
+        ],
+    )
+    def test_metric_config_instantiate_llm_judge(self, judge_model, expected_llm_cls):
+        metric_config = MetricConfig(
+            name=MetricName.FAITHFULNESS,
+            threshold=0.5,
+            llm_judge=LLMJudgeModelConfig(model=judge_model, temperature=0.0),
+        )
+        metric = metric_config.to_metric_instance()
+        assert isinstance(metric.model, expected_llm_cls)
 
     def test_get_metric_instance_invalid_enum(self):
         config_dict = {
