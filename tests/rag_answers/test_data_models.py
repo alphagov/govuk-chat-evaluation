@@ -167,6 +167,7 @@ class TestMetricConfig:
             (LLMJudgeModel.GPT_4O, GPTModel),
             (LLMJudgeModel.GPT_4O_MINI, GPTModel),
             (LLMJudgeModel.AMAZON_NOVA_MICRO_1, AmazonBedrockModel),
+            (LLMJudgeModel.AMAZON_NOVA_PRO_1, AmazonBedrockModel),
         ],
     )
     def test_metric_config_instantiate_llm_judge(self, judge_model, expected_llm_cls):

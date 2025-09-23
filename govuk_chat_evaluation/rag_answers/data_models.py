@@ -94,10 +94,13 @@ class LLMJudgeModelConfig(BaseModel):
                     temperature=self.temperature,
                     generation_kwargs={"max_tokens": 6000},
                 )
-                # Placeholder for actual class instance - e.g., CustomAmazonNovaJudge(model_name=self.model.value, temperature=self.temperature)
             case LLMJudgeModel.AMAZON_NOVA_PRO_1:
-                raise NotImplementedError(
-                    f"Judge model {self.model} instantiation not implemented."
+                region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
+                return AmazonBedrockModel(
+                    model_id=self.model.value,
+                    region_name=region,
+                    temperature=self.temperature,
+                    generation_kwargs={"max_tokens": 6000},
                 )
             case LLMJudgeModel.GEMINI_15_PRO:
                 raise NotImplementedError(
