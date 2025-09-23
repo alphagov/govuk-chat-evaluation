@@ -24,7 +24,7 @@ from ..config import BaseConfig
 class StructuredContext(BaseModel):
     title: str
     heading_hierarchy: list[str]
-    description: str
+    description: Optional[str] = None
     html_content: str
     exact_path: str
     base_path: str
