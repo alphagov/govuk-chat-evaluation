@@ -61,6 +61,23 @@ class TestAggregateResults:
                     RunMetricOutput(run=0, metric="bias", score=0.0),
                 ],
             ),
+            EvaluationResult(
+                name="Test3",
+                input="What error can occur?",
+                actual_output="Completion rate limited",
+                expected_output="Completion rate limited",
+                retrieval_context=[],
+                run_metric_outputs=[
+                    RunMetricOutput(run=0, metric="faithfulness", score=1.0),
+                    RunMetricOutput(
+                        run=1,
+                        metric="faithfulness",
+                        error="Some error occurred while producing deepeval metric output",
+                    ),
+                    RunMetricOutput(run=0, metric="bias", score=0.2),
+                    RunMetricOutput(run=0, metric="bias", score=0.1),
+                ],
+            ),
         ]
 
     def test_per_input_metric_averages(self, mock_evaluation_results):
@@ -75,17 +92,20 @@ class TestAggregateResults:
             ("mean", "faithfulness"),
             ("std", "bias"),
             ("std", "faithfulness"),
+            ("n_datapoints", "bias"),
+            ("n_datapoints", "faithfulness"),
         ]
-        assert list(metric_averages[("name", "")]) == ["Test1", "Test2"]
+        assert list(metric_averages[("name", "")]) == ["Test1", "Test2", "Test3"]
         assert list(metric_averages[("input", "")]) == [
             "Is Vat a tax?",
             "What is capital of France?",
+            "What error can occur?",
         ]
 
     def test_summary(self, mock_evaluation_results):
         summary = AggregatedResults(mock_evaluation_results).summary
         assert isinstance(summary, pd.DataFrame)
-        assert list(summary.columns) == ["median", "mean", "std"]
+        assert list(summary.columns) == ["median", "mean", "std", "n_datapoints"]
         assert list(summary.index) == ["bias", "faithfulness"]
 
     def test_export_to_csvs(self, mock_evaluation_results, tmp_path):
