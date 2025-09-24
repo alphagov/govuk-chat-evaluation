@@ -128,10 +128,11 @@ def convert_deepeval_output_to_evaluation_results(
                         RunMetricOutput(
                             run=run_idx,
                             metric=metric_data.name,
-                            score=metric_data.score,
-                            reason=metric_data.reason,
-                            cost=metric_data.evaluation_cost,
-                            success=metric_data.success,
+                            score=getattr(metric_data, "score", None),
+                            reason=getattr(metric_data, "reason", None),
+                            cost=getattr(metric_data, "evaluation_cost", None),
+                            success=getattr(metric_data, "success", None),
+                            error=getattr(metric_data, "error", None),
                         )
                     )
 

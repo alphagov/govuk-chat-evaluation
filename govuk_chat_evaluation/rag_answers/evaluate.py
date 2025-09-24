@@ -108,6 +108,7 @@ class AggregatedResults:
                         "input": eval_result.input,
                         "metric": evaluation_output.metric,
                         "score": evaluation_output.score,
+                        "error": evaluation_output.error,
                     }
                 )
 
@@ -115,9 +116,10 @@ class AggregatedResults:
 
         return (
             df.groupby(["name", "input", "metric"])["score"]
-            .agg(["mean", "std"])
+            .agg(["mean", "std", "count"])
             .unstack()
             .reset_index()
+            .rename(columns={"count": "n_datapoints"})
         )
 
     @cached_property
@@ -136,6 +138,7 @@ class AggregatedResults:
                 "median": mean_df.median(),
                 "mean": mean_df.mean(),
                 "std": mean_df.std(),
+                "n_datapoints": self.per_input_metric_averages["n_datapoints"].sum(),
             }
         )
 
