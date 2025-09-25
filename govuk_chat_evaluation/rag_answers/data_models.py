@@ -161,10 +161,11 @@ class Config(BaseConfig):
 class RunMetricOutput:
     run: int
     metric: str
-    score: float
+    score: float | None = None
     cost: float | None = None
     reason: str | None = None
     success: bool | None = None
+    error: str | None = None
 
 
 @dataclass
