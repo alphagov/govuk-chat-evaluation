@@ -17,6 +17,7 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     LLMJudgeModel,
     LLMJudgeModelConfig,
 )
+from govuk_chat_evaluation.rag_answers.bedrock_retry import bedrock_retry_count
 
 
 class TestConfig:
@@ -178,6 +179,9 @@ class TestMetricConfig:
         )
         metric = metric_config.to_metric_instance()
         assert isinstance(metric.model, expected_llm_cls)
+        if isinstance(metric.model, AmazonBedrockModel):
+            assert hasattr(metric.model, "_invalid_json_retries")
+            assert bedrock_retry_count(metric.model) == 0
 
     def test_get_metric_instance_invalid_enum(self):
         config_dict = {
