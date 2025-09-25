@@ -179,6 +179,35 @@ class TestMetricConfig:
         metric = metric_config.to_metric_instance()
         assert isinstance(metric.model, expected_llm_cls)
 
+    @pytest.mark.parametrize(
+        "judge_model",
+        [
+            LLMJudgeModel.AMAZON_NOVA_MICRO_1,
+            LLMJudgeModel.AMAZON_NOVA_PRO_1,
+        ],
+    )
+    def test_nova_models_are_wrapped_with_retry(self, monkeypatch, judge_model):
+        calls: list[AmazonBedrockModel] = []
+
+        def fake_attach(model: AmazonBedrockModel):
+            calls.append(model)
+            return model
+
+        monkeypatch.setattr(
+            "govuk_chat_evaluation.rag_answers.data_models.attach_invalid_json_retry_to_model",
+            fake_attach,
+        )
+
+        metric_config = MetricConfig(
+            name=MetricName.FAITHFULNESS,
+            threshold=0.5,
+            llm_judge=LLMJudgeModelConfig(model=judge_model, temperature=0.0),
+        )
+
+        metric_config.to_metric_instance()
+
+        assert len(calls) == 1
+
     def test_get_metric_instance_invalid_enum(self):
         config_dict = {
             "name": "does_not_exist",
