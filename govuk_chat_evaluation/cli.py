@@ -8,6 +8,7 @@ from . import rag_answers
 from . import retrieval
 from . import topic_tagger
 
+load_dotenv(".env.aws")
 load_dotenv()
 
 
