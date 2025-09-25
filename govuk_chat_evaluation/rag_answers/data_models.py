@@ -14,6 +14,7 @@ from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMe
 from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
+from .invalid_json_retry import attach_invalid_json_retry_to_model
 from .custom_deepeval.metrics.factual_correctness import (
     FactualCorrectnessMetric,
 )
@@ -88,20 +89,22 @@ class LLMJudgeModelConfig(BaseModel):
         match self.model:
             case LLMJudgeModel.AMAZON_NOVA_MICRO_1:
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
-                return AmazonBedrockModel(
+                model = AmazonBedrockModel(
                     model_id=self.model.value,
                     region_name=region,
                     temperature=self.temperature,
                     generation_kwargs={"max_tokens": 6000},
                 )
+                return attach_invalid_json_retry_to_model(model)
             case LLMJudgeModel.AMAZON_NOVA_PRO_1:
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
-                return AmazonBedrockModel(
+                model = AmazonBedrockModel(
                     model_id=self.model.value,
                     region_name=region,
                     temperature=self.temperature,
                     generation_kwargs={"max_tokens": 6000},
                 )
+                return attach_invalid_json_retry_to_model(model)
             case LLMJudgeModel.GEMINI_15_PRO:
                 raise NotImplementedError(
                     f"Judge model {self.model} instantiation not implemented."

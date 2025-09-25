@@ -8,6 +8,7 @@ from deepeval.metrics import (
 from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
+from govuk_chat_evaluation.rag_answers import data_models as data_models_module
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
     MetricConfig,
@@ -170,7 +171,9 @@ class TestMetricConfig:
             (LLMJudgeModel.AMAZON_NOVA_PRO_1, AmazonBedrockModel),
         ],
     )
-    def test_metric_config_instantiate_llm_judge(self, judge_model, expected_llm_cls):
+    def test_to_metric_instance_instantiates_llm_model(
+        self, judge_model, expected_llm_cls
+    ):
         metric_config = MetricConfig(
             name=MetricName.FAITHFULNESS,
             threshold=0.5,
@@ -178,6 +181,32 @@ class TestMetricConfig:
         )
         metric = metric_config.to_metric_instance()
         assert isinstance(metric.model, expected_llm_cls)
+
+    @pytest.mark.parametrize(
+        "judge_model",
+        [
+            LLMJudgeModel.AMAZON_NOVA_MICRO_1,
+            LLMJudgeModel.AMAZON_NOVA_PRO_1,
+        ],
+    )
+    def test_to_metric_instance_monkeypatches_nova_models(self, mocker, judge_model):
+        retry_path = (
+            "govuk_chat_evaluation.rag_answers.data_models."
+            "attach_invalid_json_retry_to_model"
+        )
+        wrapped_retry = mocker.patch(
+            retry_path,
+            wraps=data_models_module.attach_invalid_json_retry_to_model,
+        )
+        metric_config = MetricConfig(
+            name=MetricName.FAITHFULNESS,
+            threshold=0.5,
+            llm_judge=LLMJudgeModelConfig(model=judge_model, temperature=0.0),
+        )
+
+        metric = metric_config.to_metric_instance()
+
+        wrapped_retry.assert_called_once_with(metric.model)
 
     def test_get_metric_instance_invalid_enum(self):
         config_dict = {
