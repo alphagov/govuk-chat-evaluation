@@ -132,6 +132,7 @@ def convert_deepeval_output_to_evaluation_results(
                             reason=metric_data.reason,
                             cost=metric_data.evaluation_cost,
                             success=metric_data.success,
+                            error=metric_data.error,
                         )
                     )
 
