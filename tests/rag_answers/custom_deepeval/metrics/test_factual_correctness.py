@@ -104,6 +104,7 @@ class TestFactualCorrectness:
                 metric,
                 async_mode=metric.async_mode,
                 _show_indicator=expected_show_progress,
+                _in_component=False,
             )
 
         @pytest.mark.asyncio
