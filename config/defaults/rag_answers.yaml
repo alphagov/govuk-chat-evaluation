@@ -6,6 +6,9 @@ metrics:
   - name: faithfulness
     threshold: 1.0
     model: gpt-4o
+    # other available values are:
+    # model: eu.amazon.nova-micro-v1:0
+    # model: eu.amazon.nova-pro-v1:0
     temperature: 0.0
   - name: bias
     threshold: 0.0

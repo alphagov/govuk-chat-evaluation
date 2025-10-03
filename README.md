@@ -22,6 +22,16 @@ Evaluation tasks that generate responses from GOV.UK Chat require the applicatio
 
 The means to access input data is documented in [data/README.md](data/README.md).
 
+#### AWS credentials for Bedrock judges
+
+If you run evaluations that use Amazon Bedrock (for example the Nova judge models), refresh temporary credentials with:
+
+```bash
+./scripts/export_aws_credentials.sh
+```
+
+The script writes `.env.aws`, which is automatically loaded by the CLI on startup. Re-run it whenever the credentials expire.
+
 ### Usage
 
 Run `uv run govuk_chat_evaluation` to view available evaluation tasks and options.
