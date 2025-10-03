@@ -3,7 +3,9 @@ import pandas as pd
 import re
 import yaml
 import logging
+import json
 
+from deepeval.test_run import TestRun
 from govuk_chat_evaluation.rag_answers.data_models import (
     Config,
     EvaluationResult,
@@ -155,3 +157,76 @@ def test_evaluate_and_output_results_copes_with_empty_data(
     evaluate_and_output_results(mock_project_root, file_path, mock_evaluation_config)
 
     assert "There is no data to evaluate" in caplog.text
+
+
+def test_evaluate_and_output_results_writes_deepeval_test_run(
+    tmp_path,
+    mock_input_data,
+    mock_evaluation_config,
+    mock_run_deepeval_evaluation,
+    mocker,
+):
+    test_run = mocker.create_autospec(TestRun, instance=True)
+    test_run.model_dump.return_value = {"id": "test-run-123"}
+    mocker.patch(
+        "govuk_chat_evaluation.rag_answers.evaluate.global_test_run_manager.get_test_run",
+        return_value=test_run,
+    )
+
+    evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
+
+    output_path = tmp_path / "deepeval_test_run.json"
+    assert output_path.exists()
+
+    with output_path.open() as f:
+        assert json.load(f) == {"id": "test-run-123"}
+
+    test_run.model_dump.assert_called_once_with(by_alias=True, exclude_none=True)
+
+
+@pytest.mark.usefixtures("mock_run_deepeval_evaluation")
+def test_evaluate_and_output_results_logs_metric_errors(
+    tmp_path, mock_input_data, mock_evaluation_config, mocker, caplog
+):
+    caplog.set_level(logging.WARNING)
+    evaluation_results = [
+        EvaluationResult(
+            name="passes",
+            input="Question",
+            actual_output="Answer",
+            expected_output="Expected",
+            retrieval_context=[],
+            run_metric_outputs=[
+                RunMetricOutput(run=0, metric="faithfulness", score=1.0),
+            ],
+        ),
+        EvaluationResult(
+            name="fails",
+            input="Question",
+            actual_output="Answer",
+            expected_output="Expected",
+            retrieval_context=[],
+            run_metric_outputs=[
+                RunMetricOutput(
+                    run=1,
+                    metric="bias",
+                    score=float("nan"),
+                    error="rate limited",
+                ),
+            ],
+        ),
+    ]
+    mocker.patch(
+        "govuk_chat_evaluation.rag_answers.evaluate.convert_deepeval_output_to_evaluation_results",
+        return_value=evaluation_results,
+    )
+
+    evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
+
+    warnings = [
+        record for record in caplog.records if record.levelno == logging.WARNING
+    ]
+    assert any(
+        record.message == "Metric error (name=fails, metric=bias, run=1): rate limited"
+        for record in warnings
+    )

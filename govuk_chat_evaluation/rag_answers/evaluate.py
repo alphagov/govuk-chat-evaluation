@@ -1,9 +1,10 @@
-import os
 from pathlib import Path
 from typing import cast
 from functools import cached_property
 import pandas as pd
+import json
 
+from deepeval.test_run import global_test_run_manager
 from deepeval.metrics import BaseMetric
 from deepeval.evaluate.configs import (
     AsyncConfig,
@@ -32,9 +33,7 @@ async_config = AsyncConfig(
     throttle_value=5,
 )
 
-cache_config = CacheConfig(
-    use_cache=False,
-)
+cache_config = CacheConfig(use_cache=False, write_cache=False)
 
 error_config = ErrorConfig(
     ignore_errors=True,
@@ -53,8 +52,6 @@ def evaluate_and_output_results(
         evaluation_data_path: Path to the JSONL file containing the evaluation data.
         evaluation_config: Configuration for the evaluation.
     """
-    # set DeepEval results folder
-    os.environ["DEEPEVAL_RESULTS_FOLDER"] = str(output_dir)
 
     models = jsonl_to_models(evaluation_data_path, EvaluationTestCase)
 
@@ -71,6 +68,12 @@ def evaluate_and_output_results(
         cache_config=cache_config,
         error_config=error_config,
     )
+
+    test_run = global_test_run_manager.get_test_run()
+    if test_run is not None:
+        body = test_run.model_dump(by_alias=True, exclude_none=True)
+        with (output_dir / "deepeval_test_run.json").open("w") as f:
+            json.dump(body, f)
 
     evaluation_results = convert_deepeval_output_to_evaluation_results(
         evaluation_outputs
