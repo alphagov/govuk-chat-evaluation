@@ -1,9 +1,10 @@
-import os
 from pathlib import Path
 from typing import cast
 from functools import cached_property
 import pandas as pd
+import json
 
+from deepeval.test_run import global_test_run_manager
 from deepeval.metrics import BaseMetric
 from deepeval.evaluate.configs import (
     AsyncConfig,
@@ -32,9 +33,7 @@ async_config = AsyncConfig(
     throttle_value=5,
 )
 
-cache_config = CacheConfig(
-    use_cache=False,
-)
+cache_config = CacheConfig(use_cache=False, write_cache=False)
 
 error_config = ErrorConfig(
     ignore_errors=True,
@@ -53,8 +52,6 @@ def evaluate_and_output_results(
         evaluation_data_path: Path to the JSONL file containing the evaluation data.
         evaluation_config: Configuration for the evaluation.
     """
-    # set DeepEval results folder
-    os.environ["DEEPEVAL_RESULTS_FOLDER"] = str(output_dir)
 
     models = jsonl_to_models(evaluation_data_path, EvaluationTestCase)
 
@@ -72,9 +69,17 @@ def evaluate_and_output_results(
         error_config=error_config,
     )
 
+    test_run = global_test_run_manager.get_test_run()
+    if test_run is not None:
+        body = test_run.model_dump(by_alias=True, exclude_none=True)
+        with (output_dir / "deepeval_test_run.json").open("w") as f:
+            json.dump(body, f)
+
     evaluation_results = convert_deepeval_output_to_evaluation_results(
         evaluation_outputs
     )
+
+    _log_metric_errors(evaluation_results)
 
     aggregation = AggregatedResults(evaluation_results)
 
@@ -149,3 +154,21 @@ class AggregatedResults:
         pd.DataFrame(self.evaluation_results).to_csv(output_dir / "tidy_results.csv")
         self.per_input_metric_averages.to_csv(output_dir / "results_per_input.csv")
         self.summary.to_csv(output_dir / "results_summary.csv")
+
+
+def _log_metric_errors(evaluation_results: list[EvaluationResult]) -> None:
+    """Emit warnings for metrics that errored so problems.log records them.
+
+    DeepEval sets `error` on metric data when `ignore_errors=True`. We surface
+    that here without failing the run.
+    """
+    for er in evaluation_results:
+        for out in er.run_metric_outputs:
+            if out.error:
+                logging.warning(
+                    "Metric error (name=%s, metric=%s, run=%s): %s",
+                    er.name,
+                    out.metric,
+                    out.run,
+                    out.error,
+                )

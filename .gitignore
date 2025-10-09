@@ -7,7 +7,8 @@ wheels/
 *.egg-info
 
 # Individual env vars
-.env
+.env*
+!.env.example
 
 # Virtual environments
 .venv

@@ -51,13 +51,19 @@ class FactualCorrectnessMetric(BaseMetric):
         )
 
     async def a_measure(
-        self, test_case: LLMTestCase, _show_indicator: bool = True
+        self,
+        test_case: LLMTestCase,
+        _show_indicator: bool = True,
+        _in_component: bool = False,
     ) -> float:
         """Asynchronously evaluate the factual correctness of a test case."""
         check_llm_test_case_params(test_case, self._required_params, self)
 
         with metric_progress_indicator(
-            self, async_mode=self.async_mode, _show_indicator=_show_indicator
+            self,
+            async_mode=self.async_mode,
+            _show_indicator=_show_indicator,
+            _in_component=_in_component,
         ):
             self.confusion_matrix = await self._a_classify_statements(
                 test_case.input,
