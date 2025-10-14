@@ -104,7 +104,9 @@ def mock_deepeval_results():
 @pytest.fixture
 def mock_deepeval_evaluate(mocker, mock_deepeval_results):
     wrapped_results = [
-        DeepevalEvaluationResult(test_results=result, confident_link=None)
+        DeepevalEvaluationResult(
+            test_results=result, confident_link=None, test_run_id=None
+        )
         for result in mock_deepeval_results
     ]
     return mocker.patch(
