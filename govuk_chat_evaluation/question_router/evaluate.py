@@ -178,12 +178,16 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
         aggregate_results.classification_labels,
     )
 
-    write_csv_results(
-        output_dir,
-        aggregate_results.miscategorised_cases(),
-        filename="miscategorised_cases.csv",
-        data_label="miscategorised_cases",
-    )
+    if aggregate_results.miscategorised_cases():
+        write_csv_results(
+            output_dir,
+            aggregate_results.miscategorised_cases(),
+            filename="miscategorised_cases.csv",
+            data_label="miscategorised_cases",
+        )
+
+    else:
+        logging.info("There are no miscategorised cases to write to file.")
 
     table = [[k, v] for k, v in aggregate_results.to_dict().items()]
     logging.info("\nAggregate Results")

@@ -2,7 +2,7 @@ import csv
 import json
 import re
 import logging
-
+from pathlib import Path
 import pytest
 
 from govuk_chat_evaluation.question_router.evaluate import (
@@ -141,31 +141,59 @@ class TestAggregateResults:
         assert aggregate.for_csv() == expected_csv
 
 
-@pytest.fixture
-def mock_evaluation_data_file(tmp_path):
+def write_mock_evaluation_data_file(tmp_path: Path, data: list[dict]):
     file_path = tmp_path / "evaluation_data.jsonl"
-    data = [
-        {
-            "question": "Question 1",
-            "expected_outcome": "genuine_rag",
-            "actual_outcome": "genuine_rag",
-            "confidence_score": 0.95,
-            "answer": None,
-        },
-        {
-            "question": "Question 2",
-            "expected_outcome": "genuine_rag",
-            "actual_outcome": "about_mps",
-            "confidence_score": 0.95,
-            "answer": "This is an about mps answer",
-        },
-    ]
-
-    with open(tmp_path / "evaluation_data.jsonl", "w", encoding="utf8") as file:
+    with open(file_path, "w", encoding="utf8") as file:
         for item in data:
             file.write(json.dumps(item) + "\n")
 
     return file_path
+
+
+@pytest.fixture
+def mock_evaluation_data_file(tmp_path):
+    return write_mock_evaluation_data_file(
+        tmp_path,
+        [
+            {
+                "question": "Question 1",
+                "expected_outcome": "genuine_rag",
+                "actual_outcome": "genuine_rag",
+                "confidence_score": 0.95,
+                "answer": None,
+            },
+            {
+                "question": "Question 2",
+                "expected_outcome": "about_mps",
+                "actual_outcome": "about_mps",
+                "confidence_score": 0.95,
+                "answer": "This is an about mps answer",
+            },
+        ],
+    )
+
+
+@pytest.fixture
+def mock_evaluation_data_with_misclassified_cases_file(tmp_path):
+    return write_mock_evaluation_data_file(
+        tmp_path,
+        [
+            {
+                "question": "Question 1",
+                "expected_outcome": "genuine_rag",
+                "actual_outcome": "about_mps",
+                "confidence_score": 0.95,
+                "answer": "This is an about mps answer",
+            },
+            {
+                "question": "Question 2",
+                "expected_outcome": "about_mps",
+                "actual_outcome": "genuine_rag",
+                "confidence_score": 0.95,
+                "answer": None,
+            },
+        ],
+    )
 
 
 def test_evaluate_and_output_results_writes_results(
@@ -209,9 +237,11 @@ def test_evaluate_and_output_results_writes_confusion_matrix(
 
 
 def test_evaluate_and_output_results_writes_miscategorised_cases(
-    mock_project_root, mock_evaluation_data_file
+    mock_project_root, mock_evaluation_data_with_misclassified_cases_file
 ):
-    evaluate_and_output_results(mock_project_root, mock_evaluation_data_file)
+    evaluate_and_output_results(
+        mock_project_root, mock_evaluation_data_with_misclassified_cases_file
+    )
     miscategorised_cases_file = mock_project_root / "miscategorised_cases.csv"
 
     assert miscategorised_cases_file.exists()
@@ -224,6 +254,16 @@ def test_evaluate_and_output_results_writes_miscategorised_cases(
         assert "predicted_classification" in headers
         assert "actual_classification" in headers
         assert "answer" in headers
+
+
+def test_evaluate_and_output_results_logs_no_miscategorised_cases(
+    mock_project_root, mock_evaluation_data_file, caplog
+):
+    evaluate_and_output_results(mock_project_root, mock_evaluation_data_file)
+
+    miscategorised_cases_file = mock_project_root / "miscategorised_cases.csv"
+    assert "There are no miscategorised cases to write to file." in caplog.text
+    assert not miscategorised_cases_file.exists()
 
 
 def test_evaluate_and_output_results_prints_aggregates(
