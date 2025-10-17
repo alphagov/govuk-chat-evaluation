@@ -187,7 +187,7 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
         )
 
     else:
-        logging.info("\nThere are no miscategorised cases to write to file.")
+        logging.info("There are no miscategorised cases to write to file.")
 
     table = [[k, v] for k, v in aggregate_results.to_dict().items()]
     logging.info("\nAggregate Results")
