@@ -92,8 +92,10 @@ class LLMJudgeModelConfig(BaseModel):
                 model = AmazonBedrockModel(
                     model_id=self.model.value,
                     region_name=region,
-                    temperature=self.temperature,
-                    generation_kwargs={"max_tokens": 6000},
+                    generation_kwargs={
+                        "temperature": self.temperature,
+                        "maxTokens": 6000,
+                    },
                 )
                 return attach_invalid_json_retry_to_model(model)
             case LLMJudgeModel.AMAZON_NOVA_PRO_1:
@@ -101,8 +103,10 @@ class LLMJudgeModelConfig(BaseModel):
                 model = AmazonBedrockModel(
                     model_id=self.model.value,
                     region_name=region,
-                    temperature=self.temperature,
-                    generation_kwargs={"max_tokens": 6000},
+                    generation_kwargs={
+                        "temperature": self.temperature,
+                        "maxTokens": 6000,
+                    },
                 )
                 return attach_invalid_json_retry_to_model(model)
             case LLMJudgeModel.GEMINI_15_PRO:
