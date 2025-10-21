@@ -15,8 +15,9 @@ from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from .invalid_json_retry import attach_invalid_json_retry_to_model
-from .custom_deepeval.metrics.factual_correctness import (
+from .custom_deepeval.metrics import (
     FactualCorrectnessMetric,
+    ContextRelevancyMetric,
 )
 from ..config import BaseConfig
 
@@ -68,6 +69,7 @@ class MetricName(str, Enum):
     RELEVANCE = "relevance"
     BIAS = "bias"
     FACTUAL_CORRECTNESS = "factual_correctness"
+    CONTEXT_RELEVANCY = "context_relevancy"
     # others to add
 
 
@@ -148,6 +150,8 @@ class MetricConfig(BaseModel):
                 return BiasMetric(threshold=self.threshold, model=model)
             case MetricName.FACTUAL_CORRECTNESS:
                 return FactualCorrectnessMetric(threshold=self.threshold, model=model)
+            case MetricName.CONTEXT_RELEVANCY:
+                return ContextRelevancyMetric(threshold=self.threshold, model=model)
 
 
 # ----- Configuration models -----
