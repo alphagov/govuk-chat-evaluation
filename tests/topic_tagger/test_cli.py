@@ -1,12 +1,10 @@
 import pytest
 import yaml
 from click.testing import CliRunner
-from datetime import datetime
 
 from govuk_chat_evaluation.topic_tagger.cli import main
 from govuk_chat_evaluation.topic_tagger.evaluate import EvaluationResult
 
-FROZEN_TIME = datetime.now().replace(microsecond=0)
 
 @pytest.fixture(autouse=True)
 def mock_config_file(tmp_path, mock_input_data):
@@ -22,12 +20,6 @@ def mock_config_file(tmp_path, mock_input_data):
         yaml.dump(data, file)
 
     yield str(file_path)
-
-
-@pytest.fixture(autouse=True)
-def freeze_time_for_all_tests(freezer):
-    """Automatically freeze time for all tests in this file."""
-    freezer.move_to(FROZEN_TIME)
 
 
 @pytest.fixture
@@ -57,8 +49,8 @@ def mock_data_generation(mocker):
 
 
 @pytest.fixture
-def mock_output_directory(mock_project_root):
-    return mock_project_root / "results" / "topic_tagger" / FROZEN_TIME.isoformat()
+def mock_output_directory(mock_project_root, frozen_time):
+    return mock_project_root / "results" / "topic_tagger" / frozen_time.isoformat()
 
 
 @pytest.mark.usefixtures("mock_data_generation")
