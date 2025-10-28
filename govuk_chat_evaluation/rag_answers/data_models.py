@@ -20,27 +20,10 @@ from .custom_deepeval.metrics import (
     ContextRelevancyMetric,
 )
 from ..config import BaseConfig
+from .shared_data_models import StructuredContext
 
 
 # ----- Input data models -----
-
-
-class StructuredContext(BaseModel):
-    title: str
-    heading_hierarchy: list[str]
-    description: Optional[str] = None
-    html_content: str
-    exact_path: str
-    base_path: str
-
-    def to_flattened_string(self) -> str:
-        """Return the flattened string representation of the structure context."""
-        return (
-            f"{self.title}\n"
-            f"{' > '.join(self.heading_hierarchy)}\n"
-            f"{self.description}\n\n"
-            f"{self.html_content}"
-        )
 
 
 class GenerateInput(BaseModel):
@@ -50,7 +33,7 @@ class GenerateInput(BaseModel):
 
 class EvaluationTestCase(GenerateInput):
     llm_answer: str
-    retrieved_context: list[StructuredContext]
+    structured_contexts: list[StructuredContext]
 
     def to_llm_test_case(self) -> LLMTestCase:
         return LLMTestCase(
@@ -59,8 +42,9 @@ class EvaluationTestCase(GenerateInput):
             expected_output=self.ideal_answer,
             actual_output=self.llm_answer,
             retrieval_context=[
-                ctx.to_flattened_string() for ctx in self.retrieved_context
+                ctx.to_flattened_string() for ctx in self.structured_contexts
             ],
+            additional_metadata={"structured_contexts": self.structured_contexts},
         )
 
 

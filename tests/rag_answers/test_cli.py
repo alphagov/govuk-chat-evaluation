@@ -14,7 +14,7 @@ def mock_data_generation(mocker):
             question="Question",
             ideal_answer="An answer",
             llm_answer="An answer",
-            retrieved_context=[],
+            structured_contexts=[],
         )
     ] * 2
 

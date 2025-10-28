@@ -22,7 +22,8 @@ from .schema import (
     VerdictCollection,
     ScoreReason,
 )
-from data_models import StructuredContext
+from ....shared_data_models import StructuredContext
+from deepeval.errors import MissingTestCaseParamsError
 
 SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
@@ -31,7 +32,6 @@ class ContextRelevancyMetric(BaseMetric):
     _required_params: List[LLMTestCaseParams] = [
         LLMTestCaseParams.INPUT,
         LLMTestCaseParams.ACTUAL_OUTPUT,
-        LLMTestCaseParams.RETRIEVAL_CONTEXT,
     ]
     evaluation_template: Type[ContextRelevancyTemplate] = ContextRelevancyTemplate
 
@@ -57,6 +57,14 @@ class ContextRelevancyMetric(BaseMetric):
         _in_component: bool = False,
     ) -> float:
         check_llm_test_case_params(test_case, self._required_params, self)
+        if (
+            test_case.additional_metadata is None
+            or test_case.additional_metadata.get("structured_contexts") is None
+        ):
+            raise MissingTestCaseParamsError(
+                "additional_metadata['structured_contexts']"
+                " cannot be None for ContextRelevancyMetric."
+            )
 
         with metric_progress_indicator(
             self,
@@ -64,7 +72,10 @@ class ContextRelevancyMetric(BaseMetric):
             _show_indicator=_show_indicator,
             _in_component=_in_component,
         ):
-            structured_contexts = cast(List[StructuredContext], test_case.additional_metadata["structured_contexts"])
+            structured_contexts = cast(
+                List[StructuredContext],
+                test_case.additional_metadata["structured_contexts"],
+            )
 
             truth_collection = await self._generate_truths(structured_contexts)
             information_needs_collection = await self._generate_information_needs(
@@ -90,8 +101,12 @@ class ContextRelevancyMetric(BaseMetric):
 
             return self.score
 
-    async def _generate_truths(self, structured_contexts: list[StructuredContext]) -> TruthCollection:
-        retrieval_context = [ctx.to_flattened_context_content() for ctx in structured_contexts]
+    async def _generate_truths(
+        self, structured_contexts: list[StructuredContext]
+    ) -> TruthCollection:
+        retrieval_context = [
+            ctx.to_flattened_context_content() for ctx in structured_contexts
+        ]
         prompt = self.evaluation_template.truths(
             retrieval_context=retrieval_context,
         )
@@ -150,8 +165,8 @@ class ContextRelevancyMetric(BaseMetric):
         if self.using_native_model:
             result, cost = cast(
                 tuple[SchemaType, float],
-                await self.model.a_generate(prompt, schema=schema)
-                )
+                await self.model.a_generate(prompt, schema=schema),
+            )
             self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
             return result
         else:

@@ -64,13 +64,13 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
             question="Question 1",
             ideal_answer="Answer 1",
             llm_answer="An answer",
-            retrieved_context=[structured_context],
+            structured_contexts=[structured_context],
         ),
         EvaluationTestCase(
             question="Question 2",
             ideal_answer="Answer 2",
             llm_answer="An answer",
-            retrieved_context=[structured_context],
+            structured_contexts=[structured_context],
         ),
     ]
     actual_results = generate_inputs_to_evaluation_test_cases("openai", generate_inputs)

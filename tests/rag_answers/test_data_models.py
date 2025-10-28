@@ -98,7 +98,7 @@ class TestEvaluationTestCase:
             question="How are you?",
             ideal_answer=ideal_answer,
             llm_answer="Fine",
-            retrieved_context=[structured_context],
+            structured_contexts=[structured_context],
         )
 
         llm_test_case = evaluation_test_case.to_llm_test_case()
@@ -126,12 +126,25 @@ class TestStructuredContext:
         )
 
         flattened_string = structured_context.to_flattened_string()
+        expected_string = "VAT\nTax > VAT\nVAT overview\n\n<p>Some HTML about VAT</p>"
+        assert flattened_string == expected_string
 
-        assert isinstance(flattened_string, str)
-        assert "VAT" in flattened_string
-        assert "Tax > VAT" in flattened_string
-        assert "VAT overview" in flattened_string
-        assert "<p>Some HTML about VAT</p>" in flattened_string
+    def test_to_flattened_context_content(self):
+        structured_context = StructuredContext(
+            title="VAT",
+            heading_hierarchy=["Tax", "VAT"],
+            description="VAT overview",
+            html_content="<p>Some HTML about VAT</p>",
+            exact_path="https://gov.uk/vat",
+            base_path="https://gov.uk",
+        )
+
+        flattened_content = structured_context.to_flattened_context_content()
+        expected_content = (
+            "Context:\nPage Title: VAT\nPage description: VAT overview\n"
+            "Headings: Tax > VAT\n\nContent:\n<p>Some HTML about VAT</p>"
+        )
+        assert flattened_content == expected_content
 
 
 class TestMetricConfig:

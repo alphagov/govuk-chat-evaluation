@@ -6,6 +6,7 @@ from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel, DeepEvalBaseLLM
 from deepeval.errors import MissingTestCaseParamsError
 from deepeval.utils import prettify_list
+import re
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy import (
     ContextRelevancyMetric,
@@ -63,11 +64,10 @@ def mock_test_case():
         exact_path="https://gov.uk/vat",
         base_path="https://gov.uk",
     )
-    flattened_context = structured_context.to_flattened_string()
     return LLMTestCase(
         input="What is the UK's inflation rate?",
         actual_output="The inflation rate is 3.4%.",
-        retrieval_context=[flattened_context],
+        additional_metadata={"structured_contexts": [structured_context]},
     )
 
 
@@ -103,10 +103,38 @@ class TestContextRelevancyMetric:
         @pytest.mark.asyncio
         async def test_invalid_params_raise_error(self, mock_native_model):
             metric = ContextRelevancyMetric(model=mock_native_model)
-            invalid_case = LLMTestCase(
-                input="question", actual_output="answer", retrieval_context=None
-            )
+            invalid_case = LLMTestCase(input="question", actual_output=None)
             with pytest.raises(MissingTestCaseParamsError, match="cannot be None"):
+                await metric.a_measure(invalid_case)
+
+        @pytest.mark.asyncio
+        async def test_no_additional_metadata_raises_error(self, mock_native_model):
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            invalid_case = LLMTestCase(
+                input="question", actual_output="answer", additional_metadata=None
+            )
+            with pytest.raises(
+                MissingTestCaseParamsError,
+                match=re.escape(
+                    "additional_metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
+                ),
+            ):
+                await metric.a_measure(invalid_case)
+
+        @pytest.mark.asyncio
+        async def test_no_structured_context_metadata_raises_error(
+            self, mock_native_model
+        ):
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            invalid_case = LLMTestCase(
+                input="question", actual_output="answer", additional_metadata={}
+            )
+            with pytest.raises(
+                MissingTestCaseParamsError,
+                match=re.escape(
+                    "additional_metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
+                ),
+            ):
                 await metric.a_measure(invalid_case)
 
         @pytest.mark.asyncio
