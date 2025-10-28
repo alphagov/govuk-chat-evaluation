@@ -22,6 +22,7 @@ from .schema import (
     VerdictCollection,
     ScoreReason,
 )
+from deepeval.errors import MissingTestCaseParamsError
 
 SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
@@ -30,7 +31,6 @@ class ContextRelevancyMetric(BaseMetric):
     _required_params: List[LLMTestCaseParams] = [
         LLMTestCaseParams.INPUT,
         LLMTestCaseParams.ACTUAL_OUTPUT,
-        LLMTestCaseParams.RETRIEVAL_CONTEXT,
     ]
 
     def __init__(
@@ -57,6 +57,14 @@ class ContextRelevancyMetric(BaseMetric):
         _in_component: bool = False,
     ) -> float:
         check_llm_test_case_params(test_case, self._required_params, self)
+        if (
+            test_case.additional_metadata is None
+            or test_case.additional_metadata.get("structured_context") is None
+        ):
+            raise MissingTestCaseParamsError(
+                "additional_metadata['structured_context']"
+                " cannot be None for ContextRelevancyMetric."
+            )
 
         with metric_progress_indicator(
             self,
@@ -64,7 +72,22 @@ class ContextRelevancyMetric(BaseMetric):
             _show_indicator=_show_indicator,
             _in_component=_in_component,
         ):
-            retrieval_context = test_case.retrieval_context or []
+            if isinstance(test_case.additional_metadata, dict):
+                structured_context = test_case.additional_metadata.get(
+                    "structured_context", []
+                )
+                from govuk_chat_evaluation.rag_answers.data_models import (
+                    StructuredContext,
+                )
+
+                retrieval_context = [
+                    ctx.to_flattened_context_content()
+                    for ctx in structured_context
+                    if isinstance(ctx, StructuredContext)
+                ]
+            else:
+                retrieval_context = []
+
             self.evaluation_cost = 0.0
             truth_collection: TruthCollection = await self._generate_truths(
                 retrieval_context

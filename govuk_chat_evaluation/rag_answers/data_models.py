@@ -42,6 +42,17 @@ class StructuredContext(BaseModel):
             f"{self.html_content}"
         )
 
+    def to_flattened_context_content(self) -> str:
+        """Return the flattened string representation of the structured chunk in two parts: context and content"""
+        return (
+            f"Context:\n"
+            f"Page Title: {self.title}\n"
+            f"Page description: {self.description}\n"
+            f"Headings: {' > '.join(self.heading_hierarchy)}\n\n"
+            f"Content:\n"
+            f"{self.html_content}"
+        )
+
 
 class GenerateInput(BaseModel):
     question: str
@@ -61,6 +72,7 @@ class EvaluationTestCase(GenerateInput):
             retrieval_context=[
                 ctx.to_flattened_string() for ctx in self.retrieved_context
             ],
+            additional_metadata={"structured_context": self.retrieved_context},
         )
 
 
