@@ -5,7 +5,7 @@ import yaml
 import logging
 import json
 
-from deepeval.test_run import TestRun
+from deepeval.test_run import TestRun as DeepevalTestRun
 from govuk_chat_evaluation.rag_answers.data_models import (
     Config,
     EvaluationResult,
@@ -166,7 +166,7 @@ def test_evaluate_and_output_results_writes_deepeval_test_run(
     mock_run_deepeval_evaluation,
     mocker,
 ):
-    test_run = mocker.create_autospec(TestRun, instance=True)
+    test_run = mocker.create_autospec(DeepevalTestRun, instance=True)
     test_run.model_dump.return_value = {"id": "test-run-123"}
     mocker.patch(
         "govuk_chat_evaluation.rag_answers.evaluate.global_test_run_manager.get_test_run",
