@@ -10,7 +10,6 @@ from deepeval.utils import prettify_list
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy import (
     ContextRelevancyMetric,
 )
-
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy.schema import (
     Truth,
     TruthCollection,
@@ -19,6 +18,7 @@ from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy
     VerdictCollection,
     ScoreReason,
 )
+from govuk_chat_evaluation.rag_answers.data_models import StructuredContext
 
 
 @pytest.fixture
@@ -55,12 +55,19 @@ def mock_non_native_model(
 
 @pytest.fixture
 def test_case():
+    structured_context = StructuredContext(
+        title="VAT",
+        heading_hierarchy=["Tax", "VAT"],
+        description="VAT overview",
+        html_content="<p>Some HTML about VAT</p>",
+        exact_path="https://gov.uk/vat",
+        base_path="https://gov.uk",
+    )
+    flattened_context = structured_context.to_flattened_string()
     return LLMTestCase(
         input="What is the UK's inflation rate?",
         actual_output="The inflation rate is 3.4%.",
-        retrieval_context=[
-            "UK inflation data\n\n Current inflation\n\n Uk inflation data is currently 3.4% in 2024. This is a trusted source."
-        ],
+        retrieval_context=[flattened_context],
     )
 
 

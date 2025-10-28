@@ -66,24 +66,26 @@ class ContextRelevancyMetric(BaseMetric):
         ):
             retrieval_context = test_case.retrieval_context or []
             self.evaluation_cost = 0.0
-            truths: TruthCollection = await self._generate_truths(retrieval_context)
-            information_needs: InformationNeedsCollection = (
+            truth_collection: TruthCollection = await self._generate_truths(
+                retrieval_context
+            )
+            information_needs_collection: InformationNeedsCollection = (
                 await self._generate_information_needs(test_case.input)
             )
-            verdicts: VerdictCollection = await self._generate_verdicts(
-                information_needs, truths
+            verdict_collection: VerdictCollection = await self._generate_verdicts(
+                information_needs_collection, truth_collection
             )
-            self.score = self._calculate_score(verdicts)
+            self.score = self._calculate_score(verdict_collection)
             self.reason: str | None = await self._generate_reason(
-                test_case.input, verdicts
+                test_case.input, verdict_collection
             )
             self.success = self.is_successful()
             self.verbose_logs = construct_verbose_logs(
                 self,
                 steps=[
-                    f"Truths: {prettify_list(truths.truths)}",
-                    f"Information Needs:\n{prettify_list(information_needs.information_needs)}",
-                    f"Verdicts:\n{prettify_list(verdicts.verdicts)}",
+                    f"Truths: {prettify_list(truth_collection.truths)}",
+                    f"Information Needs:\n{prettify_list(information_needs_collection.information_needs)}",
+                    f"Verdicts:\n{prettify_list(verdict_collection.verdicts)}",
                     f"Score: {self.score}\nReason: {self.reason}",
                 ],
             )
@@ -105,44 +107,35 @@ class ContextRelevancyMetric(BaseMetric):
         )
 
     async def _generate_verdicts(
-        self, information_needs: InformationNeedsCollection, truths: TruthCollection
+        self,
+        information_needs_collection: InformationNeedsCollection,
+        truth_collection: TruthCollection,
     ) -> VerdictCollection:
-        if len(information_needs.information_needs) == 0:
+        if len(information_needs_collection.information_needs) == 0:
             return VerdictCollection(verdicts=[])
 
-        facts: list[str] = [fact for truth in truths.truths for fact in truth.facts]
+        facts = truth_collection.all_facts()
         prompt = self.evaluation_template.verdicts(
-            information_needs=information_needs.information_needs,
+            information_needs=information_needs_collection.information_needs,
             extracted_truths=facts,
         )
 
         return await self._generate_result_from_model(prompt, schema=VerdictCollection)
 
     def _calculate_score(self, verdicts: VerdictCollection) -> float:
-        number_of_verdicts = len(verdicts.verdicts)
-        if number_of_verdicts == 0:
-            return 1
+        score = verdicts.score_verdicts()
 
-        quality_count = 0
-        for verdict in verdicts.verdicts:
-            if verdict.verdict != "no":
-                quality_count += 1
-
-        score = quality_count / number_of_verdicts
         return 0 if self.strict_mode and score < self.threshold else score
 
     async def _generate_reason(
-        self, input: str, verdicts: VerdictCollection
+        self, input: str, verdict_collection: VerdictCollection
     ) -> str | None:
         if self.include_reason is False:
             return None
 
-        unmet_needs = []
-        for verdict in verdicts.verdicts:
-            if verdict.verdict == "no":
-                unmet_needs.append(verdict.reason)
-
+        unmet_needs = verdict_collection.unmet_needs()
         score = float(round(self.score or 0.0, 2))
+
         prompt = self.evaluation_template.reason(
             unmet_needs=unmet_needs,
             input=input,
