@@ -1,15 +1,17 @@
 import pytest
 from click.testing import CliRunner
+from datetime import datetime
 
 from govuk_chat_evaluation.rag_answers.cli import main
 from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 
-# ─── Fixtures
+FROZEN_TIME = datetime.now().replace(microsecond=0)
 
+# ─── Fixtures
 
 @pytest.fixture(autouse=True)
 def freeze_time_for_all_tests(freezer):
-    freezer.move_to("2024-11-11 12:34:56")
+    freezer.move_to(FROZEN_TIME)
 
 
 @pytest.fixture(autouse=True)
@@ -31,7 +33,7 @@ def mock_data_generation(mocker):
 
 @pytest.fixture
 def mock_output_directory(mock_project_root):
-    return mock_project_root / "results" / "rag_answers" / "2024-11-11T12:34:56"
+    return mock_project_root / "results" / "rag_answers" / FROZEN_TIME.isoformat()
 
 
 # ─── Main CLI Tests
