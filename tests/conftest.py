@@ -1,5 +1,6 @@
 import csv
 import os
+from datetime import datetime
 from pathlib import Path
 from inspect import signature
 from typing import Callable
@@ -11,6 +12,15 @@ from typeguard import check_type, TypeCheckError
 
 
 load_dotenv()
+
+FROZEN_TIME = datetime.now().replace(microsecond=0)
+
+
+@pytest.fixture
+def frozen_time(freezer):
+    """Return a frozen value of the current time."""
+    freezer.move_to(FROZEN_TIME)
+    return FROZEN_TIME
 
 
 @pytest.fixture

@@ -47,12 +47,6 @@ def mock_config_file(tmp_path, mock_input_data):
     yield str(file_path)
 
 
-@pytest.fixture(autouse=True)
-def freeze_time_for_all_tests(freezer):
-    """Automatically freeze time for all tests in this file."""
-    freezer.move_to("2024-11-11 12:34:56")
-
-
 @pytest.fixture
 def mock_data_generation(mocker):
     return_value = [
@@ -77,8 +71,8 @@ def mock_data_generation(mocker):
 
 
 @pytest.fixture
-def mock_output_directory(mock_project_root):
-    return mock_project_root / "results" / "question_router" / "2024-11-11T12:34:56"
+def mock_output_directory(mock_project_root, frozen_time):
+    return mock_project_root / "results" / "question_router" / frozen_time.isoformat()
 
 
 def test_main_creates_output_files(

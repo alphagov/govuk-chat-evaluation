@@ -8,11 +8,6 @@ from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 
 
 @pytest.fixture(autouse=True)
-def freeze_time_for_all_tests(freezer):
-    freezer.move_to("2024-11-11 12:34:56")
-
-
-@pytest.fixture(autouse=True)
 def mock_data_generation(mocker):
     return_value = [
         EvaluationTestCase(
@@ -30,8 +25,8 @@ def mock_data_generation(mocker):
 
 
 @pytest.fixture
-def mock_output_directory(mock_project_root):
-    return mock_project_root / "results" / "rag_answers" / "2024-11-11T12:34:56"
+def mock_output_directory(mock_project_root, frozen_time):
+    return mock_project_root / "results" / "rag_answers" / frozen_time.isoformat()
 
 
 # ─── Main CLI Tests
