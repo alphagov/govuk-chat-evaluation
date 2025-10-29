@@ -133,6 +133,26 @@ class TestStructuredContext:
         assert "VAT overview" in flattened_string
         assert "<p>Some HTML about VAT</p>" in flattened_string
 
+    def test_to_flattened_context_content(self):
+        structured_context = StructuredContext(
+            title="VAT",
+            heading_hierarchy=["Tax", "VAT"],
+            description="VAT overview",
+            html_content="<p>Some HTML about VAT</p>",
+            exact_path="https://gov.uk/vat",
+            base_path="https://gov.uk",
+        )
+
+        flattened_content = structured_context.to_flattened_context_content()
+
+        assert isinstance(flattened_content, str)
+        assert "Context:" in flattened_content
+        assert "Page Title: VAT" in flattened_content
+        assert "Page description: VAT overview" in flattened_content
+        assert "Headings: Tax > VAT" in flattened_content
+        assert "Content:" in flattened_content
+        assert "<p>Some HTML about VAT</p>" in flattened_content
+
 
 class TestMetricConfig:
     @pytest.mark.parametrize(

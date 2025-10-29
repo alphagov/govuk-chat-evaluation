@@ -15,8 +15,9 @@ from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from .invalid_json_retry import attach_invalid_json_retry_to_model
-from .custom_deepeval.metrics.factual_correctness import (
+from .custom_deepeval.metrics import (
     FactualCorrectnessMetric,
+    ContextRelevancyMetric,
 )
 from ..config import BaseConfig
 
@@ -41,6 +42,17 @@ class StructuredContext(BaseModel):
             f"{self.html_content}"
         )
 
+    def to_flattened_context_content(self) -> str:
+        """Return the flattened string representation of the structured chunk in two parts: context and content"""
+        return (
+            f"Context:\n"
+            f"Page Title: {self.title}\n"
+            f"Page description: {self.description}\n"
+            f"Headings: {' > '.join(self.heading_hierarchy)}\n\n"
+            f"Content:\n"
+            f"{self.html_content}"
+        )
+
 
 class GenerateInput(BaseModel):
     question: str
@@ -60,6 +72,7 @@ class EvaluationTestCase(GenerateInput):
             retrieval_context=[
                 ctx.to_flattened_string() for ctx in self.retrieved_context
             ],
+            additional_metadata={"structured_context": self.retrieved_context},
         )
 
 
@@ -68,6 +81,7 @@ class MetricName(str, Enum):
     RELEVANCE = "relevance"
     BIAS = "bias"
     FACTUAL_CORRECTNESS = "factual_correctness"
+    CONTEXT_RELEVANCY = "context_relevancy"
     # others to add
 
 
@@ -148,6 +162,8 @@ class MetricConfig(BaseModel):
                 return BiasMetric(threshold=self.threshold, model=model)
             case MetricName.FACTUAL_CORRECTNESS:
                 return FactualCorrectnessMetric(threshold=self.threshold, model=model)
+            case MetricName.CONTEXT_RELEVANCY:
+                return ContextRelevancyMetric(threshold=self.threshold, model=model)
 
 
 # ----- Configuration models -----
