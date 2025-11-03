@@ -26,4 +26,8 @@ metrics:
     threshold: 0.8
     model: eu.amazon.nova-pro-v1:0
     temperature: 0.0
+  - name: coherence
+    threshold: 0.8
+    model: eu.amazon.nova-pro-v1:0
+    temperature: 0.0
 n_runs: 2
