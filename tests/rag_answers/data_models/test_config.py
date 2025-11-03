@@ -17,6 +17,9 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     MetricConfig,
     TaskConfig,
 )
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
+    CoherenceMetric,
+)
 
 
 class TestMetricConfig:
@@ -40,6 +43,15 @@ class TestMetricConfig:
                     "temperature": 0.0,
                 },
                 BiasMetric,
+            ),
+            (
+                {
+                    "name": "coherence",
+                    "threshold": 0.8,
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                },
+                CoherenceMetric,
             ),
         ],
     )
