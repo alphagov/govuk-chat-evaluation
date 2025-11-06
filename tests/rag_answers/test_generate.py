@@ -6,6 +6,8 @@ import pytest
 from govuk_chat_evaluation.rag_answers.generate import (
     generate_inputs_to_evaluation_test_cases,
     generate_and_write_dataset,
+)
+from govuk_chat_evaluation.rag_answers.data_models import (
     GenerateInput,
     EvaluationTestCase,
     StructuredContext,

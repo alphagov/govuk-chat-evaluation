@@ -19,7 +19,9 @@ from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy
     VerdictCollection,
     ScoreReason,
 )
-from govuk_chat_evaluation.rag_answers.data_models import StructuredContext
+from govuk_chat_evaluation.rag_answers.data_models import (
+    StructuredContext,
+)
 
 
 @pytest.fixture

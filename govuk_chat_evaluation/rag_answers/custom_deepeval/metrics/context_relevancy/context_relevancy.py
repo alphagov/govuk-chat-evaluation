@@ -22,7 +22,9 @@ from .schema import (
     VerdictCollection,
     ScoreReason,
 )
-from ....shared_data_models import StructuredContext
+from govuk_chat_evaluation.rag_answers.data_models import (
+    StructuredContext,
+)
 from deepeval.errors import MissingTestCaseParamsError
 
 SchemaType = TypeVar("SchemaType", bound=BaseModel)

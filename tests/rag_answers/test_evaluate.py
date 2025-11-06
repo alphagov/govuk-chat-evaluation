@@ -7,13 +7,15 @@ import json
 
 from deepeval.test_run import TestRun as DeepevalTestRun
 from govuk_chat_evaluation.rag_answers.data_models import (
-    Config,
-    EvaluationResult,
-    RunMetricOutput,
+    TaskConfig,
 )
 from govuk_chat_evaluation.rag_answers.evaluate import (
     AggregatedResults,
     evaluate_and_output_results,
+)
+from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
+    EvaluationResult,
+    RunMetricOutput,
 )
 from tests.conftest import assert_csv_exists_with_headers
 
@@ -22,7 +24,7 @@ from tests.conftest import assert_csv_exists_with_headers
 def mock_evaluation_config(mock_config_file):
     with open(mock_config_file, "r") as file:
         config_data = yaml.safe_load(file)
-        return Config(**config_data)
+        return TaskConfig(**config_data)
 
 
 @pytest.fixture

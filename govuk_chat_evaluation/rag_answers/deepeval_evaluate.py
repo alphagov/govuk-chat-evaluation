@@ -1,13 +1,34 @@
 from collections import defaultdict
+from pydantic.dataclasses import dataclass
+from typing import Optional
 
 from deepeval import evaluate as deepeval_evaluate
 from deepeval.evaluate.types import TestResult
 from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
-
-from .data_models import EvaluationResult, RunMetricOutput
 from ..timing import log_task_duration
 import logging
+
+
+@dataclass
+class RunMetricOutput:
+    run: int
+    metric: str
+    score: float | None = None
+    cost: float | None = None
+    reason: str | None = None
+    success: bool | None = None
+    error: str | None = None
+
+
+@dataclass
+class EvaluationResult:
+    name: str
+    input: str
+    actual_output: str
+    retrieval_context: list[str]
+    run_metric_outputs: list[RunMetricOutput]
+    expected_output: Optional[str] = None
 
 
 def run_deepeval_evaluation(

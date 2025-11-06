@@ -1,5 +1,7 @@
+from deepeval.test_case import LLMTestCase
 from pydantic import BaseModel
 from typing import Optional
+import uuid
 
 
 class StructuredContext(BaseModel):
@@ -29,4 +31,26 @@ class StructuredContext(BaseModel):
             f"Headings: {' > '.join(self.heading_hierarchy)}\n\n"
             f"Content:\n"
             f"{self.html_content}"
+        )
+
+
+class GenerateInput(BaseModel):
+    question: str
+    ideal_answer: Optional[str] = None
+
+
+class EvaluationTestCase(GenerateInput):
+    llm_answer: str
+    structured_contexts: list[StructuredContext]
+
+    def to_llm_test_case(self) -> LLMTestCase:
+        return LLMTestCase(
+            input=self.question,
+            name=str(uuid.uuid4()),
+            expected_output=self.ideal_answer,
+            actual_output=self.llm_answer,
+            retrieval_context=[
+                ctx.to_flattened_string() for ctx in self.structured_contexts
+            ],
+            additional_metadata={"structured_contexts": self.structured_contexts},
         )

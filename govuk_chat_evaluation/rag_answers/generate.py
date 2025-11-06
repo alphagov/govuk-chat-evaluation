@@ -3,7 +3,11 @@ from pathlib import Path
 
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
-from .data_models import GenerateInput, EvaluationTestCase, StructuredContext
+from .data_models import (
+    GenerateInput,
+    EvaluationTestCase,
+    StructuredContext,
+)
 
 
 def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):

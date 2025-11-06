@@ -1,11 +1,8 @@
-from deepeval.test_case import LLMTestCase
 from pydantic import BaseModel, model_validator
-from pydantic.dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
-import uuid
+from typing import Any
 import os
-
+from ...config import BaseConfig
 from deepeval.metrics import (
     FaithfulnessMetric,
     BiasMetric,
@@ -14,38 +11,11 @@ from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMe
 from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
-from .invalid_json_retry import attach_invalid_json_retry_to_model
-from .custom_deepeval.metrics import (
+from ..invalid_json_retry import attach_invalid_json_retry_to_model
+from ..custom_deepeval.metrics import (
     FactualCorrectnessMetric,
     ContextRelevancyMetric,
 )
-from ..config import BaseConfig
-from .shared_data_models import StructuredContext
-
-
-# ----- Input data models -----
-
-
-class GenerateInput(BaseModel):
-    question: str
-    ideal_answer: Optional[str] = None
-
-
-class EvaluationTestCase(GenerateInput):
-    llm_answer: str
-    structured_contexts: list[StructuredContext]
-
-    def to_llm_test_case(self) -> LLMTestCase:
-        return LLMTestCase(
-            input=self.question,
-            name=str(uuid.uuid4()),
-            expected_output=self.ideal_answer,
-            actual_output=self.llm_answer,
-            retrieval_context=[
-                ctx.to_flattened_string() for ctx in self.structured_contexts
-            ],
-            additional_metadata={"structured_contexts": self.structured_contexts},
-        )
 
 
 class MetricName(str, Enum):
@@ -138,10 +108,7 @@ class MetricConfig(BaseModel):
                 return ContextRelevancyMetric(threshold=self.threshold, model=model)
 
 
-# ----- Configuration models -----
-
-
-class Config(BaseConfig):
+class TaskConfig(BaseConfig):
     what: BaseConfig.GenericFields.what
     generate: BaseConfig.GenericFields.generate
     provider: BaseConfig.GenericFields.provider_openai_or_claude
@@ -156,27 +123,3 @@ class Config(BaseConfig):
     def metric_instances(self):
         """Return the list of runtime metric objects for evaluation."""
         return [metric.to_metric_instance() for metric in self.metrics]  # type: ignore
-
-
-# ----- Output data models -----
-
-
-@dataclass
-class RunMetricOutput:
-    run: int
-    metric: str
-    score: float | None = None
-    cost: float | None = None
-    reason: str | None = None
-    success: bool | None = None
-    error: str | None = None
-
-
-@dataclass
-class EvaluationResult:
-    name: str
-    input: str
-    actual_output: str
-    retrieval_context: list[str]
-    run_metric_outputs: list[RunMetricOutput]
-    expected_output: Optional[str] = None
