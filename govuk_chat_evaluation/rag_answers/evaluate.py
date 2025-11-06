@@ -18,7 +18,10 @@ from .deepeval_evaluate import (
     convert_deepeval_output_to_evaluation_results,
 )
 from ..file_system import jsonl_to_models
-from .data_models import EvaluationTestCase, Config, EvaluationResult
+from .data_models import EvaluationTestCase, TaskConfig
+from .deepeval_evaluate import (
+    EvaluationResult,
+)
 import logging
 
 
@@ -42,7 +45,7 @@ error_config = ErrorConfig(
 
 # would expect we need to pass config object through if that has metrics configuration
 def evaluate_and_output_results(
-    output_dir: Path, evaluation_data_path: Path, evaluation_config: Config
+    output_dir: Path, evaluation_data_path: Path, evaluation_config: TaskConfig
 ):
     """
     Function to run the evaluation, aggregate the results, and export them to files.

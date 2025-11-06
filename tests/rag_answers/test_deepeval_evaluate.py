@@ -13,8 +13,8 @@ from deepeval.evaluate.configs import (
 from govuk_chat_evaluation.file_system import jsonl_to_models
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
-    EvaluationResult,
 )
+from govuk_chat_evaluation.rag_answers.deepeval_evaluate import EvaluationResult
 from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
     run_deepeval_evaluation,
     convert_deepeval_output_to_evaluation_results,

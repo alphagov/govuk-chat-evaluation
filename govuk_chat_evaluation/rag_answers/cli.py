@@ -8,7 +8,7 @@ from ..config import apply_click_options_to_command, config_from_cli_args
 from ..file_system import write_config_file_for_reuse
 from .evaluate import evaluate_and_output_results
 from .generate import generate_and_write_dataset
-from .data_models import Config
+from .data_models import TaskConfig
 from ..output import initialise_output
 
 
@@ -18,14 +18,14 @@ from ..output import initialise_output
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default="config/defaults/rag_answers.yaml",
 )
-@apply_click_options_to_command(Config)
+@apply_click_options_to_command(TaskConfig)
 def main(**cli_args):
     """Run RAG answers evaluation"""
     start_time = datetime.now()
 
-    config: Config = config_from_cli_args(
+    config: TaskConfig = config_from_cli_args(
         config_path=cli_args["config_path"],
-        config_cls=Config,
+        config_cls=TaskConfig,
         cli_args=cli_args,
     )
 

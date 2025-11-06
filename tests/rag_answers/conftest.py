@@ -16,13 +16,13 @@ def mock_input_data(mock_project_root):
             "question": "Question 1",
             "llm_answer": "Hi",
             "ideal_answer": "Hello",
-            "retrieved_context": [],
+            "structured_contexts": [],
         },
         {
             "question": "Question 2",
             "llm_answer": "Bye",
             "ideal_answer": "Bye",
-            "retrieved_context": [],
+            "structured_contexts": [],
         },
     ]
 

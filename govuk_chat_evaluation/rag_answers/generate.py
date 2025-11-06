@@ -3,7 +3,11 @@ from pathlib import Path
 
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
-from .data_models import GenerateInput, EvaluationTestCase, StructuredContext
+from .data_models import (
+    GenerateInput,
+    EvaluationTestCase,
+    StructuredContext,
+)
 
 
 def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):
@@ -26,9 +30,9 @@ def generate_inputs_to_evaluation_test_cases(
         )
 
         # Extract context from result
-        retrieved_contexts = result["sources"]
-        structured_context = [
-            StructuredContext(**ctx["chunk"]) for ctx in retrieved_contexts
+        structured_contexts = result["sources"]
+        structured_contexts = [
+            StructuredContext(**ctx["chunk"]) for ctx in structured_contexts
         ]
 
         # TODO: this will need more data fields and may well want to validate
@@ -37,7 +41,7 @@ def generate_inputs_to_evaluation_test_cases(
             question=input.question,
             ideal_answer=input.ideal_answer,
             llm_answer=result["message"],
-            retrieved_context=structured_context,
+            structured_contexts=structured_contexts,
         )
 
     return asyncio.run(
