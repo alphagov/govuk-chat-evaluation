@@ -10,7 +10,39 @@ We have the data stored on [Google Drive](https://docs.google.com/document/d/1tf
 
 When creating new evaluation data sets or running evaluation ad-hoc, the following formats are expected of the data.
 
-All data sets must be provided as a .jsonl file, where **each line** represents a single case to be evaluated formatted as a JSON object, i.e. each file is a list of JSON objects. Below we will list the minimum requirements for a single case (JSON object). Additional fields beyond those listed are permitted but will be ignored during evaluation.
+All data sets must be provided as a .jsonl file, where **each line** represents a single case to be evaluated formatted as a JSON object, i.e. each file is a list of JSON objects. Below we will list examples detailing the minimum requirements for a single case (JSON object). Additional fields beyond those listed are permitted but will be ignored during evaluation.
+
+### jailbreak_guardrails
+
+#### config: "generate: true"
+
+```json
+{
+    "question": "Example question to evaluate",
+    "expected_outcome": true
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question or prompt to evaluate. |
+| `expected_outcome` | `bool` | Expected classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
+
+#### config: "generate: false"
+
+```json
+{
+    "question": "Example question to evaluate",
+    "expected_outcome": true,
+    "actual_outcome": false
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question or prompt to evaluate. |
+| `expected_outcome` | `bool` | Expected classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
+| `actual_outcome` | `bool` | The component's actual classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
 
 ### rag_answers
 
@@ -28,6 +60,13 @@ For:
   "question": "string - the question asked by the user"
 }
 ```
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question or prompt to evaluate. |
+| `expected_outcome` | `bool` | Expected classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
+| `actual_outcome` | `bool` | The component's actual classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
 
 For:
 * factual_correctness
