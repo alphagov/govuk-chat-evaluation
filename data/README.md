@@ -48,6 +48,72 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 }
 ```
 
+### output_guardrails
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | **The answer** (!) we want to evaluate against the output guardrails. |
+| `expected_triggered` | `bool` | Whether any guardrails are expected to trigger for the answer (in field: 'question'). |
+| `expected_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail expected to trigger, `false` = not expected. |
+| `actual_triggered` | `bool` | Whether any guardrails actually triggered. |
+| `actual_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail triggered, `false` = did not trigger. |
+
+`expected_guardrails` and `actual_guardrails` keys:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `sensitive_financial_matters` | `bool` | True if answer triggers the sensitive financial matters guardrail. |
+| `appropriate_language` | `bool` | True if answer triggers the language appropriateness guardrail. |
+| `political` | `bool` | True if answer triggers the political content guardrail. |
+| `unsupported_statements` | `bool` | True if answer triggers the unsupported statements guardrail. |
+| `contains_pii` | `bool` | True if answer triggers the personally identifiable information guardrail. |
+| `illegal` | `bool` | True if answer triggers illegal-content guardrail. |
+| `inappropriate_style` | `bool` | True if answer triggers the inappropriate style guardrail. |
+
+#### Example: 'generate: true'
+
+```json
+{
+    "question": "Example answer to test the output guardrails.",
+    "expected_triggered": true,
+    "expected_guardrails": {
+        "sensitive_financial_matters": true, 
+        "appropriate_language": false, 
+        "political": false, 
+        "unsupported_statements": false, 
+        "contains_pii": false, 
+        "illegal": true, 
+        "inappropriate_style": false}
+}
+```
+
+#### Example: 'generate: false'
+
+```json
+{
+    "question": "Example answer to test the output guardrails.",
+    "expected_triggered": true,
+    "expected_guardrails": {
+        "sensitive_financial_matters": true, 
+        "appropriate_language": false, 
+        "political": false, 
+        "unsupported_statements": false, 
+        "contains_pii": false, 
+        "illegal": true, 
+        "inappropriate_style": false},
+        "expected_triggered": true,
+    "actual_triggered": true,
+    "actual_guardrails": {
+        "sensitive_financial_matters": true, 
+        "appropriate_language": false, 
+        "political": false, 
+        "unsupported_statements": false, 
+        "contains_pii": false, 
+        "illegal": true, 
+        "inappropriate_style": false}
+}
+```
+
 ### rag_answers
 
 | Field | Type | Description |
@@ -67,7 +133,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 | `description` | `string` | Short description or summary of the source page. |
 | `html_content` | `string` | Raw HTML content of the chunk. |
 
-#### config: "generate: true"
+#### Example: 'generate: true'
 
 For:
 * relevance 
@@ -92,7 +158,7 @@ For:
 }
 ```
 
-#### config: "generate: false"
+#### Example: 'generate: false'
 
 For:
 * relevance 
