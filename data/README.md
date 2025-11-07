@@ -6,8 +6,6 @@ This directory should contain input data for evaluation. The contents are purpos
 
 We have the data stored on [Google Drive](https://docs.google.com/document/d/1tfgY8-5hCZDqw5zYAVpgYgB-VtjCKlzk1l1HMdOVV8U/edit?tab=t.0#heading=h.9awg20g181xc) which AI Team members can access. It is expected that files from Google Drive will be saved to this directory to run an evaluation.
 
-## Expected format of data sets
-
 When creating new evaluation data sets or running evaluation ad-hoc, each data set has to follow a particular format.
 
 All data sets must be provided as a .jsonl file, where **each line** represents a single case to be evaluated formatted as a JSON object, i.e. each file is a list of JSON objects. 
@@ -20,7 +18,7 @@ Below we will define the fields each evaluation task expects and give examples f
 
 In all cases: additional fields beyond those listed are permitted but will be ignored during evaluation.
 
-### jailbreak_guardrails
+## jailbreak_guardrails
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -29,7 +27,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 | `actual_outcome` | `bool` | The component's actual classification outcome. `false` = "no-jailbreak"; `true` = "jailbreak". |
 
 
-#### Example: 'generate: true'
+### Example: 'generate: true'
 
 ```json
 {
@@ -38,7 +36,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 }
 ```
 
-#### Example: 'generate: false'
+### Example: 'generate: false'
 
 ```json
 {
@@ -48,7 +46,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 }
 ```
 
-### output_guardrails
+## output_guardrails
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -70,7 +68,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 | `illegal` | `bool` | True if answer triggers illegal-content guardrail. |
 | `inappropriate_style` | `bool` | True if answer triggers the inappropriate style guardrail. |
 
-#### Example: 'generate: true'
+### Example: 'generate: true'
 
 ```json
 {
@@ -87,7 +85,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 }
 ```
 
-#### Example: 'generate: false'
+### Example: 'generate: false'
 
 ```json
 {
@@ -114,7 +112,34 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 }
 ```
 
-### rag_answers
+## question_router
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question to evaluate. |
+| `expected_outcome` | `string` | Expected question_routing_label. |
+| `actual_outcome` | `object` | Actual question_routing_label assigned by the system component. |
+
+### Example: 'generate: true'
+
+```json
+{
+    "question": "Example question to eveluate.",
+    "expected_outcome": "genuine_rag"
+}
+```
+
+### Example: 'generate: false'
+
+```json
+{
+    "question": "Example question to evaluate.",
+    "expected_outcome": "genuine_rag",
+    "actual_outcome": "unclear_intent"
+}
+```
+
+## rag_answers
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -133,7 +158,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 | `description` | `string` | Short description or summary of the source page. |
 | `html_content` | `string` | Raw HTML content of the chunk. |
 
-#### Example: 'generate: true'
+### Example: 'generate: true'
 
 For:
 * relevance 
@@ -158,7 +183,7 @@ For:
 }
 ```
 
-#### Example: 'generate: false'
+### Example: 'generate: false'
 
 For:
 * relevance 
@@ -202,4 +227,41 @@ For:
 }
 ```
 
+## retrieval
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question to evaluate. |
+| `expected_exact_paths` | `list[string]` | List of expected exact_paths of chunks. |
+| `actual_exact_paths_and_scores` | `list[object]` | List of retrieved, actual exact_paths of chunks. |
+
+actual_exact_paths_and_scores object:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `exact_path` | `string` | The exact_path of a chunk. |
+| `weighted_score` | `float` | The weighted_score of the chunk. |
+| `original_score` | `float` | The cosine similarity scorev of the chunk relative to the question. |
+
+### Example: 'generate: true'
+
+```json
+{
+    "question": "Example question to eveluate.",
+    "expected_exact_paths": "/example-exact-path-to#chunk"
+}
+```
+
+### Example: 'generate: false'
+
+```json
+{
+    "question": "Example question to evaluate.",
+    "expected_exact_paths": "/example-exact-path-to#chunk",
+    "actual_exact_paths_and_scores": {
+        "exact_path": "/example-exact-path-to#chunk",
+        "weighted_score": 0.9,
+        "original_score": 0.85
+    }
+}
+```
