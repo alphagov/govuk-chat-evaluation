@@ -265,3 +265,37 @@ actual_exact_paths_and_scores object:
     }
 }
 ```
+
+
+## topic_tagger
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `question` | `string` | The question to evaluate. |
+| `expected_primary_topic` | `string` | Expected primary topic of the question. |
+| `expected_secondary_topic` | `string\|None` | Expected secondary topic of the question. |
+| `actual_primary_topic` | `string` | Actual primary topic assigned to the question by topic-tagger component. |
+| `actual_secondary_topic` | `string\|None` |  Actual secondary topic assigned to the question by topic-tagger component. |
+
+
+### Example: 'generate: true'
+
+```json
+{
+    "question": "Example question to eveluate.",
+    "expected_primary_topic": "tax",
+    "expected_secondary_topic": "business"
+}
+```
+
+### Example: 'generate: false'
+
+```json
+{
+    "question": "Example question to eveluate.",
+    "expected_primary_topic": "tax",
+    "expected_secondary_topic": "business",
+    "actual_primary_topic": "benefits",
+    "actual_secondary_topic": "business"
+}
+```
