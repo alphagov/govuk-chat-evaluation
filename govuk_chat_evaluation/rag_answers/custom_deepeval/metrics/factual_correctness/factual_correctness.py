@@ -55,6 +55,7 @@ class FactualCorrectnessMetric(BaseMetric):
         test_case: LLMTestCase,
         _show_indicator: bool = True,
         _in_component: bool = False,
+        **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
         """Asynchronously evaluate the factual correctness of a test case."""
         check_llm_test_case_params(test_case, self._required_params, self)
