@@ -15,7 +15,7 @@ from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from .schema import CoherenceJudgement
 from .template import CoherenceTemplate, SCORE_RANGE
 
-COHERENCE_THRESHOLD = 0.8
+COHERENCE_THRESHOLD = 1.0  # require a perfect rubric score
 
 
 class CoherenceMetric(BaseMetric):
@@ -69,7 +69,7 @@ class CoherenceMetric(BaseMetric):
             )
 
             self.rubric_score = self._clamp_score(judgement.score)
-            self.score = self._normalise_score(self.rubric_score)
+            self.score = self._normalise_rubric_score(self.rubric_score)
             cleaned_reason = judgement.reason.strip()
             self.reason = cleaned_reason if self.include_reason else None
             self.success = self.is_successful()
@@ -111,8 +111,8 @@ class CoherenceMetric(BaseMetric):
             data = trimAndLoadJson(raw_response, self)
             return schema(**data)
 
-    def _normalise_score(self, rubric_score: int) -> float:
-        """Normalise rubric score (1–5) to 0–1 so thresholds/rollups align with other metrics."""
+    def _normalise_rubric_score(self, rubric_score: int) -> float:
+        """Normalise a rubric score in SCORE_RANGE to [0.0, 1.0]."""
         lo, hi = SCORE_RANGE
         return (rubric_score - lo) / (hi - lo)
 
