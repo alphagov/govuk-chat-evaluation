@@ -15,6 +15,7 @@ from ..invalid_json_retry import attach_invalid_json_retry_to_model
 from ..custom_deepeval.metrics import (
     FactualCorrectnessMetric,
     ContextRelevancyMetric,
+    CoherenceMetric,
 )
 
 
@@ -24,6 +25,7 @@ class MetricName(str, Enum):
     BIAS = "bias"
     FACTUAL_CORRECTNESS = "factual_correctness"
     CONTEXT_RELEVANCY = "context_relevancy"
+    COHERENCE = "coherence"
     # others to add
 
 
@@ -106,6 +108,8 @@ class MetricConfig(BaseModel):
                 return FactualCorrectnessMetric(threshold=self.threshold, model=model)
             case MetricName.CONTEXT_RELEVANCY:
                 return ContextRelevancyMetric(threshold=self.threshold, model=model)
+            case MetricName.COHERENCE:
+                return CoherenceMetric(threshold=self.threshold, model=model)
 
 
 class TaskConfig(BaseConfig):
