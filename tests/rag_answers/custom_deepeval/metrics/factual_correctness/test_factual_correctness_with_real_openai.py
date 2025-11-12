@@ -1,15 +1,17 @@
 import pytest
 from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness import (
-    FactualCorrectnessMetric,
+from deepeval import assert_test
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
+    FactualCorrectnessCompleteness,
+    Mode,
 )
 
 
 @pytest.mark.real_openai
 class TestFactualCorrectnessRealOpenAI:
     """
-    Test the FactualCorrectnessMetric with real OpenAI API calls.
+    Test the FactualCorrectnessCompleteness with real OpenAI API calls.
     This test requires the OPENAI_API_KEY environment variable to be set.
 
     It can be run with the command:
@@ -81,8 +83,9 @@ class TestFactualCorrectnessRealOpenAI:
     async def test_factual_correctness_score(
         self, llm_test_case: LLMTestCase, expected_score: float
     ):
-        metric = FactualCorrectnessMetric(
+        metric = FactualCorrectnessCompleteness(
             model=GPTModel(model="gpt-4o", temperature=0),
+            mode=Mode.CORRECTNESS,
             include_reason=False,
         )
         computed_score = await metric.a_measure(llm_test_case)  # type: ignore

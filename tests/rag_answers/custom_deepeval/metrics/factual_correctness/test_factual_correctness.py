@@ -8,11 +8,12 @@ from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel, DeepEvalBaseLLM
 from deepeval.errors import MissingTestCaseParamsError
 
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness import (
-    FactualCorrectnessMetric,
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
+    FactualCorrectnessCompleteness,
+    Mode,
 )
 
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness.schema import (
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.schema import (
     ClassifiedFacts,
     FactClassificationResult,
 )
@@ -58,11 +59,13 @@ def fact_classification_result():
     )
 
 
-class TestFactualCorrectness:
+class TestFactualCorrectnessCompleteness:
     class TestAMeasure:
         @pytest.mark.asyncio
         async def test_invalid_params(self, mock_native_model: Mock):
-            metric = FactualCorrectnessMetric(model=mock_native_model)
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
 
             invalid_test_case = LLMTestCase(
                 input="Input", actual_output="Actual", expected_output=None
@@ -73,7 +76,7 @@ class TestFactualCorrectness:
 
         @pytest.mark.asyncio
         @patch(
-            "govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness.factual_correctness.metric_progress_indicator"
+            "govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.factual_correctness_completeness.metric_progress_indicator"
         )
         @pytest.mark.parametrize(
             "set_show_progress, expected_show_progress",
@@ -94,7 +97,9 @@ class TestFactualCorrectness:
             set_show_progress: bool,
             expected_show_progress: bool,
         ):
-            metric = FactualCorrectnessMetric(model=mock_native_model)
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
 
             # since we patched metric_progress_indicator, it should call the mocked context manager mock_progress_indicator
             await metric.a_measure(test_case, _show_indicator=set_show_progress)
@@ -112,7 +117,9 @@ class TestFactualCorrectness:
             self, mock_native_model: Mock, test_case, caplog: pytest.LogCaptureFixture
         ):
             caplog.set_level(logging.DEBUG)
-            metric = FactualCorrectnessMetric(model=mock_native_model)
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
 
             await metric.a_measure(test_case)
 
@@ -156,8 +163,11 @@ class TestFactualCorrectness:
                 )
             )
 
-            metric = FactualCorrectnessMetric(
-                model=mock_native_model, threshold=0.7, include_reason=True
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model,
+                mode=Mode.CORRECTNESS,
+                threshold=0.7,
+                include_reason=True,
             )
 
             # let _calculate_score run naturally; it uses mocked a_generate
@@ -193,8 +203,8 @@ class TestFactualCorrectness:
             mock_native_model.a_generate = AsyncMock(
                 return_value=(FactClassificationResult(classified_facts=facts), 0.1)
             )
-            metric = FactualCorrectnessMetric(
-                model=mock_native_model, threshold=threshold
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS, threshold=threshold
             )
 
             _ = await metric.a_measure(test_case)
@@ -223,8 +233,10 @@ class TestFactualCorrectness:
             mock_native_model: Mock,
             test_case: LLMTestCase,
         ):
-            metric = FactualCorrectnessMetric(
-                model=mock_native_model, include_reason=include_reason
+            metric = FactualCorrectnessCompleteness(
+                mode=Mode.CORRECTNESS,
+                model=mock_native_model,
+                include_reason=include_reason,
             )
 
             _ = await metric.a_measure(test_case)
@@ -293,7 +305,8 @@ class TestFactualCorrectness:
                 )
             )
 
-            metric = FactualCorrectnessMetric(
+            metric = FactualCorrectnessCompleteness(
+                mode=Mode.CORRECTNESS,
                 model=mock_native_model,
                 threshold=threshold,
                 strict_mode=strict_mode,
@@ -318,7 +331,9 @@ class TestFactualCorrectness:
                 return_value=(fact_classification_result, expected_cost)
             )
 
-            metric = FactualCorrectnessMetric(model=mock_native_model)
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
 
             _ = await metric.a_measure(test_case)
 
@@ -332,7 +347,7 @@ class TestFactualCorrectness:
             test_case: LLMTestCase,
             fact_classification_result: FactClassificationResult,
         ):
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert isinstance(metric.confusion_matrix, ClassifiedFacts)
@@ -356,7 +371,9 @@ class TestFactualCorrectness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)
+            metric = FactualCorrectnessCompleteness(
+                mode=Mode.CORRECTNESS, model=mock_non_native_model
+            )
 
             result = await metric.a_measure(test_case)
 
@@ -405,7 +422,7 @@ class TestFactualCorrectness:
                 )
             )
 
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert round(result, 3) == round(expected_score, 3)
@@ -421,7 +438,7 @@ class TestFactualCorrectness:
             mock_non_native_model: Mock,
             test_case: LLMTestCase,
         ):
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert metric.evaluation_cost is None
@@ -442,7 +459,7 @@ class TestFactualCorrectness:
                 ]
             )
 
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
             _ = await metric.a_measure(test_case)
 
             # verify a_generate was called twice:
@@ -483,7 +500,7 @@ class TestFactualCorrectness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
 
@@ -518,7 +535,7 @@ class TestFactualCorrectness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessMetric(model=mock_non_native_model)  # type: ignore
+            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
 
@@ -536,7 +553,9 @@ class TestFactualCorrectness:
     def test_measure_raises_not_implemented(
         self, mock_native_model: Mock, test_case: LLMTestCase
     ):
-        metric = FactualCorrectnessMetric(model=mock_native_model)
+        metric = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS
+        )
 
         with pytest.raises(
             NotImplementedError, match="Synchronous evaluation is not supported"
@@ -572,7 +591,9 @@ class TestFactualCorrectness:
             )
         )
 
-        metric = FactualCorrectnessMetric(model=mock_native_model, threshold=threshold)
+        metric = FactualCorrectnessCompleteness(
+            mode=Mode.CORRECTNESS, model=mock_native_model, threshold=threshold
+        )
         await metric.a_measure(test_case)
 
         assert metric.is_successful() is expected_success

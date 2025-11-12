@@ -13,7 +13,8 @@ from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from ..invalid_json_retry import attach_invalid_json_retry_to_model
 from ..custom_deepeval.metrics import (
-    FactualCorrectnessMetric,
+    FactualCorrectnessCompleteness,
+    FactualMode,
     ContextRelevancyMetric,
     CoherenceMetric,
 )
@@ -105,7 +106,9 @@ class MetricConfig(BaseModel):
             case MetricName.BIAS:
                 return BiasMetric(threshold=self.threshold, model=model)
             case MetricName.FACTUAL_CORRECTNESS:
-                return FactualCorrectnessMetric(threshold=self.threshold, model=model)
+                return FactualCorrectnessCompleteness(
+                    threshold=self.threshold, model=model, mode=FactualMode.CORRECTNESS
+                )
             case MetricName.CONTEXT_RELEVANCY:
                 return ContextRelevancyMetric(threshold=self.threshold, model=model)
             case MetricName.COHERENCE:
