@@ -1,5 +1,5 @@
 from typing import Optional, List, Type
-from enum import Enum
+from enum import Enum, auto
 
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from deepeval.metrics import BaseMetric
@@ -20,8 +20,9 @@ from .schema import ClassifiedFacts, FactClassificationResult
 import logging
 
 
-class Mode(str, Enum):
-    CORRECTNESS = "correctness"
+class Mode(Enum):
+    CORRECTNESS = auto()
+    COMPLETENESS = auto()
 
 
 class FactualCorrectnessCompleteness(BaseMetric):
@@ -52,7 +53,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         self.confusion_matrix: ClassifiedFacts = ClassifiedFacts()
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:
-        """Synchronously evaluate the factual correctness of a test case."""
+        """Synchronously evaluate the metric (correctness or completeness) for a test case."""
         raise NotImplementedError(
             "Synchronous evaluation is not supported. Use async a_measure instead."
         )
@@ -64,7 +65,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         _in_component: bool = False,
         **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
-        """Asynchronously evaluate the factual correctness of a test case."""
+        """Asynchronously evaluate factual correctness or completeness, depending on `mode`."""
         check_llm_test_case_params(test_case, self._required_params, self)
 
         with metric_progress_indicator(
@@ -143,17 +144,19 @@ class FactualCorrectnessCompleteness(BaseMetric):
         statements.
 
         Returns:
-            float: The factual-correctness score.
+            float: The factual-correctness or the factual-completeness score, depending on `mode`.
         """
         if self.confusion_matrix is None:
             return 0.0
 
         tp = len(self.confusion_matrix.TP)
         fp = len(self.confusion_matrix.FP)
-        if self.mode == Mode.CORRECTNESS:
-            score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        else:
-            raise NotImplementedError(f"Mode {self.mode} not yet implemented")
+        fn = len(self.confusion_matrix.FN)
+        match self.mode:
+            case Mode.CORRECTNESS:
+                score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            case Mode.COMPLETENESS:
+                score = tp / (tp + fn) if tp > 0 else 0.0
 
         return 0.0 if self.strict_mode and score < self.threshold else score
 
@@ -164,4 +167,8 @@ class FactualCorrectnessCompleteness(BaseMetric):
 
     @property
     def __name__(self):  # type: ignore[arg-type]
-        return "FactualCorrectness"
+        match self.mode:
+            case Mode.COMPLETENESS:
+                return "Factual Completeness"
+            case Mode.CORRECTNESS:
+                return "Factual Correctness"

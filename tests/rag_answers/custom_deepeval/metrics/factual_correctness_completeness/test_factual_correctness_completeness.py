@@ -143,7 +143,7 @@ class TestFactualCorrectnessCompleteness:
                 ([], [], 0.0),
             ],
         )
-        async def test_returns_score(
+        async def test_returns_correctness_score(
             self,
             mock_native_model: Mock,
             test_case: LLMTestCase,
@@ -179,6 +179,50 @@ class TestFactualCorrectnessCompleteness:
             mock_native_model.a_generate.assert_awaited_once()
             _, kwargs = mock_native_model.a_generate.call_args
             assert kwargs.get("schema") == FactClassificationResult
+
+        @pytest.mark.asyncio
+        @pytest.mark.parametrize(
+            "input_TP,input_FN,expected_score",
+            [
+                (
+                    ["fact1"],
+                    ["fact2", "fact3"],
+                    1 / 3,
+                ),
+                ([], [], 0.0),
+            ],
+        )
+        async def test_returns_completeness_score(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+            input_TP: list,
+            input_FN: list,
+            expected_score: float,
+        ):
+            # override the a_generate method to return a mock response
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(
+                    FactClassificationResult(
+                        classified_facts=ClassifiedFacts(
+                            TP=input_TP, FN=input_FN, FP=["fact3"]
+                        )
+                    ),
+                    0.1,
+                )
+            )
+
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model,
+                mode=Mode.COMPLETENESS,
+                threshold=0.7,
+                include_reason=True,
+            )
+
+            # let _calculate_score run naturally; it uses mocked a_generate
+            result = await metric.a_measure(test_case)
+
+            assert round(result, 3) == round(expected_score, 3)
 
         sample_facts = ClassifiedFacts(TP=["fact1", "fact2"], FP=["wrong1"], FN=[])
 
@@ -347,7 +391,9 @@ class TestFactualCorrectnessCompleteness:
             test_case: LLMTestCase,
             fact_classification_result: FactClassificationResult,
         ):
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert isinstance(metric.confusion_matrix, ClassifiedFacts)
@@ -422,7 +468,9 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert round(result, 3) == round(expected_score, 3)
@@ -438,7 +486,9 @@ class TestFactualCorrectnessCompleteness:
             mock_non_native_model: Mock,
             test_case: LLMTestCase,
         ):
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
             result = await metric.a_measure(test_case)
 
             assert metric.evaluation_cost is None
@@ -459,7 +509,9 @@ class TestFactualCorrectnessCompleteness:
                 ]
             )
 
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
             _ = await metric.a_measure(test_case)
 
             # verify a_generate was called twice:
@@ -500,7 +552,9 @@ class TestFactualCorrectnessCompleteness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
 
@@ -535,7 +589,9 @@ class TestFactualCorrectnessCompleteness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessCompleteness(model=mock_non_native_model, mode=Mode.CORRECTNESS)  # type: ignore
+            metric = FactualCorrectnessCompleteness(
+                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            )  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
 
@@ -561,6 +617,18 @@ class TestFactualCorrectnessCompleteness:
             NotImplementedError, match="Synchronous evaluation is not supported"
         ):
             metric.measure(test_case)
+
+    @pytest.mark.asyncio
+    async def test_metric_names_differ_by_mode(self, mock_native_model: Mock):
+        correctness = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS
+        )
+        completeness = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.COMPLETENESS
+        )
+
+        assert correctness.__name__ == "Factual Correctness"
+        assert completeness.__name__ == "Factual Completeness"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

@@ -1,13 +1,13 @@
 from .factual_correctness_completeness import (
     FactualCorrectnessCompleteness,
-    Mode as FactualMode,
+    Mode as FactualCorrectnessCompletenessMode,
 )
 from .context_relevancy import ContextRelevancyMetric
 from .coherence import CoherenceMetric
 
 __all__ = [
     "FactualCorrectnessCompleteness",
-    "FactualMode",
+    "FactualCorrectnessCompletenessMode",
     "ContextRelevancyMetric",
     "CoherenceMetric",
 ]
