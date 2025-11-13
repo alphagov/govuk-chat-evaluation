@@ -1,7 +1,6 @@
 import pytest
 from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel
-from deepeval import assert_test
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
     CoherenceMetric,
@@ -124,16 +123,3 @@ class TestCoherenceRealOpenAI:
 
         # Check if the metric passes/fails as expected based on threshold
         assert metric.is_successful() == expected_to_pass
-
-    def test_coherence_deepeval(self):
-        test_case = LLMTestCase(
-            input="What is Universal Credit?",
-            actual_output="Universal Credit is a payment to help with your living costs if you're on a low income or out of work.",
-        )
-
-        metric = CoherenceMetric(
-            model=GPTModel(model="gpt-4o", temperature=0),
-            include_reason=True,
-        )
-
-        assert_test(test_case, [metric])

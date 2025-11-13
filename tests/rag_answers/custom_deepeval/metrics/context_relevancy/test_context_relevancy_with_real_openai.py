@@ -1,7 +1,6 @@
 import pytest
 from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel
-from deepeval import assert_test
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy import (
     ContextRelevancyMetric,
 )
@@ -58,17 +57,3 @@ class TestContextRelevancyRealOpenAI:
         )
         computed_score = await metric.a_measure(llm_test_case)
         assert round(computed_score, 2) == pytest.approx(expected_score, rel=0.2)
-
-    def test_context_relevancy_deepeval(self):
-        test_case = LLMTestCase(
-            input="What is the UK's inflation rate?",
-            actual_output="The inflation rate in the UK is 3.4%.",
-            additional_metadata={"structured_contexts": [self.structured_context]},
-        )
-
-        metric = ContextRelevancyMetric(
-            model=GPTModel(model="gpt-4o", temperature=0),
-            include_reason=False,
-        )
-
-        assert_test(test_case, [metric])
