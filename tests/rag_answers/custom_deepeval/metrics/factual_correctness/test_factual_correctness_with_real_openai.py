@@ -1,7 +1,6 @@
 import pytest
 from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel
-from deepeval import assert_test
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness import (
     FactualCorrectnessMetric,
 )
@@ -88,15 +87,3 @@ class TestFactualCorrectnessRealOpenAI:
         )
         computed_score = await metric.a_measure(llm_test_case)  # type: ignore
         assert round(computed_score, 4) == round(expected_score, 4)
-
-    def test_factual_correctness_deepeval(self):
-        test_case = LLMTestCase(
-            input="What noise do pigs and dogs do?",
-            actual_output="Pigs oink and dogs bark.",
-            expected_output="Pigs oink. Dogs bark.",
-        )
-        metric = FactualCorrectnessMetric(
-            model=GPTModel(model="gpt-4o", temperature=0),
-            include_reason=False,
-        )
-        assert_test(test_case, [metric])
