@@ -35,7 +35,7 @@ def run_deepeval_evaluation(
     cases: list[LLMTestCase], metrics: list[BaseMetric], n_runs: int = 1, **kwargs
 ) -> list[list[TestResult]]:
     """ "
-    Run the Deepval evaluation on the given models and metrics
+    Run the DeepEval evaluation on the given models and metrics
 
     Args:
         cases : List of test cases to evaluate
@@ -48,8 +48,8 @@ def run_deepeval_evaluation(
 
     """
 
-    with log_task_duration("Running Deepval Evaluation"):
-        logging.info("Running Deepval evaluation")
+    with log_task_duration("Running DeepEval Evaluation"):
+        logging.info("Running DeepEval evaluation")
 
         all_evaluation_runs = []
 
@@ -66,7 +66,7 @@ def run_deepeval_evaluation(
                 evaluation_run.test_results
             )  # Store results per run
 
-    logging.info("Deepval evaluation complete")
+    logging.info("DeepEval evaluation complete")
 
     return all_evaluation_runs
 

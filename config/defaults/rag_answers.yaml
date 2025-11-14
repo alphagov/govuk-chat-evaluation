@@ -22,6 +22,10 @@ metrics:
     threshold: 1.0
     model: gpt-4o
     temperature: 0.0
+  - name: factual_completeness
+    threshold: 1.0
+    model: gpt-4o
+    temperature: 0.0
   - name: context_relevancy
     threshold: 0.8
     model: eu.amazon.nova-pro-v1:0

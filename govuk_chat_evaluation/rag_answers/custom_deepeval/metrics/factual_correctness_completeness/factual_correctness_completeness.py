@@ -1,4 +1,5 @@
 from typing import Optional, List, Type
+from enum import Enum, auto
 
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from deepeval.metrics import BaseMetric
@@ -19,7 +20,12 @@ from .schema import ClassifiedFacts, FactClassificationResult
 import logging
 
 
-class FactualCorrectnessMetric(BaseMetric):
+class Mode(Enum):
+    CORRECTNESS = auto()
+    COMPLETENESS = auto()
+
+
+class FactualCorrectnessCompleteness(BaseMetric):
     _required_params: List[LLMTestCaseParams] = [
         LLMTestCaseParams.INPUT,
         LLMTestCaseParams.ACTUAL_OUTPUT,
@@ -32,11 +38,13 @@ class FactualCorrectnessMetric(BaseMetric):
     def __init__(
         self,
         model: DeepEvalBaseLLM,
+        mode: Mode,
         threshold: float = 0.5,
         include_reason: bool = True,
         strict_mode: bool = False,
     ):
         self.model, self.using_native_model = initialize_model(model)
+        self.mode = mode
         self.threshold = 1 if strict_mode else threshold
         self.evaluation_model = self.model.get_model_name()
         self.include_reason = include_reason
@@ -45,7 +53,7 @@ class FactualCorrectnessMetric(BaseMetric):
         self.confusion_matrix: ClassifiedFacts = ClassifiedFacts()
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:
-        """Synchronously evaluate the factual correctness of a test case."""
+        """Synchronously evaluate the metric (correctness or completeness) for a test case."""
         raise NotImplementedError(
             "Synchronous evaluation is not supported. Use async a_measure instead."
         )
@@ -57,7 +65,7 @@ class FactualCorrectnessMetric(BaseMetric):
         _in_component: bool = False,
         **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
-        """Asynchronously evaluate the factual correctness of a test case."""
+        """Asynchronously evaluate factual correctness or completeness, depending on `mode`."""
         check_llm_test_case_params(test_case, self._required_params, self)
 
         with metric_progress_indicator(
@@ -136,14 +144,19 @@ class FactualCorrectnessMetric(BaseMetric):
         statements.
 
         Returns:
-            float: The factual-correctness score.
+            float: The factual-correctness or the factual-completeness score, depending on `mode`.
         """
         if self.confusion_matrix is None:
             return 0.0
 
         tp = len(self.confusion_matrix.TP)
         fp = len(self.confusion_matrix.FP)
-        score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        fn = len(self.confusion_matrix.FN)
+        match self.mode:
+            case Mode.CORRECTNESS:
+                score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            case Mode.COMPLETENESS:
+                score = tp / (tp + fn) if tp > 0 else 0.0
 
         return 0.0 if self.strict_mode and score < self.threshold else score
 
@@ -154,4 +167,8 @@ class FactualCorrectnessMetric(BaseMetric):
 
     @property
     def __name__(self):  # type: ignore[arg-type]
-        return "FactualCorrectness"
+        match self.mode:
+            case Mode.COMPLETENESS:
+                return "Factual Completeness"
+            case Mode.CORRECTNESS:
+                return "Factual Correctness"
