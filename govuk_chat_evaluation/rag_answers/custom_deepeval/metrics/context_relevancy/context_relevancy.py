@@ -193,4 +193,4 @@ class ContextRelevancyMetric(BaseMetric):
 
     @property
     def __name__(self):  # type: ignore[arg-type]
-        return "ContextRelevancy"
+        return "Context Relevancy"
