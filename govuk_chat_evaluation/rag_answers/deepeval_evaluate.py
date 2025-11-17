@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pydantic.dataclasses import dataclass
 from typing import Optional
+import json
 
 from deepeval import evaluate as deepeval_evaluate
 from deepeval.evaluate.types import TestResult
@@ -8,6 +9,9 @@ from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
 from ..timing import log_task_duration
 import logging
+from deepeval.test_run import global_test_run_manager
+from pathlib import Path
+import govuk_chat_evaluation.file_system as file_system
 
 
 @dataclass
@@ -32,7 +36,11 @@ class EvaluationResult:
 
 
 def run_deepeval_evaluation(
-    cases: list[LLMTestCase], metrics: list[BaseMetric], n_runs: int = 1, **kwargs
+    cases: list[LLMTestCase],
+    metrics: list[BaseMetric],
+    output_dir: Path,
+    n_runs: int = 1,
+    **kwargs,
 ) -> list[list[TestResult]]:
     """ "
     Run the DeepEval evaluation on the given models and metrics
@@ -66,7 +74,20 @@ def run_deepeval_evaluation(
                 evaluation_run.test_results
             )  # Store results per run
 
-    logging.info("DeepEval evaluation complete")
+            test_run = global_test_run_manager.get_test_run()
+            path = output_dir / f"deepeval_test_run_{i + 1}.json"
+
+            if test_run is None:
+                raise RuntimeError(f"DeepEval test run not found for run {i + 1}")
+
+            body = test_run.model_dump(by_alias=True, exclude_none=True)
+            with (path).open("w") as f:
+                json.dump(body, f)
+
+            relative_path = path.relative_to(file_system.project_root())
+            logging.info(f"Run {i + 1} done. written to {relative_path}")
+
+    logging.info("Deepval evaluation complete")
 
     return all_evaluation_runs
 

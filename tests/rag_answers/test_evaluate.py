@@ -3,9 +3,7 @@ import pandas as pd
 import re
 import yaml
 import logging
-import json
 
-from deepeval.test_run import TestRun as DeepevalTestRun
 from govuk_chat_evaluation.rag_answers.data_models import (
     TaskConfig,
 )
@@ -159,31 +157,6 @@ def test_evaluate_and_output_results_copes_with_empty_data(
     evaluate_and_output_results(mock_project_root, file_path, mock_evaluation_config)
 
     assert "There is no data to evaluate" in caplog.text
-
-
-def test_evaluate_and_output_results_writes_deepeval_test_run(
-    tmp_path,
-    mock_input_data,
-    mock_evaluation_config,
-    mock_run_deepeval_evaluation,
-    mocker,
-):
-    test_run = mocker.create_autospec(DeepevalTestRun, instance=True)
-    test_run.model_dump.return_value = {"id": "test-run-123"}
-    mocker.patch(
-        "govuk_chat_evaluation.rag_answers.evaluate.global_test_run_manager.get_test_run",
-        return_value=test_run,
-    )
-
-    evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
-
-    output_path = tmp_path / "deepeval_test_run.json"
-    assert output_path.exists()
-
-    with output_path.open() as f:
-        assert json.load(f) == {"id": "test-run-123"}
-
-    test_run.model_dump.assert_called_once_with(by_alias=True, exclude_none=True)
 
 
 @pytest.mark.usefixtures("mock_run_deepeval_evaluation")
