@@ -2,9 +2,7 @@ from pathlib import Path
 from typing import cast
 from functools import cached_property
 import pandas as pd
-import json
 
-from deepeval.test_run import global_test_run_manager
 from deepeval.metrics import BaseMetric
 from deepeval.evaluate.configs import (
     AsyncConfig,
@@ -70,13 +68,8 @@ def evaluate_and_output_results(
         async_config=async_config,
         cache_config=cache_config,
         error_config=error_config,
+        output_dir=output_dir,
     )
-
-    test_run = global_test_run_manager.get_test_run()
-    if test_run is not None:
-        body = test_run.model_dump(by_alias=True, exclude_none=True)
-        with (output_dir / "deepeval_test_run.json").open("w") as f:
-            json.dump(body, f)
 
     evaluation_results = convert_deepeval_output_to_evaluation_results(
         evaluation_outputs
