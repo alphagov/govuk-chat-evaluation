@@ -17,6 +17,9 @@ from .deepeval_evaluate import (
 )
 from ..file_system import jsonl_to_models
 from .data_models import EvaluationTestCase, TaskConfig
+from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
+    ensure_model_ids_are_unique,
+)
 from .deepeval_evaluate import (
     EvaluationResult,
 )
@@ -60,8 +63,10 @@ def evaluate_and_output_results(
         logging.error("\nThere is no data to evaluate")
         return
 
+    models_with_unique_ids = ensure_model_ids_are_unique(models)
+
     evaluation_outputs = run_deepeval_evaluation(
-        cases=[model.to_llm_test_case() for model in models],
+        cases=[model.to_llm_test_case() for model in models_with_unique_ids],
         metrics=cast(list[BaseMetric], evaluation_config.metric_instances()),
         n_runs=evaluation_config.n_runs,
         display_config=display_config,
@@ -105,7 +110,7 @@ class AggregatedResults:
             for evaluation_output in eval_result.run_metric_outputs:
                 data.append(
                     {
-                        "name": eval_result.name,
+                        "id": eval_result.id,
                         "input": eval_result.input,
                         "metric": evaluation_output.metric,
                         "score": evaluation_output.score,
@@ -116,7 +121,7 @@ class AggregatedResults:
         df = pd.DataFrame(data)
 
         return (
-            df.groupby(["name", "input", "metric"])["score"]
+            df.groupby(["id", "input", "metric"])["score"]
             .agg(["mean", "std", "count"])
             .unstack()
             .reset_index()
@@ -162,8 +167,8 @@ def _log_metric_errors(evaluation_results: list[EvaluationResult]) -> None:
         for out in er.run_metric_outputs:
             if out.error:
                 logging.warning(
-                    "Metric error (name=%s, metric=%s, run=%s): %s",
-                    er.name,
+                    "Metric error (id=%s, metric=%s, run=%s): %s",
+                    er.id,
                     out.metric,
                     out.run,
                     out.error,

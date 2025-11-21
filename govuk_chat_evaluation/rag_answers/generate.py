@@ -8,11 +8,18 @@ from .data_models import (
     EvaluationTestCase,
     StructuredContext,
 )
+from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
+    ensure_model_ids_are_unique,
+)
 
 
 def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):
     models = jsonl_to_models(Path(input_path), GenerateInput)
-    generated = generate_inputs_to_evaluation_test_cases(provider, models)
+    models_with_unique_ids = ensure_model_ids_are_unique(models)
+    generated = generate_inputs_to_evaluation_test_cases(
+        provider, models_with_unique_ids
+    )
+
     return write_generated_to_output(output_dir, generated)
 
 
@@ -38,6 +45,7 @@ def generate_inputs_to_evaluation_test_cases(
         # TODO: this will need more data fields and may well want to validate
         # aspects of the returned data rather than just using the JSON directly
         return EvaluationTestCase(
+            id=input.id,
             question=input.question,
             ideal_answer=input.ideal_answer,
             llm_answer=result["message"],

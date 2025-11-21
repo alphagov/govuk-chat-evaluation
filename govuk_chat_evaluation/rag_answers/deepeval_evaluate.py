@@ -27,7 +27,7 @@ class RunMetricOutput:
 
 @dataclass
 class EvaluationResult:
-    name: str
+    id: str
     input: str
     actual_output: str
     retrieval_context: list[str]
@@ -115,7 +115,7 @@ def convert_deepeval_output_to_evaluation_results(
     2. For each input, create an EvaluationResult object containing the input, actual output, expected output, and the evaluation results for each run.
         [
             EvaluationResult(
-                name='input_1',
+                id='input_1',
                 input='input_1',
                 actual_output='actual_output_1',
                 expected_output='expected_output_1',
@@ -140,7 +140,7 @@ def convert_deepeval_output_to_evaluation_results(
                 ]
             ),
             EvaluationResult(
-                name='input_2',
+                id='input_2',
                 ...)
                 ]
 
@@ -180,7 +180,7 @@ def convert_deepeval_output_to_evaluation_results(
 
         aggregated_results.append(
             EvaluationResult(
-                name=sample_result.name,
+                id=sample_result.name,
                 input=sample_result.input,
                 actual_output=sample_result.actual_output,
                 expected_output=sample_result.expected_output,

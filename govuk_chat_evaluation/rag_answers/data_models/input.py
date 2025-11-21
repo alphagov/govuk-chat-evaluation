@@ -1,5 +1,5 @@
 from deepeval.test_case import LLMTestCase
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 import uuid
 
@@ -35,6 +35,7 @@ class StructuredContext(BaseModel):
 
 
 class GenerateInput(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     question: str
     ideal_answer: Optional[str] = None
 
@@ -46,7 +47,7 @@ class EvaluationTestCase(GenerateInput):
     def to_llm_test_case(self) -> LLMTestCase:
         return LLMTestCase(
             input=self.question,
-            name=str(uuid.uuid4()),
+            name=self.id,
             expected_output=self.ideal_answer,
             actual_output=self.llm_answer,
             retrieval_context=[
