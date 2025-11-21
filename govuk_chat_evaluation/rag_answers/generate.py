@@ -8,11 +8,14 @@ from .data_models import (
     EvaluationTestCase,
     StructuredContext,
 )
+from collections import defaultdict
 
 
 def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):
     models = jsonl_to_models(Path(input_path), GenerateInput)
-    generated = generate_inputs_to_evaluation_test_cases(provider, models)
+    models_with_unique_ids = ensure_model_ids_are_unique(models)
+    generated = generate_inputs_to_evaluation_test_cases(provider, models_with_unique_ids)
+
     return write_generated_to_output(output_dir, generated)
 
 
@@ -48,3 +51,23 @@ def generate_inputs_to_evaluation_test_cases(
     return asyncio.run(
         generate_dataset(generate_inputs, generate_input_to_evaluation_test_case)
     )
+
+
+def ensure_model_ids_are_unique(
+    inputs: list[GenerateInput],
+) -> list[GenerateInput]:
+    ids = [input.id for input in inputs]
+    if len(ids) == len(set(ids)):
+        return inputs
+
+    inputs_by_id = defaultdict(list)
+
+    for input in inputs:
+        inputs_by_id[input.id].append(input)
+
+    for _id, grouped_inputs in inputs_by_id.items():
+        if len(grouped_inputs) > 1:
+            for index, input in enumerate(grouped_inputs[1:], start=1):
+                input.id = f"{input.id}-duplicate-{index}"
+
+    return inputs
