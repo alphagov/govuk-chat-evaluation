@@ -38,7 +38,7 @@ class TestAggregateResults:
     def mock_evaluation_results(self) -> list[EvaluationResult]:
         return [
             EvaluationResult(
-                name="Test1",
+                id="Test1",
                 input="Is Vat a tax?",
                 actual_output="Yes",
                 expected_output="Yes, VAT is a tax.",
@@ -51,7 +51,7 @@ class TestAggregateResults:
                 ],
             ),
             EvaluationResult(
-                name="Test2",
+                id="Test2",
                 input="What error can occur?",
                 actual_output="Completion rate limited",
                 expected_output="Completion rate limited",
@@ -75,7 +75,7 @@ class TestAggregateResults:
         ).per_input_metric_averages
         assert isinstance(metric_averages, pd.DataFrame)
         assert list(metric_averages.columns) == [
-            ("name", ""),
+            ("id", ""),
             ("input", ""),
             ("mean", "bias"),
             ("mean", "faithfulness"),
@@ -84,7 +84,7 @@ class TestAggregateResults:
             ("n_datapoints", "bias"),
             ("n_datapoints", "faithfulness"),
         ]
-        assert list(metric_averages[("name", "")]) == ["Test1", "Test2"]
+        assert list(metric_averages[("id", "")]) == ["Test1", "Test2"]
         assert list(metric_averages[("input", "")]) == [
             "Is Vat a tax?",
             "What error can occur?",
@@ -166,7 +166,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
     caplog.set_level(logging.WARNING)
     evaluation_results = [
         EvaluationResult(
-            name="passes",
+            id="passes",
             input="Question",
             actual_output="Answer",
             expected_output="Expected",
@@ -176,7 +176,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
             ],
         ),
         EvaluationResult(
-            name="fails",
+            id="fails",
             input="Question",
             actual_output="Answer",
             expected_output="Expected",
@@ -202,6 +202,6 @@ def test_evaluate_and_output_results_logs_metric_errors(
         record for record in caplog.records if record.levelno == logging.WARNING
     ]
     assert any(
-        record.message == "Metric error (name=fails, metric=bias, run=1): rate limited"
+        record.message == "Metric error (id=fails, metric=bias, run=1): rate limited"
         for record in warnings
     )
