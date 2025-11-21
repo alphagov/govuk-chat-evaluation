@@ -11,12 +11,20 @@ from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 def mock_data_generation(mocker):
     return_value = [
         EvaluationTestCase(
+            id="question-1",
             question="Question",
             ideal_answer="An answer",
             llm_answer="An answer",
             structured_contexts=[],
-        )
-    ] * 2
+        ),
+        EvaluationTestCase(
+            id="question-2",
+            question="Another Question",
+            ideal_answer="Another answer",
+            llm_answer="Another answer",
+            structured_contexts=[],
+        ),
+    ]
 
     return mocker.patch(
         "govuk_chat_evaluation.rag_answers.generate.generate_inputs_to_evaluation_test_cases",

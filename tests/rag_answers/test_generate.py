@@ -12,6 +12,7 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
     StructuredContext,
 )
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -106,3 +107,15 @@ def test_generate_and_write_dataset(mock_input_data, mock_project_root):
     with open(path, "r") as file:
         for line in file:
             assert json.loads(line)
+
+
+@pytest.mark.usefixtures("run_rake_task_mock")
+def test_generate_and_write_dataset_calls_ensure_unique_model_ids(
+    mock_input_data, mock_project_root
+):
+    with patch(
+        "govuk_chat_evaluation.rag_answers.generate.ensure_unique_model_ids"
+    ) as mock:
+        mock.side_effect = lambda inputs: inputs
+        generate_and_write_dataset(mock_input_data, "openai", mock_project_root)
+        mock.assert_called_once()

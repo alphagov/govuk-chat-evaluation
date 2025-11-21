@@ -16,6 +16,7 @@ from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
     RunMetricOutput,
 )
 from tests.conftest import assert_csv_exists_with_headers
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -157,6 +158,18 @@ def test_evaluate_and_output_results_copes_with_empty_data(
     evaluate_and_output_results(mock_project_root, file_path, mock_evaluation_config)
 
     assert "There is no data to evaluate" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_run_deepeval_evaluation")
+def test_evaluate_and_output_results_calls_ensure_unique_model_ids(
+    tmp_path, mock_input_data, mock_evaluation_config
+):
+    with patch(
+        "govuk_chat_evaluation.rag_answers.evaluate.ensure_unique_model_ids"
+    ) as mock:
+        mock.side_effect = lambda inputs: inputs
+        evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
+        mock.assert_called_once()
 
 
 @pytest.mark.usefixtures("mock_run_deepeval_evaluation")

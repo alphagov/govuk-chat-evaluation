@@ -1,4 +1,8 @@
-from .input import EvaluationTestCase, GenerateInput, StructuredContext
+from .input import (
+    EvaluationTestCase,
+    GenerateInput,
+    StructuredContext,
+)
 from .config import (
     LLMJudgeModelConfig,
     MetricConfig,
