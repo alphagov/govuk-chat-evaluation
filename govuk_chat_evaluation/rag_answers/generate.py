@@ -38,6 +38,7 @@ def generate_inputs_to_evaluation_test_cases(
         # TODO: this will need more data fields and may well want to validate
         # aspects of the returned data rather than just using the JSON directly
         return EvaluationTestCase(
+            id=input.id,
             question=input.question,
             ideal_answer=input.ideal_answer,
             llm_answer=result["message"],

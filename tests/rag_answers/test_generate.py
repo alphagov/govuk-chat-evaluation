@@ -50,8 +50,8 @@ def run_rake_task_mock(mocker):
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases():
     generate_inputs = [
-        GenerateInput(question="Question 1", ideal_answer="Answer 1"),
-        GenerateInput(question="Question 2", ideal_answer="Answer 2"),
+        GenerateInput(id="question-1", question="Question 1", ideal_answer="Answer 1"),
+        GenerateInput(id="question-2", question="Question 2", ideal_answer="Answer 2"),
     ]
     structured_context = StructuredContext(
         title="Title",
@@ -63,12 +63,14 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
 
     expected_results = [
         EvaluationTestCase(
+            id="question-1",
             question="Question 1",
             ideal_answer="Answer 1",
             llm_answer="An answer",
             structured_contexts=[structured_context],
         ),
         EvaluationTestCase(
+            id="question-2",
             question="Question 2",
             ideal_answer="Answer 2",
             llm_answer="An answer",
