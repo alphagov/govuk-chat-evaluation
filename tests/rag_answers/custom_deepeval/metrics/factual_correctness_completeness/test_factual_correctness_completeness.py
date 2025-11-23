@@ -75,9 +75,11 @@ class TestFactualCorrectnessCompleteness:
             key_1 = make_cache_key("model-a", "answer", "ground")
             key_2 = make_cache_key("model-b", "answer", "ground")
             key_3 = make_cache_key("model-a", "different", "ground")
+            key_4 = make_cache_key(None, "answer", "ground")
 
             assert key_1 != key_2
             assert key_1 != key_3
+            assert key_4[0] == "unknown-model"
 
         def test_clear_fact_classification_cache_empties_cache(self):
             cache_key = make_cache_key("model", "answer", "ground")
@@ -730,3 +732,46 @@ class TestFactualCorrectnessCompleteness:
         assert (
             correctness_metric.confusion_matrix == completeness_metric.confusion_matrix
         )
+
+    @pytest.mark.asyncio
+    async def test_different_models_do_not_share_cache(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+    ):
+        mock_other_model = Mock(spec=GPTModel)
+        mock_other_model.get_model_name.return_value = "other-model"
+        mock_other_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.05,
+            )
+        )
+
+        mock_native_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.05,
+            )
+        )
+
+        metric_model_a = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS
+        )
+        metric_model_b = FactualCorrectnessCompleteness(
+            model=mock_other_model, mode=Mode.CORRECTNESS
+        )
+
+        await metric_model_a.a_measure(test_case)
+        await metric_model_b.a_measure(test_case)
+
+        assert mock_native_model.a_generate.await_count == 1
+        assert mock_other_model.a_generate.await_count == 1
