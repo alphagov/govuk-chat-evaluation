@@ -11,6 +11,9 @@ from deepeval.errors import MissingTestCaseParamsError
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
     FactualCorrectnessCompleteness,
     Mode,
+    make_cache_key,
+    reset_fact_classification_cache,
+    get_fact_classification_cache,
 )
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.schema import (
@@ -59,7 +62,35 @@ def fact_classification_result():
     )
 
 
+@pytest.fixture(autouse=True)
+def clear_fact_cache_between_tests():
+    reset_fact_classification_cache()
+    yield
+    reset_fact_classification_cache()
+
+
 class TestFactualCorrectnessCompleteness:
+    class TestCacheHelpers:
+        def test_make_cache_key_depends_on_model_and_texts(self):
+            key_1 = make_cache_key("model-a", "answer", "ground")
+            key_2 = make_cache_key("model-b", "answer", "ground")
+            key_3 = make_cache_key("model-a", "different", "ground")
+
+            assert key_1 != key_2
+            assert key_1 != key_3
+
+        def test_clear_fact_classification_cache_empties_cache(self):
+            cache_key = make_cache_key("model", "answer", "ground")
+            get_fact_classification_cache()[cache_key] = ClassifiedFacts(
+                TP=["t"], FP=[], FN=[]
+            )
+
+            assert cache_key in get_fact_classification_cache()
+
+            reset_fact_classification_cache()
+
+            assert get_fact_classification_cache() == {}
+
     class TestAMeasure:
         @pytest.mark.asyncio
         async def test_invalid_params(self, mock_native_model: Mock):
