@@ -696,3 +696,37 @@ class TestFactualCorrectnessCompleteness:
         await metric.a_measure(test_case)
 
         assert metric.is_successful() is expected_success
+
+    @pytest.mark.asyncio
+    async def test_correctness_and_completeness_share_classification_result_sequentially(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+    ):
+        mock_native_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.1,
+            )
+        )
+
+        correctness_metric = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS
+        )
+        completeness_metric = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.COMPLETENESS
+        )
+
+        correctness_score = await correctness_metric.a_measure(test_case)
+        completeness_score = await completeness_metric.a_measure(test_case)
+
+        assert mock_native_model.a_generate.await_count == 1
+        assert round(correctness_score, 3) == 1.0
+        assert round(completeness_score, 3) == 0.5
+        assert (
+            correctness_metric.confusion_matrix == completeness_metric.confusion_matrix
+        )

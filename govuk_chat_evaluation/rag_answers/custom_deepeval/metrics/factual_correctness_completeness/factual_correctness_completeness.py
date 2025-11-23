@@ -17,6 +17,7 @@ from .template import (
     FactualCorrectnessTemplate,
 )
 from .schema import ClassifiedFacts, FactClassificationResult
+from .cache import make_cache_key, get_cache
 import logging
 
 
@@ -107,34 +108,45 @@ class FactualCorrectnessCompleteness(BaseMetric):
     async def _a_classify_statements(
         self, input: str, actual_output: str, expected_output: str
     ) -> ClassifiedFacts:
+        cache_key = make_cache_key(
+            self.evaluation_model, actual_output, expected_output
+        )
+        cached = get_cache().get(cache_key)
+        if cached is not None:
+            return cached
+
         prompt = self.evaluation_template.classify_facts(
             answer=actual_output, ground_truth=expected_output
         )
+        classified_facts: ClassifiedFacts
         if self.using_native_model:
             res, cost = await self.model.a_generate(
                 prompt, schema=FactClassificationResult
             )
             if isinstance(cost, (int, float)):
                 self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
-            return res.classified_facts  # type: ignore[arg-type]
+            classified_facts = res.classified_facts  # type: ignore[arg-type]
         else:
             try:
                 res = await self.model.a_generate(
                     prompt, schema=FactClassificationResult
                 )
-                return res.classified_facts  # type: ignore[arg-type]
+                classified_facts = res.classified_facts  # type: ignore[arg-type]
             except TypeError:
                 try:
                     res = await self.model.a_generate(prompt)
                     data = trimAndLoadJson(res, self)
                     data_model = FactClassificationResult(**data)
-                    return data_model.classified_facts
+                    classified_facts = data_model.classified_facts
                 except Exception as inner_e:
                     logging.error(
                         f"Failed to parse fallback JSON for test input: {input}",
                         exc_info=inner_e,
                     )
-                    return ClassifiedFacts()
+                    classified_facts = ClassifiedFacts()
+
+        get_cache()[cache_key] = classified_facts
+        return classified_facts
 
     def _calculate_score(self) -> float:
         """
