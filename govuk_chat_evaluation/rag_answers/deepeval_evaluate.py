@@ -63,6 +63,12 @@ def run_deepeval_evaluation(
 
         for i in range(n_runs):
             logging.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
+            for metric in metrics:
+                reset_method = getattr(
+                    metric.__class__, "reset_fact_classification_cache", None
+                )
+                if callable(reset_method):
+                    reset_method()
 
             evaluation_run = deepeval_evaluate(
                 test_cases=cases,

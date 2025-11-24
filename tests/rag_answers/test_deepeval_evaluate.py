@@ -14,8 +14,8 @@ from govuk_chat_evaluation.file_system import jsonl_to_models
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
 )
-from govuk_chat_evaluation.rag_answers.deepeval_evaluate import EvaluationResult
 from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
+    EvaluationResult,
     run_deepeval_evaluation,
     convert_deepeval_output_to_evaluation_results,
 )
@@ -75,6 +75,42 @@ class TestRunDeepEvalEvaluation:
             mock_test_cases, mock_metrics, mock_project_root, n_runs=2
         )
         assert len(results) == 2
+
+    def test_fact_classification_cache_is_cleared_each_run(
+        self,
+        mock_test_cases,
+        mock_metrics,
+        mock_deepeval_evaluate,
+        mock_project_root,
+        mocker,
+    ):
+        """Ensure our per-run hook calls the cache reset once per run."""
+
+        class DummyMetric(BaseMetric):
+            def measure(self, test_case, *args, **kwargs):
+                raise NotImplementedError
+
+            async def a_measure(self, test_case, *args, **kwargs):
+                raise NotImplementedError
+
+            def is_successful(self) -> bool:
+                return True
+
+            @classmethod
+            def reset_fact_classification_cache(cls) -> None:
+                pass
+
+        reset_spy = mocker.spy(DummyMetric, "reset_fact_classification_cache")
+
+        n_runs = 2
+        run_deepeval_evaluation(
+            mock_test_cases,
+            [DummyMetric()],
+            mock_project_root,
+            n_runs=n_runs,
+        )
+
+        assert reset_spy.call_count == n_runs
 
     def test_accepts_deepeval_options(
         self, mock_test_cases, mock_metrics, mock_deepeval_evaluate, mock_project_root

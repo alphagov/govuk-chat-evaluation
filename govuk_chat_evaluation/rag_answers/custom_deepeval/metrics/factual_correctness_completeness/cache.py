@@ -5,7 +5,6 @@ from .schema import ClassifiedFacts
 
 CacheKey = Tuple[str, str, str]
 
-# Process-local cache of fact classifications keyed by (evaluation_model, answer, ground_truth)
 _CACHE: dict[CacheKey, ClassifiedFacts] = {}
 
 

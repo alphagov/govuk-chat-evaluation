@@ -17,7 +17,7 @@ from .template import (
     FactualCorrectnessTemplate,
 )
 from .schema import ClassifiedFacts, FactClassificationResult
-from .cache import make_cache_key, get_cache
+from .cache import make_cache_key, get_cache, reset_cache
 import logging
 
 
@@ -84,6 +84,11 @@ class FactualCorrectnessCompleteness(BaseMetric):
                 f"Confusion matrix for test input: '{test_case.input}': \n{self.confusion_matrix}"
             )
             return self._finalise_evaluation(test_case.input)
+
+    @classmethod
+    def reset_fact_classification_cache(cls) -> None:
+        """Reset shared fact-classification cache between evaluation runs."""
+        reset_cache()
 
     def _finalise_evaluation(self, input: str) -> float:
         """Finalise the evaluation by computing score, reason, and success status."""
