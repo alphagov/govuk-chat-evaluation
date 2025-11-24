@@ -18,6 +18,7 @@ from ..custom_deepeval.metrics import (
     ContextRelevancyMetric,
     CoherenceMetric,
 )
+from ..patch_bedrock_a_generate import a_generate_filters_non_text_responses
 
 
 class MetricName(str, Enum):
@@ -38,6 +39,15 @@ class LLMJudgeModel(str, Enum):
     AMAZON_NOVA_PRO_1 = "eu.amazon.nova-pro-v1:0"
     GEMINI_15_PRO = "gemini-1.5-pro-002"
     GEMINI_15_FLASH = "gemini-1.5-flash-002"
+    GPT_OSS_20B = "openai.gpt-oss-20b-1:0"
+    GPT_OSS_120B = "openai.gpt-oss-120b-1:0"
+
+
+# This is a monkey patch to ensure that responses from Bedrock OpenAI
+# that contain reasoningContent are handled correctly.
+# A PR has been submitted to deepeval to include this fix upstream.
+# See: https://github.com/confident-ai/deepeval/pull/2328
+AmazonBedrockModel.a_generate = a_generate_filters_non_text_responses
 
 
 class LLMJudgeModelConfig(BaseModel):
@@ -79,6 +89,18 @@ class LLMJudgeModelConfig(BaseModel):
                 )
             case LLMJudgeModel.GPT_4O_MINI | LLMJudgeModel.GPT_4O:
                 return GPTModel(model=self.model.value, temperature=self.temperature)
+            case LLMJudgeModel.GPT_OSS_20B | LLMJudgeModel.GPT_OSS_120B:
+                # OpenAI Bedrock models aren't available on eu-west-1 yet, so default to eu-north-1.
+                region = os.getenv("AWS_BEDROCK_REGION", "eu-north-1")
+                model = AmazonBedrockModel(
+                    model_id=self.model.value,
+                    region_name=region,
+                    generation_kwargs={
+                        "temperature": self.temperature,
+                        "maxTokens": 6000,
+                    },
+                )
+                return attach_invalid_json_retry_to_model(model)
 
 
 class MetricConfig(BaseModel):

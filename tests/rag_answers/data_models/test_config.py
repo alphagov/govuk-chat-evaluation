@@ -20,6 +20,13 @@ from govuk_chat_evaluation.rag_answers.data_models import (
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
     CoherenceMetric,
 )
+from govuk_chat_evaluation.rag_answers.patch_bedrock_a_generate import (
+    a_generate_filters_non_text_responses,
+)
+
+
+def test_config_monkeypatches_amazong_bedrock_model_a_generate_on_initialisation():
+    assert AmazonBedrockModel.a_generate == a_generate_filters_non_text_responses
 
 
 class TestMetricConfig:
@@ -66,6 +73,8 @@ class TestMetricConfig:
             (LLMJudgeModel.GPT_4O_MINI, GPTModel),
             (LLMJudgeModel.AMAZON_NOVA_MICRO_1, AmazonBedrockModel),
             (LLMJudgeModel.AMAZON_NOVA_PRO_1, AmazonBedrockModel),
+            (LLMJudgeModel.GPT_OSS_20B, AmazonBedrockModel),
+            (LLMJudgeModel.GPT_OSS_120B, AmazonBedrockModel),
         ],
     )
     def test_to_metric_instance_instantiates_llm_model(
@@ -84,9 +93,11 @@ class TestMetricConfig:
         [
             LLMJudgeModel.AMAZON_NOVA_MICRO_1,
             LLMJudgeModel.AMAZON_NOVA_PRO_1,
+            LLMJudgeModel.GPT_OSS_20B,
+            LLMJudgeModel.GPT_OSS_120B,
         ],
     )
-    def test_to_metric_instance_monkeypatches_nova_models(self, mocker, judge_model):
+    def test_to_metric_instance_monkeypatches_bedrock_models(self, mocker, judge_model):
         retry_path = (
             "govuk_chat_evaluation.rag_answers.data_models.config."
             "attach_invalid_json_retry_to_model"
