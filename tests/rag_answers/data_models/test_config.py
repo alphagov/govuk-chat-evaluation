@@ -7,15 +7,19 @@ from deepeval.metrics import (
 from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
-from govuk_chat_evaluation.rag_answers.data_models import (
-    config as config_module,
-)
+from typing import cast
+
 from govuk_chat_evaluation.rag_answers.data_models import (
     MetricName,
     LLMJudgeModel,
     LLMJudgeModelConfig,
     MetricConfig,
     TaskConfig,
+    config as config_module,
+)
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics import (
+    FactualCorrectnessCompleteness,
+    FactClassificationCache,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
     CoherenceMetric,
@@ -30,6 +34,17 @@ def test_config_monkeypatches_amazong_bedrock_model_a_generate_on_initialisation
 
 
 class TestMetricConfig:
+    @pytest.fixture
+    def task_config(self, mock_input_data):
+        return TaskConfig(
+            what="Test",
+            generate=False,
+            provider=None,
+            input_path=mock_input_data,
+            metrics=[],
+            n_runs=1,
+        )
+
     @pytest.mark.parametrize(
         "config_dict, expected_class",
         [
@@ -62,9 +77,10 @@ class TestMetricConfig:
             ),
         ],
     )
-    def test_to_metric_instance(self, config_dict, expected_class):
+    def test_build_metric(self, config_dict, expected_class, task_config):
         metric_config = MetricConfig(**config_dict)
-        assert isinstance(metric_config.to_metric_instance(), expected_class)
+        metric = task_config._build_metric(metric_config, FactClassificationCache())
+        assert isinstance(metric, expected_class)
 
     @pytest.mark.parametrize(
         "judge_model, expected_llm_cls",
@@ -77,15 +93,15 @@ class TestMetricConfig:
             (LLMJudgeModel.GPT_OSS_120B, AmazonBedrockModel),
         ],
     )
-    def test_to_metric_instance_instantiates_llm_model(
-        self, judge_model, expected_llm_cls
+    def test_build_metric_instantiates_llm_model(
+        self, judge_model, expected_llm_cls, task_config
     ):
         metric_config = MetricConfig(
             name=MetricName.FAITHFULNESS,
             threshold=0.5,
             llm_judge=LLMJudgeModelConfig(model=judge_model, temperature=0.0),
         )
-        metric = metric_config.to_metric_instance()
+        metric = task_config._build_metric(metric_config, FactClassificationCache())
         assert isinstance(metric.model, expected_llm_cls)
 
     @pytest.mark.parametrize(
@@ -97,7 +113,9 @@ class TestMetricConfig:
             LLMJudgeModel.GPT_OSS_120B,
         ],
     )
-    def test_to_metric_instance_monkeypatches_bedrock_models(self, mocker, judge_model):
+    def test_build_metric_monkeypatches_bedrock_models(
+        self, mocker, judge_model, task_config
+    ):
         retry_path = (
             "govuk_chat_evaluation.rag_answers.data_models.config."
             "attach_invalid_json_retry_to_model"
@@ -112,7 +130,7 @@ class TestMetricConfig:
             llm_judge=LLMJudgeModelConfig(model=judge_model, temperature=0.0),
         )
 
-        metric = metric_config.to_metric_instance()
+        metric = task_config._build_metric(metric_config, FactClassificationCache())
 
         wrapped_retry.assert_called_once_with(metric.model)
 
@@ -190,3 +208,50 @@ class TestTaskConfig:
         assert len(metrics) == 2
         assert isinstance(metrics[0], FaithfulnessMetric)
         assert isinstance(metrics[1], BiasMetric)
+
+    def test_fact_classification_cache_scoped_per_metric_instances_call(
+        self, mock_input_data
+    ):
+        config_dict = {
+            "what": "Test",
+            "generate": False,
+            "provider": None,
+            "input_path": mock_input_data,
+            "metrics": [
+                {
+                    "name": "factual_correctness",
+                    "threshold": 0.5,
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                },
+                {
+                    "name": "factual_completeness",
+                    "threshold": 0.5,
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                },
+            ],
+            "n_runs": 1,
+        }
+
+        config = TaskConfig(**config_dict)
+
+        first_run_metrics = config.metric_instances()
+        second_run_metrics = config.metric_instances()
+
+        assert isinstance(first_run_metrics[0], FactualCorrectnessCompleteness)
+        assert isinstance(first_run_metrics[1], FactualCorrectnessCompleteness)
+        assert isinstance(second_run_metrics[0], FactualCorrectnessCompleteness)
+        assert isinstance(second_run_metrics[1], FactualCorrectnessCompleteness)
+
+        fc1 = cast(FactualCorrectnessCompleteness, first_run_metrics[0])
+        fc2 = cast(FactualCorrectnessCompleteness, first_run_metrics[1])
+        fc3 = cast(FactualCorrectnessCompleteness, second_run_metrics[0])
+        fc4 = cast(FactualCorrectnessCompleteness, second_run_metrics[1])
+
+        # Within a single call, factual metrics share the same cache
+        assert fc1.cache is fc2.cache
+        assert fc3.cache is fc4.cache
+
+        # Across calls, a fresh cache is created
+        assert fc1.cache is not fc3.cache

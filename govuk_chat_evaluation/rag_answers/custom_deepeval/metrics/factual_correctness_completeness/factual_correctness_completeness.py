@@ -17,7 +17,7 @@ from .template import (
     FactualCorrectnessTemplate,
 )
 from .schema import ClassifiedFacts, FactClassificationResult
-from .cache import make_cache_key, get_cache, reset_cache
+from .cache import FactClassificationCache
 import logging
 
 
@@ -43,6 +43,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         threshold: float = 0.5,
         include_reason: bool = True,
         strict_mode: bool = False,
+        cache: FactClassificationCache | None = None,
     ):
         self.model, self.using_native_model = initialize_model(model)
         self.mode = mode
@@ -52,6 +53,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         self.strict_mode = strict_mode
         self.evaluation_cost = 0 if self.using_native_model else None
         self.confusion_matrix: ClassifiedFacts = ClassifiedFacts()
+        self.cache = cache or FactClassificationCache()
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:
         """Synchronously evaluate the metric (correctness or completeness) for a test case."""
@@ -85,11 +87,6 @@ class FactualCorrectnessCompleteness(BaseMetric):
             )
             return self._finalise_evaluation(test_case.input)
 
-    @classmethod
-    def reset_fact_classification_cache(cls) -> None:
-        """Reset shared fact-classification cache between evaluation runs."""
-        reset_cache()
-
     def _finalise_evaluation(self, input: str) -> float:
         """Finalise the evaluation by computing score, reason, and success status."""
         if self.confusion_matrix.has_facts():
@@ -113,10 +110,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
     async def _a_classify_statements(
         self, input: str, actual_output: str, expected_output: str
     ) -> ClassifiedFacts:
-        cache_key = make_cache_key(
-            self.evaluation_model, actual_output, expected_output
-        )
-        cached = get_cache().get(cache_key)
+        cached = self.cache.get(self.evaluation_model, actual_output, expected_output)
         if cached is not None:
             return cached
 
@@ -124,6 +118,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
             answer=actual_output, ground_truth=expected_output
         )
         classified_facts: ClassifiedFacts
+        should_cache_result = True
         if self.using_native_model:
             res, cost = await self.model.a_generate(
                 prompt, schema=FactClassificationResult
@@ -149,8 +144,15 @@ class FactualCorrectnessCompleteness(BaseMetric):
                         exc_info=inner_e,
                     )
                     classified_facts = ClassifiedFacts()
+                    should_cache_result = False
 
-        get_cache()[cache_key] = classified_facts
+        if should_cache_result:
+            self.cache.set(
+                self.evaluation_model,
+                actual_output,
+                expected_output,
+                classified_facts,
+            )
         return classified_facts
 
     def _calculate_score(self) -> float:

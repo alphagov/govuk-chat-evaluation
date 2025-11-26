@@ -13,6 +13,7 @@ from deepeval.evaluate.configs import (
 from govuk_chat_evaluation.file_system import jsonl_to_models
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
+    TaskConfig,
 )
 from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
     EvaluationResult,
@@ -46,20 +47,36 @@ class TestRunDeepEvalEvaluation:
 
         return [metric1, metric2]
 
+    @pytest.fixture
+    def mock_task_config(self, mock_input_data, mock_metrics):
+        config = MagicMock(spec=TaskConfig)
+        config.metric_instances.return_value = mock_metrics
+        return config
+
     def test_runs_evaluate_defaults_to_1_time(
-        self, mock_test_cases, mock_metrics, mock_deepeval_evaluate, mock_project_root
+        self,
+        mock_test_cases,
+        mock_metrics,
+        mock_task_config,
+        mock_deepeval_evaluate,
+        mock_project_root,
     ):
-        run_deepeval_evaluation(mock_test_cases, mock_metrics, mock_project_root)
+        run_deepeval_evaluation(mock_test_cases, mock_task_config, mock_project_root)
         assert_mock_call_matches_signature(mock_deepeval_evaluate, deepeval_evaluate)
         mock_deepeval_evaluate.assert_called_once_with(
             test_cases=mock_test_cases, metrics=mock_metrics
         )
 
     def test_runs_evaluate_n_times(
-        self, mock_test_cases, mock_metrics, mock_deepeval_evaluate, mock_project_root
+        self,
+        mock_test_cases,
+        mock_metrics,
+        mock_task_config,
+        mock_deepeval_evaluate,
+        mock_project_root,
     ):
         run_deepeval_evaluation(
-            mock_test_cases, mock_metrics, mock_project_root, n_runs=2
+            mock_test_cases, mock_task_config, mock_project_root, n_runs=2
         )
         assert_mock_call_matches_signature(mock_deepeval_evaluate, deepeval_evaluate)
         mock_deepeval_evaluate.assert_called_with(
@@ -69,55 +86,24 @@ class TestRunDeepEvalEvaluation:
         assert mock_deepeval_evaluate.call_count == 2
 
     def test_returns_a_list_for_each_n_runs(
-        self, mock_test_cases, mock_metrics, mock_project_root
+        self, mock_test_cases, mock_task_config, mock_project_root
     ):
         results = run_deepeval_evaluation(
-            mock_test_cases, mock_metrics, mock_project_root, n_runs=2
+            mock_test_cases, mock_task_config, mock_project_root, n_runs=2
         )
         assert len(results) == 2
 
-    def test_fact_classification_cache_is_cleared_each_run(
+    def test_accepts_deepeval_options(
         self,
         mock_test_cases,
         mock_metrics,
+        mock_task_config,
         mock_deepeval_evaluate,
         mock_project_root,
-        mocker,
-    ):
-        """Ensure our per-run hook calls the cache reset once per run."""
-
-        class DummyMetric(BaseMetric):
-            def measure(self, test_case, *args, **kwargs):
-                raise NotImplementedError
-
-            async def a_measure(self, test_case, *args, **kwargs):
-                raise NotImplementedError
-
-            def is_successful(self) -> bool:
-                return True
-
-            @classmethod
-            def reset_fact_classification_cache(cls) -> None:
-                pass
-
-        reset_spy = mocker.spy(DummyMetric, "reset_fact_classification_cache")
-
-        n_runs = 2
-        run_deepeval_evaluation(
-            mock_test_cases,
-            [DummyMetric()],
-            mock_project_root,
-            n_runs=n_runs,
-        )
-
-        assert reset_spy.call_count == n_runs
-
-    def test_accepts_deepeval_options(
-        self, mock_test_cases, mock_metrics, mock_deepeval_evaluate, mock_project_root
     ):
         run_deepeval_evaluation(
             mock_test_cases,
-            mock_metrics,
+            mock_task_config,
             mock_project_root,
             display_config=DisplayConfig(print_results=True),
             async_config=AsyncConfig(max_concurrent=10),
@@ -137,7 +123,7 @@ class TestRunDeepEvalEvaluation:
         )
 
     def test_evaluate_and_output_results_writes_deepeval_test_run(
-        self, mock_test_cases, mock_metrics, mocker, mock_project_root, caplog
+        self, mock_test_cases, mock_task_config, mocker, mock_project_root, caplog
     ):
         test_run = mocker.create_autospec(DeepevalTestRun, instance=True)
         test_run.model_dump.return_value = {"id": "test-run-123"}
@@ -149,7 +135,7 @@ class TestRunDeepEvalEvaluation:
 
         n_runs = 2
         run_deepeval_evaluation(
-            mock_test_cases, mock_metrics, mock_project_root, n_runs=n_runs
+            mock_test_cases, mock_task_config, mock_project_root, n_runs=n_runs
         )
 
         for i in range(n_runs):
@@ -171,7 +157,7 @@ class TestRunDeepEvalEvaluation:
     def test_evaluate_and_output_results_raises_if_no_test_run(
         self,
         mock_test_cases,
-        mock_metrics,
+        mock_task_config,
         mocker,
         mock_project_root,
     ):
@@ -182,7 +168,7 @@ class TestRunDeepEvalEvaluation:
 
         with pytest.raises(RuntimeError) as exc_info:
             run_deepeval_evaluation(
-                mock_test_cases, mock_metrics, mock_project_root, n_runs=1
+                mock_test_cases, mock_task_config, mock_project_root, n_runs=1
             )
 
         assert str(exc_info.value) == "DeepEval test run not found for run 1"

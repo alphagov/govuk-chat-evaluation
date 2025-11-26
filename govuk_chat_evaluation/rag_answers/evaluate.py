@@ -1,9 +1,7 @@
 from pathlib import Path
-from typing import cast
 from functools import cached_property
 import pandas as pd
 
-from deepeval.metrics import BaseMetric
 from deepeval.evaluate.configs import (
     AsyncConfig,
     DisplayConfig,
@@ -67,7 +65,7 @@ def evaluate_and_output_results(
 
     evaluation_outputs = run_deepeval_evaluation(
         cases=[model.to_llm_test_case() for model in models],
-        metrics=cast(list[BaseMetric], evaluation_config.metric_instances()),
+        config=evaluation_config,
         n_runs=evaluation_config.n_runs,
         display_config=display_config,
         async_config=async_config,
