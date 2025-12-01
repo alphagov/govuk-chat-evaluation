@@ -53,7 +53,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         self.evaluation_model = self.model.get_model_name()
         self.include_reason = include_reason
         self.strict_mode = strict_mode
-        self.evaluation_cost = 0 if self.using_native_model else None
+        self.evaluation_cost: float | None = None
         self.confusion_matrix: ClassifiedFacts = ClassifiedFacts()
         self.cache = cache or FactClassificationCache()
         self.verbose_mode = verbose_mode
@@ -74,6 +74,9 @@ class FactualCorrectnessCompleteness(BaseMetric):
     ) -> float:
         """Asynchronously evaluate factual correctness or completeness, depending on `mode`."""
         check_llm_test_case_params(test_case, self._required_params, self)
+
+        if self.using_native_model:
+            self.evaluation_cost = 0.0
 
         with metric_progress_indicator(
             self,

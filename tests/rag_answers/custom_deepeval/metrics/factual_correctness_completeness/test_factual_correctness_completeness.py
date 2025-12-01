@@ -386,6 +386,36 @@ class TestFactualCorrectnessCompleteness:
             mock_native_model.a_generate.assert_awaited_once()
 
         @pytest.mark.asyncio
+        async def test_native_cost_is_per_evaluation(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+            fact_classification_result: FactClassificationResult,
+        ):
+            mock_native_model.a_generate = AsyncMock(
+                side_effect=[
+                    (fact_classification_result, 0.1),
+                    (fact_classification_result, 0.2),
+                ]
+            )
+
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
+
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.1)
+
+            second_test_case = LLMTestCase(
+                input="Input 2", actual_output="Actual 2", expected_output="Expected 2"
+            )
+
+            await metric.a_measure(second_test_case)
+            assert metric.evaluation_cost == pytest.approx(0.2)
+
+            assert mock_native_model.a_generate.await_count == 2
+
+        @pytest.mark.asyncio
         async def test_non_native_model_returns_valid_schema(
             self,
             mock_non_native_model: Mock,
@@ -494,6 +524,35 @@ class TestFactualCorrectnessCompleteness:
 
             assert metric.evaluation_cost is None
             assert isinstance(result, float)
+
+        @pytest.mark.asyncio
+        async def test_cache_hit_has_zero_cost(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+            fact_classification_result: FactClassificationResult,
+        ):
+            shared_cache = FactClassificationCache()
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(fact_classification_result, 0.07)
+            )
+
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model,
+                mode=Mode.CORRECTNESS,
+                cache=shared_cache,
+            )
+
+            # First evaluation: cache miss, cost recorded
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.07)
+
+            # Second evaluation: cache hit, cost should reset to 0 for this eval
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.0)
+
+            # Only one model call across both evaluations because of cache reuse
+            assert mock_native_model.a_generate.await_count == 1
 
         @pytest.mark.asyncio
         async def test_non_native_model_returns_recoverable_json(
@@ -761,8 +820,8 @@ class TestFactualCorrectnessCompleteness:
         self,
         mock_native_model: Mock,
         test_case: LLMTestCase,
-        shared_cache: FactClassificationCache,
     ):
+        shared_cache = FactClassificationCache()
         shared_cache.set(
             mock_native_model.get_model_name(),
             test_case.actual_output or "",
