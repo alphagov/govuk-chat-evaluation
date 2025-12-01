@@ -12,6 +12,7 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
     StructuredContext,
 )
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -50,8 +51,8 @@ def run_rake_task_mock(mocker):
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases():
     generate_inputs = [
-        GenerateInput(question="Question 1", ideal_answer="Answer 1"),
-        GenerateInput(question="Question 2", ideal_answer="Answer 2"),
+        GenerateInput(id="question-1", question="Question 1", ideal_answer="Answer 1"),
+        GenerateInput(id="question-2", question="Question 2", ideal_answer="Answer 2"),
     ]
     structured_context = StructuredContext(
         title="Title",
@@ -63,12 +64,14 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
 
     expected_results = [
         EvaluationTestCase(
+            id="question-1",
             question="Question 1",
             ideal_answer="Answer 1",
             llm_answer="An answer",
             structured_contexts=[structured_context],
         ),
         EvaluationTestCase(
+            id="question-2",
             question="Question 2",
             ideal_answer="Answer 2",
             llm_answer="An answer",
@@ -104,3 +107,15 @@ def test_generate_and_write_dataset(mock_input_data, mock_project_root):
     with open(path, "r") as file:
         for line in file:
             assert json.loads(line)
+
+
+@pytest.mark.usefixtures("run_rake_task_mock")
+def test_generate_and_write_dataset_calls_ensure_unique_model_ids(
+    mock_input_data, mock_project_root
+):
+    with patch(
+        "govuk_chat_evaluation.rag_answers.generate.ensure_unique_model_ids"
+    ) as mock:
+        mock.side_effect = lambda inputs: inputs
+        generate_and_write_dataset(mock_input_data, "openai", mock_project_root)
+        mock.assert_called_once()

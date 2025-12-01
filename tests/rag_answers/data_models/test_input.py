@@ -2,10 +2,11 @@ import pytest
 from deepeval.test_case import LLMTestCase
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
-)
-from govuk_chat_evaluation.rag_answers.data_models import (
     StructuredContext,
+    GenerateInput,
 )
+import uuid
+from unittest.mock import patch
 
 
 class TestStructuredContext:
@@ -72,3 +73,15 @@ class TestEvaluationTestCase:
         assert all(isinstance(chunk, str) for chunk in llm_test_case.retrieval_context)
         assert "VAT" in llm_test_case.retrieval_context[0]
         assert "Some HTML about VAT" in llm_test_case.retrieval_context[0]
+
+
+class TestGenerateInput:
+    def test_generate_input_id_defaults_to_uuid(self):
+        expected_uuid = str(uuid.uuid4())
+        with patch("uuid.uuid4", return_value=(expected_uuid)):
+            input = GenerateInput(
+                question="What is VAT?",
+                ideal_answer="Value Added Tax",
+            )
+
+            assert input.id == expected_uuid
