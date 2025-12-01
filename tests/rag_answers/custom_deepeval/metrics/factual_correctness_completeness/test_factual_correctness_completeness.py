@@ -757,6 +757,32 @@ class TestFactualCorrectnessCompleteness:
         )
 
     @pytest.mark.asyncio
+    async def test_verbose_logs_record_cache_hits(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+        shared_cache: FactClassificationCache,
+    ):
+        shared_cache.set(
+            mock_native_model.get_model_name(),
+            test_case.actual_output or "",
+            test_case.expected_output or "",
+            ClassifiedFacts(TP=["fact1"], FP=[], FN=[]),
+        )
+
+        metric = FactualCorrectnessCompleteness(
+            model=mock_native_model,
+            mode=Mode.CORRECTNESS,
+            cache=shared_cache,
+            verbose_mode=True,
+        )
+
+        await metric.a_measure(test_case)
+
+        assert metric.verbose_logs is not None
+        assert "Cache hit: True" in metric.verbose_logs
+
+    @pytest.mark.asyncio
     async def test_different_models_do_not_share_cache(
         self,
         mock_native_model: Mock,
