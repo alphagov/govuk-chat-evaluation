@@ -1,3 +1,7 @@
-from .factual_correctness_completeness import FactualCorrectnessCompleteness, Mode
+from .factual_correctness_completeness import (
+    FactualCorrectnessCompleteness,
+    Mode,
+)
+from .cache import FactClassificationCache
 
-__all__ = ["FactualCorrectnessCompleteness", "Mode"]
+__all__ = ["FactualCorrectnessCompleteness", "Mode", "FactClassificationCache"]

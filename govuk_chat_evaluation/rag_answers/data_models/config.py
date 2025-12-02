@@ -2,10 +2,12 @@ from pydantic import BaseModel, model_validator
 from enum import Enum
 from typing import Any
 import os
+
 from ...config import BaseConfig
 from deepeval.metrics import (
     FaithfulnessMetric,
     BiasMetric,
+    BaseMetric,
 )
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
 from deepeval.models.llms.openai_model import GPTModel
@@ -17,6 +19,7 @@ from ..custom_deepeval.metrics import (
     FactualCorrectnessCompletenessMode,
     ContextRelevancyMetric,
     CoherenceMetric,
+    FactClassificationCache,
 )
 from ..patch_bedrock_a_generate import a_generate_filters_non_text_responses
 
@@ -119,32 +122,6 @@ class MetricConfig(BaseModel):
             }
         return values
 
-    def to_metric_instance(self):
-        model = self.llm_judge.instantiate_llm_judge()
-        match self.name:
-            case MetricName.FAITHFULNESS:
-                return FaithfulnessMetric(threshold=self.threshold, model=model)
-            case MetricName.RELEVANCE:
-                return AnswerRelevancyMetric(threshold=self.threshold, model=model)
-            case MetricName.BIAS:
-                return BiasMetric(threshold=self.threshold, model=model)
-            case MetricName.FACTUAL_CORRECTNESS:
-                return FactualCorrectnessCompleteness(
-                    threshold=self.threshold,
-                    model=model,
-                    mode=FactualCorrectnessCompletenessMode.CORRECTNESS,
-                )
-            case MetricName.FACTUAL_COMPLETENESS:
-                return FactualCorrectnessCompleteness(
-                    threshold=self.threshold,
-                    model=model,
-                    mode=FactualCorrectnessCompletenessMode.COMPLETENESS,
-                )
-            case MetricName.CONTEXT_RELEVANCY:
-                return ContextRelevancyMetric(threshold=self.threshold, model=model)
-            case MetricName.COHERENCE:
-                return CoherenceMetric(threshold=self.threshold, model=model)
-
 
 class TaskConfig(BaseConfig):
     what: BaseConfig.GenericFields.what
@@ -158,6 +135,40 @@ class TaskConfig(BaseConfig):
     def run_validatons(self):
         return self._validate_fields_required_for_generate("provider")
 
-    def metric_instances(self):
+    def metric_instances(self) -> list[BaseMetric]:
         """Return the list of runtime metric objects for evaluation."""
-        return [metric.to_metric_instance() for metric in self.metrics]  # type: ignore
+        fact_classification_cache = FactClassificationCache()
+        return [
+            self._build_metric(metric, fact_classification_cache)
+            for metric in self.metrics
+        ]
+
+    def _build_metric(
+        self, metric: MetricConfig, fact_classification_cache: FactClassificationCache
+    ):
+        model = metric.llm_judge.instantiate_llm_judge()
+        match metric.name:
+            case MetricName.FAITHFULNESS:
+                return FaithfulnessMetric(threshold=metric.threshold, model=model)
+            case MetricName.RELEVANCE:
+                return AnswerRelevancyMetric(threshold=metric.threshold, model=model)
+            case MetricName.BIAS:
+                return BiasMetric(threshold=metric.threshold, model=model)
+            case MetricName.FACTUAL_CORRECTNESS:
+                return FactualCorrectnessCompleteness(
+                    threshold=metric.threshold,
+                    model=model,
+                    mode=FactualCorrectnessCompletenessMode.CORRECTNESS,
+                    cache=fact_classification_cache,
+                )
+            case MetricName.FACTUAL_COMPLETENESS:
+                return FactualCorrectnessCompleteness(
+                    threshold=metric.threshold,
+                    model=model,
+                    mode=FactualCorrectnessCompletenessMode.COMPLETENESS,
+                    cache=fact_classification_cache,
+                )
+            case MetricName.CONTEXT_RELEVANCY:
+                return ContextRelevancyMetric(threshold=metric.threshold, model=model)
+            case MetricName.COHERENCE:
+                return CoherenceMetric(threshold=metric.threshold, model=model)

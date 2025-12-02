@@ -6,6 +6,7 @@ from deepeval.metrics import BaseMetric
 
 from deepeval.metrics.utils import (
     check_llm_test_case_params,
+    construct_verbose_logs,
     trimAndLoadJson,
     initialize_model,
 )
@@ -17,6 +18,7 @@ from .template import (
     FactualCorrectnessTemplate,
 )
 from .schema import ClassifiedFacts, FactClassificationResult
+from .cache import FactClassificationCache
 import logging
 
 
@@ -42,6 +44,8 @@ class FactualCorrectnessCompleteness(BaseMetric):
         threshold: float = 0.5,
         include_reason: bool = True,
         strict_mode: bool = False,
+        cache: FactClassificationCache | None = None,
+        verbose_mode: bool = False,
     ):
         self.model, self.using_native_model = initialize_model(model)
         self.mode = mode
@@ -49,8 +53,11 @@ class FactualCorrectnessCompleteness(BaseMetric):
         self.evaluation_model = self.model.get_model_name()
         self.include_reason = include_reason
         self.strict_mode = strict_mode
-        self.evaluation_cost = 0 if self.using_native_model else None
+        self.evaluation_cost: float | None = None
         self.confusion_matrix: ClassifiedFacts = ClassifiedFacts()
+        self.cache = cache or FactClassificationCache()
+        self.verbose_mode = verbose_mode
+        self._used_cache_for_last_classification = False
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:
         """Synchronously evaluate the metric (correctness or completeness) for a test case."""
@@ -67,6 +74,9 @@ class FactualCorrectnessCompleteness(BaseMetric):
     ) -> float:
         """Asynchronously evaluate factual correctness or completeness, depending on `mode`."""
         check_llm_test_case_params(test_case, self._required_params, self)
+
+        if self.using_native_model:
+            self.evaluation_cost = 0.0
 
         with metric_progress_indicator(
             self,
@@ -93,6 +103,21 @@ class FactualCorrectnessCompleteness(BaseMetric):
             capture_metric_type(
                 self.__name__, async_mode=self.async_mode, in_component=False
             )
+            self.verbose_logs = construct_verbose_logs(
+                self,
+                steps=[
+                    f"Mode: {self.__name__}",
+                    f"Cache hit: {self._used_cache_for_last_classification}",
+                    (
+                        "TP: "
+                        f"{len(self.confusion_matrix.TP)}, "
+                        f"FP: {len(self.confusion_matrix.FP)}, "
+                        f"FN: {len(self.confusion_matrix.FN)}"
+                    ),
+                    f"Score: {self.score}",
+                    f"Reason: {self.reason or 'Reason omitted'}",
+                ],
+            )
             return self.score
         else:
             self.error = f"Error: no facts were classified. confusion_matrix is empty for input: {input}."
@@ -107,34 +132,53 @@ class FactualCorrectnessCompleteness(BaseMetric):
     async def _a_classify_statements(
         self, input: str, actual_output: str, expected_output: str
     ) -> ClassifiedFacts:
+        cached = self.cache.get(self.evaluation_model, actual_output, expected_output)
+        if cached is not None:
+            self._used_cache_for_last_classification = True
+            return cached
+
+        self._used_cache_for_last_classification = False
+
         prompt = self.evaluation_template.classify_facts(
             answer=actual_output, ground_truth=expected_output
         )
+        classified_facts: ClassifiedFacts
+        should_cache_result = True
         if self.using_native_model:
             res, cost = await self.model.a_generate(
                 prompt, schema=FactClassificationResult
             )
             if isinstance(cost, (int, float)):
                 self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
-            return res.classified_facts  # type: ignore[arg-type]
+            classified_facts = res.classified_facts  # type: ignore[arg-type]
         else:
             try:
                 res = await self.model.a_generate(
                     prompt, schema=FactClassificationResult
                 )
-                return res.classified_facts  # type: ignore[arg-type]
+                classified_facts = res.classified_facts  # type: ignore[arg-type]
             except TypeError:
                 try:
                     res = await self.model.a_generate(prompt)
                     data = trimAndLoadJson(res, self)
                     data_model = FactClassificationResult(**data)
-                    return data_model.classified_facts
+                    classified_facts = data_model.classified_facts
                 except Exception as inner_e:
                     logging.error(
                         f"Failed to parse fallback JSON for test input: {input}",
                         exc_info=inner_e,
                     )
-                    return ClassifiedFacts()
+                    classified_facts = ClassifiedFacts()
+                    should_cache_result = False
+
+        if should_cache_result:
+            self.cache.set(
+                self.evaluation_model,
+                actual_output,
+                expected_output,
+                classified_facts,
+            )
+        return classified_facts
 
     def _calculate_score(self) -> float:
         """

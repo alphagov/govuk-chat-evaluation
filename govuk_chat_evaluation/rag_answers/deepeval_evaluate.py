@@ -5,8 +5,9 @@ import json
 
 from deepeval import evaluate as deepeval_evaluate
 from deepeval.evaluate.types import TestResult
-from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
+from .data_models.config import TaskConfig
+
 from ..timing import log_task_duration
 import logging
 from deepeval.test_run import global_test_run_manager
@@ -37,7 +38,7 @@ class EvaluationResult:
 
 def run_deepeval_evaluation(
     cases: list[LLMTestCase],
-    metrics: list[BaseMetric],
+    config: TaskConfig,
     output_dir: Path,
     n_runs: int = 1,
     **kwargs,
@@ -63,6 +64,8 @@ def run_deepeval_evaluation(
 
         for i in range(n_runs):
             logging.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
+
+            metrics = config.metric_instances()
 
             evaluation_run = deepeval_evaluate(
                 test_cases=cases,

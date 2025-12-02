@@ -11,6 +11,7 @@ from deepeval.errors import MissingTestCaseParamsError
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
     FactualCorrectnessCompleteness,
     Mode,
+    FactClassificationCache,
 )
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.schema import (
@@ -385,6 +386,36 @@ class TestFactualCorrectnessCompleteness:
             mock_native_model.a_generate.assert_awaited_once()
 
         @pytest.mark.asyncio
+        async def test_native_cost_is_per_evaluation(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+            fact_classification_result: FactClassificationResult,
+        ):
+            mock_native_model.a_generate = AsyncMock(
+                side_effect=[
+                    (fact_classification_result, 0.1),
+                    (fact_classification_result, 0.2),
+                ]
+            )
+
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model, mode=Mode.CORRECTNESS
+            )
+
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.1)
+
+            second_test_case = LLMTestCase(
+                input="Input 2", actual_output="Actual 2", expected_output="Expected 2"
+            )
+
+            await metric.a_measure(second_test_case)
+            assert metric.evaluation_cost == pytest.approx(0.2)
+
+            assert mock_native_model.a_generate.await_count == 2
+
+        @pytest.mark.asyncio
         async def test_non_native_model_returns_valid_schema(
             self,
             mock_non_native_model: Mock,
@@ -495,6 +526,35 @@ class TestFactualCorrectnessCompleteness:
             assert isinstance(result, float)
 
         @pytest.mark.asyncio
+        async def test_cache_hit_has_zero_cost(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+            fact_classification_result: FactClassificationResult,
+        ):
+            shared_cache = FactClassificationCache()
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(fact_classification_result, 0.07)
+            )
+
+            metric = FactualCorrectnessCompleteness(
+                model=mock_native_model,
+                mode=Mode.CORRECTNESS,
+                cache=shared_cache,
+            )
+
+            # First evaluation: cache miss, cost recorded
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.07)
+
+            # Second evaluation: cache hit, cost should reset to 0 for this eval
+            await metric.a_measure(test_case)
+            assert metric.evaluation_cost == pytest.approx(0.0)
+
+            # Only one model call across both evaluations because of cache reuse
+            assert mock_native_model.a_generate.await_count == 1
+
+        @pytest.mark.asyncio
         async def test_non_native_model_returns_recoverable_json(
             self, mock_non_native_model: Mock, test_case: LLMTestCase
         ):
@@ -569,6 +629,56 @@ class TestFactualCorrectnessCompleteness:
             assert metric.confusion_matrix.TP == []
             assert metric.confusion_matrix.FP == []
             assert metric.confusion_matrix.FN == []
+
+        @pytest.mark.asyncio
+        async def test_failed_classification_not_cached(
+            self,
+            test_case: LLMTestCase,
+        ):
+            unparsable_json = (
+                '{"classified_facts": {"TP": [fact1"], "FP: ["fact2], "FN": []}'
+            )
+
+            failing_model = Mock(spec=DeepEvalBaseLLM)
+            failing_model.get_model_name.return_value = "failing-model"
+            failing_model.a_generate = AsyncMock(
+                side_effect=[TypeError("Schema not supported"), unparsable_json]
+            )
+
+            shared_cache = FactClassificationCache()
+
+            failing_metric = FactualCorrectnessCompleteness(
+                model=failing_model, mode=Mode.CORRECTNESS, cache=shared_cache
+            )
+
+            await failing_metric.a_measure(test_case)
+
+            # Because parsing failed, nothing should be cached for this key
+            assert (
+                shared_cache.get(
+                    failing_model.get_model_name(),
+                    test_case.actual_output or "",
+                    test_case.expected_output or "",
+                )
+                is None
+            )
+
+            success_model = Mock(spec=DeepEvalBaseLLM)
+            success_model.get_model_name.return_value = "failing-model"
+            success_model.a_generate = AsyncMock(
+                return_value=FactClassificationResult(
+                    classified_facts=ClassifiedFacts(TP=["fact1"], FP=[], FN=[])
+                )
+            )
+
+            success_metric = FactualCorrectnessCompleteness(
+                model=success_model, mode=Mode.CORRECTNESS, cache=shared_cache
+            )
+
+            await success_metric.a_measure(test_case)
+
+            # Cache was empty so we should have had to call the model
+            assert success_model.a_generate.await_count == 1
 
         @pytest.mark.asyncio
         async def test_non_native_model_fallback_validation_error_triggers_exception(
@@ -665,3 +775,112 @@ class TestFactualCorrectnessCompleteness:
         await metric.a_measure(test_case)
 
         assert metric.is_successful() is expected_success
+
+    @pytest.mark.asyncio
+    async def test_correctness_and_completeness_can_share_a_cache(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+    ):
+        shared_cache = FactClassificationCache()
+        mock_native_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.1,
+            )
+        )
+
+        correctness_metric = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        )
+        completeness_metric = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.COMPLETENESS, cache=shared_cache
+        )
+
+        correctness_score = await correctness_metric.a_measure(test_case)
+        completeness_score = await completeness_metric.a_measure(test_case)
+
+        # Both metrics share a cache, so there should only be one classification
+        # call and the result reused.
+        assert mock_native_model.a_generate.await_count == 1
+        # Shared classification still produces distinct scores.
+        assert round(correctness_score, 3) == 1.0
+        assert round(completeness_score, 3) == 0.5
+        # Both metrics should see the same underlying classified facts.
+        assert (
+            correctness_metric.confusion_matrix == completeness_metric.confusion_matrix
+        )
+
+    @pytest.mark.asyncio
+    async def test_verbose_logs_record_cache_hits(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+    ):
+        shared_cache = FactClassificationCache()
+        shared_cache.set(
+            mock_native_model.get_model_name(),
+            test_case.actual_output or "",
+            test_case.expected_output or "",
+            ClassifiedFacts(TP=["fact1"], FP=[], FN=[]),
+        )
+
+        metric = FactualCorrectnessCompleteness(
+            model=mock_native_model,
+            mode=Mode.CORRECTNESS,
+            cache=shared_cache,
+            verbose_mode=True,
+        )
+
+        await metric.a_measure(test_case)
+
+        assert metric.verbose_logs is not None
+        assert "Cache hit: True" in metric.verbose_logs
+
+    @pytest.mark.asyncio
+    async def test_different_models_do_not_share_cache(
+        self,
+        mock_native_model: Mock,
+        test_case: LLMTestCase,
+    ):
+        shared_cache = FactClassificationCache()
+        mock_other_model = Mock(spec=GPTModel)
+        mock_other_model.get_model_name.return_value = "other-model"
+        mock_other_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.05,
+            )
+        )
+
+        mock_native_model.a_generate = AsyncMock(
+            return_value=(
+                FactClassificationResult(
+                    classified_facts=ClassifiedFacts(
+                        TP=["fact1"], FP=[], FN=["missing"]
+                    )
+                ),
+                0.05,
+            )
+        )
+
+        metric_model_a = FactualCorrectnessCompleteness(
+            model=mock_native_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        )
+        metric_model_b = FactualCorrectnessCompleteness(
+            model=mock_other_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        )
+
+        await metric_model_a.a_measure(test_case)
+        await metric_model_b.a_measure(test_case)
+
+        assert mock_native_model.a_generate.await_count == 1
+        assert mock_other_model.a_generate.await_count == 1
