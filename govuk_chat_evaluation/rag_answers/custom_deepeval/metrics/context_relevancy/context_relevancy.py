@@ -60,6 +60,10 @@ class ContextRelevancyMetric(BaseMetric):
         **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
         check_llm_test_case_params(test_case, self._required_params, self)
+
+        if self.using_native_model:
+            self.evaluation_cost = 0.0
+
         if (
             test_case.additional_metadata is None
             or test_case.additional_metadata.get("structured_contexts") is None
