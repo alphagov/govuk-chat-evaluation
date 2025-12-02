@@ -188,11 +188,27 @@ class TestContextRelevancyMetric:
             self,
             mock_native_model,
             mock_test_case,
+            sample_truths,
+            sample_information_needs,
+            sample_verdicts,
+            sample_reason,
         ):
             metric = ContextRelevancyMetric(model=mock_native_model)
             await metric.a_measure(mock_test_case)
 
             assert metric.evaluation_cost == 0.4
+
+            # Second evaluation should reset cost back to 0.0 and recount
+            mock_native_model.a_generate.reset_mock()
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, 0.05),
+                (sample_information_needs, 0.05),
+                (sample_verdicts, 0.05),
+                (sample_reason, 0.05),
+            ]
+
+            await metric.a_measure(mock_test_case)
+            assert metric.evaluation_cost == pytest.approx(0.2)
 
         @pytest.mark.parametrize(
             "threshold, expected_success",
