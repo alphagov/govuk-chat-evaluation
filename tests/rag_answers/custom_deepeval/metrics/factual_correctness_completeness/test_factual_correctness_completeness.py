@@ -8,13 +8,13 @@ from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel, DeepEvalBaseLLM
 from deepeval.errors import MissingTestCaseParamsError
 
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
-    FactualCorrectnessCompleteness,
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall import (
+    FactualPrecisionRecall,
     Mode,
     FactClassificationCache,
 )
 
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.schema import (
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall.schema import (
     ClassifiedFacts,
     FactClassificationResult,
 )
@@ -60,12 +60,12 @@ def fact_classification_result():
     )
 
 
-class TestFactualCorrectnessCompleteness:
+class TestFactualPrecisionRecall:
     class TestAMeasure:
         @pytest.mark.asyncio
         async def test_invalid_params(self, mock_native_model: Mock):
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION
             )
 
             invalid_test_case = LLMTestCase(
@@ -77,7 +77,7 @@ class TestFactualCorrectnessCompleteness:
 
         @pytest.mark.asyncio
         @patch(
-            "govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.factual_correctness_completeness.metric_progress_indicator"
+            "govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall.factual_precision_recall.metric_progress_indicator"
         )
         @pytest.mark.parametrize(
             "set_show_progress, expected_show_progress",
@@ -98,8 +98,8 @@ class TestFactualCorrectnessCompleteness:
             set_show_progress: bool,
             expected_show_progress: bool,
         ):
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION
             )
 
             # since we patched metric_progress_indicator, it should call the mocked context manager mock_progress_indicator
@@ -118,8 +118,8 @@ class TestFactualCorrectnessCompleteness:
             self, mock_native_model: Mock, test_case, caplog: pytest.LogCaptureFixture
         ):
             caplog.set_level(logging.DEBUG)
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION
             )
 
             await metric.a_measure(test_case)
@@ -144,7 +144,7 @@ class TestFactualCorrectnessCompleteness:
                 ([], [], 0.0),
             ],
         )
-        async def test_returns_correctness_score(
+        async def test_returns_precision_score(
             self,
             mock_native_model: Mock,
             test_case: LLMTestCase,
@@ -164,9 +164,9 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            metric = FactualCorrectnessCompleteness(
+            metric = FactualPrecisionRecall(
                 model=mock_native_model,
-                mode=Mode.CORRECTNESS,
+                mode=Mode.PRECISION,
                 threshold=0.7,
                 include_reason=True,
             )
@@ -193,7 +193,7 @@ class TestFactualCorrectnessCompleteness:
                 ([], [], 0.0),
             ],
         )
-        async def test_returns_completeness_score(
+        async def test_returns_recall_score(
             self,
             mock_native_model: Mock,
             test_case: LLMTestCase,
@@ -213,9 +213,9 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            metric = FactualCorrectnessCompleteness(
+            metric = FactualPrecisionRecall(
                 model=mock_native_model,
-                mode=Mode.COMPLETENESS,
+                mode=Mode.RECALL,
                 threshold=0.7,
                 include_reason=True,
             )
@@ -248,8 +248,8 @@ class TestFactualCorrectnessCompleteness:
             mock_native_model.a_generate = AsyncMock(
                 return_value=(FactClassificationResult(classified_facts=facts), 0.1)
             )
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS, threshold=threshold
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION, threshold=threshold
             )
 
             _ = await metric.a_measure(test_case)
@@ -278,8 +278,8 @@ class TestFactualCorrectnessCompleteness:
             mock_native_model: Mock,
             test_case: LLMTestCase,
         ):
-            metric = FactualCorrectnessCompleteness(
-                mode=Mode.CORRECTNESS,
+            metric = FactualPrecisionRecall(
+                mode=Mode.PRECISION,
                 model=mock_native_model,
                 include_reason=include_reason,
             )
@@ -350,8 +350,8 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            metric = FactualCorrectnessCompleteness(
-                mode=Mode.CORRECTNESS,
+            metric = FactualPrecisionRecall(
+                mode=Mode.PRECISION,
                 model=mock_native_model,
                 threshold=threshold,
                 strict_mode=strict_mode,
@@ -376,8 +376,8 @@ class TestFactualCorrectnessCompleteness:
                 return_value=(fact_classification_result, expected_cost)
             )
 
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION
             )
 
             _ = await metric.a_measure(test_case)
@@ -399,8 +399,8 @@ class TestFactualCorrectnessCompleteness:
                 ]
             )
 
-            metric = FactualCorrectnessCompleteness(
-                model=mock_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_native_model, mode=Mode.PRECISION
             )
 
             await metric.a_measure(test_case)
@@ -422,8 +422,8 @@ class TestFactualCorrectnessCompleteness:
             test_case: LLMTestCase,
             fact_classification_result: FactClassificationResult,
         ):
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
             result = await metric.a_measure(test_case)
 
@@ -448,8 +448,8 @@ class TestFactualCorrectnessCompleteness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessCompleteness(
-                mode=Mode.CORRECTNESS, model=mock_non_native_model
+            metric = FactualPrecisionRecall(
+                mode=Mode.PRECISION, model=mock_non_native_model
             )
 
             result = await metric.a_measure(test_case)
@@ -499,8 +499,8 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
             result = await metric.a_measure(test_case)
 
@@ -517,8 +517,8 @@ class TestFactualCorrectnessCompleteness:
             mock_non_native_model: Mock,
             test_case: LLMTestCase,
         ):
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
             result = await metric.a_measure(test_case)
 
@@ -537,9 +537,9 @@ class TestFactualCorrectnessCompleteness:
                 return_value=(fact_classification_result, 0.07)
             )
 
-            metric = FactualCorrectnessCompleteness(
+            metric = FactualPrecisionRecall(
                 model=mock_native_model,
-                mode=Mode.CORRECTNESS,
+                mode=Mode.PRECISION,
                 cache=shared_cache,
             )
 
@@ -569,8 +569,8 @@ class TestFactualCorrectnessCompleteness:
                 ]
             )
 
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
             _ = await metric.a_measure(test_case)
 
@@ -612,8 +612,8 @@ class TestFactualCorrectnessCompleteness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
@@ -647,8 +647,8 @@ class TestFactualCorrectnessCompleteness:
 
             shared_cache = FactClassificationCache()
 
-            failing_metric = FactualCorrectnessCompleteness(
-                model=failing_model, mode=Mode.CORRECTNESS, cache=shared_cache
+            failing_metric = FactualPrecisionRecall(
+                model=failing_model, mode=Mode.PRECISION, cache=shared_cache
             )
 
             await failing_metric.a_measure(test_case)
@@ -671,8 +671,8 @@ class TestFactualCorrectnessCompleteness:
                 )
             )
 
-            success_metric = FactualCorrectnessCompleteness(
-                model=success_model, mode=Mode.CORRECTNESS, cache=shared_cache
+            success_metric = FactualPrecisionRecall(
+                model=success_model, mode=Mode.PRECISION, cache=shared_cache
             )
 
             await success_metric.a_measure(test_case)
@@ -699,8 +699,8 @@ class TestFactualCorrectnessCompleteness:
             )
 
             caplog.set_level(logging.ERROR)
-            metric = FactualCorrectnessCompleteness(
-                model=mock_non_native_model, mode=Mode.CORRECTNESS
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
             )  # type: ignore
 
             _ = await metric.a_measure(test_case=test_case)
@@ -719,9 +719,7 @@ class TestFactualCorrectnessCompleteness:
     def test_measure_raises_not_implemented(
         self, mock_native_model: Mock, test_case: LLMTestCase
     ):
-        metric = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.CORRECTNESS
-        )
+        metric = FactualPrecisionRecall(model=mock_native_model, mode=Mode.PRECISION)
 
         with pytest.raises(
             NotImplementedError, match="Synchronous evaluation is not supported"
@@ -730,15 +728,11 @@ class TestFactualCorrectnessCompleteness:
 
     @pytest.mark.asyncio
     async def test_metric_names_differ_by_mode(self, mock_native_model: Mock):
-        correctness = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.CORRECTNESS
-        )
-        completeness = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.COMPLETENESS
-        )
+        precision = FactualPrecisionRecall(model=mock_native_model, mode=Mode.PRECISION)
+        recall = FactualPrecisionRecall(model=mock_native_model, mode=Mode.RECALL)
 
-        assert correctness.__name__ == "Factual Correctness"
-        assert completeness.__name__ == "Factual Completeness"
+        assert precision.__name__ == "Factual Precision"
+        assert recall.__name__ == "Factual Recall"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -769,15 +763,15 @@ class TestFactualCorrectnessCompleteness:
             )
         )
 
-        metric = FactualCorrectnessCompleteness(
-            mode=Mode.CORRECTNESS, model=mock_native_model, threshold=threshold
+        metric = FactualPrecisionRecall(
+            mode=Mode.PRECISION, model=mock_native_model, threshold=threshold
         )
         await metric.a_measure(test_case)
 
         assert metric.is_successful() is expected_success
 
     @pytest.mark.asyncio
-    async def test_correctness_and_completeness_can_share_a_cache(
+    async def test_precision_and_recall_can_share_a_cache(
         self,
         mock_native_model: Mock,
         test_case: LLMTestCase,
@@ -794,26 +788,24 @@ class TestFactualCorrectnessCompleteness:
             )
         )
 
-        correctness_metric = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        precision_metric = FactualPrecisionRecall(
+            model=mock_native_model, mode=Mode.PRECISION, cache=shared_cache
         )
-        completeness_metric = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.COMPLETENESS, cache=shared_cache
+        recall_metric = FactualPrecisionRecall(
+            model=mock_native_model, mode=Mode.RECALL, cache=shared_cache
         )
 
-        correctness_score = await correctness_metric.a_measure(test_case)
-        completeness_score = await completeness_metric.a_measure(test_case)
+        precision_score = await precision_metric.a_measure(test_case)
+        recall_score = await recall_metric.a_measure(test_case)
 
         # Both metrics share a cache, so there should only be one classification
         # call and the result reused.
         assert mock_native_model.a_generate.await_count == 1
         # Shared classification still produces distinct scores.
-        assert round(correctness_score, 3) == 1.0
-        assert round(completeness_score, 3) == 0.5
+        assert round(precision_score, 3) == 1.0
+        assert round(recall_score, 3) == 0.5
         # Both metrics should see the same underlying classified facts.
-        assert (
-            correctness_metric.confusion_matrix == completeness_metric.confusion_matrix
-        )
+        assert precision_metric.confusion_matrix == recall_metric.confusion_matrix
 
     @pytest.mark.asyncio
     async def test_verbose_logs_record_cache_hits(
@@ -829,9 +821,9 @@ class TestFactualCorrectnessCompleteness:
             ClassifiedFacts(TP=["fact1"], FP=[], FN=[]),
         )
 
-        metric = FactualCorrectnessCompleteness(
+        metric = FactualPrecisionRecall(
             model=mock_native_model,
-            mode=Mode.CORRECTNESS,
+            mode=Mode.PRECISION,
             cache=shared_cache,
             verbose_mode=True,
         )
@@ -872,11 +864,11 @@ class TestFactualCorrectnessCompleteness:
             )
         )
 
-        metric_model_a = FactualCorrectnessCompleteness(
-            model=mock_native_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        metric_model_a = FactualPrecisionRecall(
+            model=mock_native_model, mode=Mode.PRECISION, cache=shared_cache
         )
-        metric_model_b = FactualCorrectnessCompleteness(
-            model=mock_other_model, mode=Mode.CORRECTNESS, cache=shared_cache
+        metric_model_b = FactualPrecisionRecall(
+            model=mock_other_model, mode=Mode.PRECISION, cache=shared_cache
         )
 
         await metric_model_a.a_measure(test_case)

@@ -15,7 +15,7 @@ from deepeval.metrics.indicator import metric_progress_indicator
 from deepeval.telemetry import capture_metric_type
 
 from .template import (
-    FactualCorrectnessTemplate,
+    FactualPrecisionRecallTemplate,
 )
 from .schema import ClassifiedFacts, FactClassificationResult
 from .cache import FactClassificationCache
@@ -23,18 +23,20 @@ import logging
 
 
 class Mode(Enum):
-    CORRECTNESS = auto()
-    COMPLETENESS = auto()
+    PRECISION = auto()
+    RECALL = auto()
 
 
-class FactualCorrectnessCompleteness(BaseMetric):
+class FactualPrecisionRecall(BaseMetric):
     _required_params: List[LLMTestCaseParams] = [
         LLMTestCaseParams.INPUT,
         LLMTestCaseParams.ACTUAL_OUTPUT,
         LLMTestCaseParams.EXPECTED_OUTPUT,
     ]
 
-    evaluation_template: Type[FactualCorrectnessTemplate] = FactualCorrectnessTemplate
+    evaluation_template: Type[FactualPrecisionRecallTemplate] = (
+        FactualPrecisionRecallTemplate
+    )
     async_mode: bool = True
 
     def __init__(
@@ -60,7 +62,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         self._used_cache_for_last_classification = False
 
     def measure(self, test_case: LLMTestCase, *args, **kwargs) -> float:
-        """Synchronously evaluate the metric (correctness or completeness) for a test case."""
+        """Synchronously evaluate the metric (precision or recall) for a test case."""
         raise NotImplementedError(
             "Synchronous evaluation is not supported. Use async a_measure instead."
         )
@@ -72,7 +74,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
         _in_component: bool = False,
         **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
-        """Asynchronously evaluate factual correctness or completeness, depending on `mode`."""
+        """Asynchronously evaluate factual precision or recall, depending on `mode`."""
         check_llm_test_case_params(test_case, self._required_params, self)
 
         if self.using_native_model:
@@ -182,13 +184,18 @@ class FactualCorrectnessCompleteness(BaseMetric):
 
     def _calculate_score(self) -> float:
         """
-        Calculates the factual-correctness score based on the confusion matrix as a
-        float between 0 and 1. The score is calculated as the ratio of the number of
-        True Positive statements to the total number of True Positive + False Positive
-        statements.
+        Calculate the factual-precision or factual-recall score.
+
+        The score is derived from the confusion matrix as a float between 0 and 1.
+        Depending on `self.mode`, it is calculated as:
+        - Precision: the ratio of the number of True Positive statements to the
+          total number of True Positive + False Positive statements.
+        - Recall: the ratio of the number of True Positive statements to the
+          total number of True Positive + False Negative statements.
 
         Returns:
-            float: The factual-correctness or the factual-completeness score, depending on `mode`.
+            float: The factual-precision or the factual-recall score, depending
+            on `mode`.
         """
         if self.confusion_matrix is None:
             return 0.0
@@ -197,9 +204,9 @@ class FactualCorrectnessCompleteness(BaseMetric):
         fp = len(self.confusion_matrix.FP)
         fn = len(self.confusion_matrix.FN)
         match self.mode:
-            case Mode.CORRECTNESS:
+            case Mode.PRECISION:
                 score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-            case Mode.COMPLETENESS:
+            case Mode.RECALL:
                 score = tp / (tp + fn) if tp > 0 else 0.0
 
         return 0.0 if self.strict_mode and score < self.threshold else score
@@ -212,7 +219,7 @@ class FactualCorrectnessCompleteness(BaseMetric):
     @property
     def __name__(self):  # type: ignore[arg-type]
         match self.mode:
-            case Mode.COMPLETENESS:
-                return "Factual Completeness"
-            case Mode.CORRECTNESS:
-                return "Factual Correctness"
+            case Mode.RECALL:
+                return "Factual Recall"
+            case Mode.PRECISION:
+                return "Factual Precision"

@@ -1,4 +1,4 @@
-class FactualCorrectnessTemplate:
+class FactualPrecisionRecallTemplate:
     @staticmethod
     def classify_facts(answer, ground_truth):
         return f"""Given a ground-truth and an answer, analyse each key fact in the answer and classify them in one of the following categories:

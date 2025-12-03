@@ -18,11 +18,11 @@ metrics:
     threshold: 0.8
     model: gpt-4o
     temperature: 0.0
-  - name: factual_correctness
+  - name: factual_precision
     threshold: 1.0
     model: gpt-4o
     temperature: 0.0
-  - name: factual_completeness
+  - name: factual_recall
     threshold: 1.0
     model: gpt-4o
     temperature: 0.0
