@@ -141,7 +141,6 @@ class TestFactualPrecisionRecall:
                     ["fact3"],
                     2 / 3,
                 ),
-                ([], [], 0.0),
             ],
         )
         async def test_returns_precision_score(
@@ -182,6 +181,32 @@ class TestFactualPrecisionRecall:
             assert kwargs.get("schema") == FactClassificationResult
 
         @pytest.mark.asyncio
+        async def test_precision_score_is_nan_when_no_predicted_facts(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+        ):
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(
+                    FactClassificationResult(
+                        classified_facts=ClassifiedFacts(TP=[], FP=[], FN=["fact3"])
+                    ),
+                    0.1,
+                )
+            )
+
+            metric = FactualPrecisionRecall(
+                model=mock_native_model,
+                mode=Mode.PRECISION,
+                threshold=0.7,
+                include_reason=True,
+            )
+
+            result = await metric.a_measure(test_case)
+
+            assert math.isnan(result)
+
+        @pytest.mark.asyncio
         @pytest.mark.parametrize(
             "input_TP,input_FN,expected_score",
             [
@@ -190,7 +215,6 @@ class TestFactualPrecisionRecall:
                     ["fact2", "fact3"],
                     1 / 3,
                 ),
-                ([], [], 0.0),
             ],
         )
         async def test_returns_recall_score(
@@ -224,6 +248,32 @@ class TestFactualPrecisionRecall:
             result = await metric.a_measure(test_case)
 
             assert round(result, 3) == round(expected_score, 3)
+
+        @pytest.mark.asyncio
+        async def test_recall_score_is_nan_when_no_expected_facts(
+            self,
+            mock_native_model: Mock,
+            test_case: LLMTestCase,
+        ):
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(
+                    FactClassificationResult(
+                        classified_facts=ClassifiedFacts(TP=[], FN=[], FP=["fact3"])
+                    ),
+                    0.1,
+                )
+            )
+
+            metric = FactualPrecisionRecall(
+                model=mock_native_model,
+                mode=Mode.RECALL,
+                threshold=0.7,
+                include_reason=True,
+            )
+
+            result = await metric.a_measure(test_case)
+
+            assert math.isnan(result)
 
         sample_facts = ClassifiedFacts(TP=["fact1", "fact2"], FP=["wrong1"], FN=[])
 
@@ -477,7 +527,6 @@ class TestFactualPrecisionRecall:
                     ["fact3"],
                     2 / 3,
                 ),
-                ([], [], 0.0),
             ],
         )
         @pytest.mark.asyncio
@@ -510,6 +559,27 @@ class TestFactualPrecisionRecall:
             mock_non_native_model.a_generate.assert_awaited_once()
             _, kwargs = mock_non_native_model.a_generate.call_args
             assert kwargs.get("schema") == FactClassificationResult
+
+        @pytest.mark.asyncio
+        async def test_non_native_precision_score_is_nan_when_no_predicted_facts(
+            self,
+            mock_non_native_model: Mock,
+            test_case: LLMTestCase,
+        ):
+            mock_non_native_model.a_generate = AsyncMock(
+                return_value=(
+                    FactClassificationResult(
+                        classified_facts=ClassifiedFacts(TP=[], FP=[], FN=["fact3"])
+                    )
+                )
+            )
+
+            metric = FactualPrecisionRecall(
+                model=mock_non_native_model, mode=Mode.PRECISION
+            )  # type: ignore
+            result = await metric.a_measure(test_case)
+
+            assert math.isnan(result)
 
         @pytest.mark.asyncio
         async def test_non_native_model_does_not_set_evaluation_costs(

@@ -205,9 +205,9 @@ class FactualPrecisionRecall(BaseMetric):
         fn = len(self.confusion_matrix.FN)
         match self.mode:
             case Mode.PRECISION:
-                score = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+                score = tp / (tp + fp) if (tp + fp) > 0 else float("nan")
             case Mode.RECALL:
-                score = tp / (tp + fn) if tp > 0 else 0.0
+                score = tp / (tp + fn) if (tp + fn) > 0 else float("nan")
 
         return 0.0 if self.strict_mode and score < self.threshold else score
 
