@@ -15,8 +15,8 @@ from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 from ..invalid_json_retry import attach_invalid_json_retry_to_model
 from ..custom_deepeval.metrics import (
-    FactualCorrectnessCompleteness,
-    FactualCorrectnessCompletenessMode,
+    FactualPrecisionRecall,
+    FactualPrecisionRecallMode,
     ContextRelevancyMetric,
     CoherenceMetric,
     FactClassificationCache,
@@ -28,8 +28,8 @@ class MetricName(str, Enum):
     FAITHFULNESS = "faithfulness"
     RELEVANCE = "relevance"
     BIAS = "bias"
-    FACTUAL_CORRECTNESS = "factual_correctness"
-    FACTUAL_COMPLETENESS = "factual_completeness"
+    FACTUAL_PRECISION = "factual_precision"
+    FACTUAL_RECALL = "factual_recall"
     CONTEXT_RELEVANCY = "context_relevancy"
     COHERENCE = "coherence"
     # others to add
@@ -154,18 +154,18 @@ class TaskConfig(BaseConfig):
                 return AnswerRelevancyMetric(threshold=metric.threshold, model=model)
             case MetricName.BIAS:
                 return BiasMetric(threshold=metric.threshold, model=model)
-            case MetricName.FACTUAL_CORRECTNESS:
-                return FactualCorrectnessCompleteness(
+            case MetricName.FACTUAL_PRECISION:
+                return FactualPrecisionRecall(
                     threshold=metric.threshold,
                     model=model,
-                    mode=FactualCorrectnessCompletenessMode.CORRECTNESS,
+                    mode=FactualPrecisionRecallMode.PRECISION,
                     cache=fact_classification_cache,
                 )
-            case MetricName.FACTUAL_COMPLETENESS:
-                return FactualCorrectnessCompleteness(
+            case MetricName.FACTUAL_RECALL:
+                return FactualPrecisionRecall(
                     threshold=metric.threshold,
                     model=model,
-                    mode=FactualCorrectnessCompletenessMode.COMPLETENESS,
+                    mode=FactualPrecisionRecallMode.RECALL,
                     cache=fact_classification_cache,
                 )
             case MetricName.CONTEXT_RELEVANCY:

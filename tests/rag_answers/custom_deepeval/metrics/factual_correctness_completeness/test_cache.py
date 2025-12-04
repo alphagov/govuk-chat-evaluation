@@ -1,7 +1,7 @@
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness import (
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall import (
     FactClassificationCache,
 )
-from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_correctness_completeness.schema import (
+from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall.schema import (
     ClassifiedFacts,
 )
 

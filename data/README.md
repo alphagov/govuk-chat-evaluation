@@ -172,7 +172,8 @@ For:
 ```
 
 For:
-* factual_correctness
+* factual_precision
+* factual_recall
 
 ```json
 {
@@ -206,7 +207,8 @@ For:
 ```
 
 For:
-* factual_correctness
+* factual_precision
+* factual_recall
 
 ```json
 {

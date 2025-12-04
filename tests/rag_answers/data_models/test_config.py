@@ -18,7 +18,7 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     config as config_module,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics import (
-    FactualCorrectnessCompleteness,
+    FactualPrecisionRecall,
     FactClassificationCache,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
@@ -219,13 +219,13 @@ class TestTaskConfig:
             "input_path": mock_input_data,
             "metrics": [
                 {
-                    "name": "factual_correctness",
+                    "name": "factual_precision",
                     "threshold": 0.5,
                     "model": "gpt-4o",
                     "temperature": 0.0,
                 },
                 {
-                    "name": "factual_completeness",
+                    "name": "factual_recall",
                     "threshold": 0.5,
                     "model": "gpt-4o",
                     "temperature": 0.0,
@@ -239,15 +239,15 @@ class TestTaskConfig:
         first_run_metrics = config.metric_instances()
         second_run_metrics = config.metric_instances()
 
-        assert isinstance(first_run_metrics[0], FactualCorrectnessCompleteness)
-        assert isinstance(first_run_metrics[1], FactualCorrectnessCompleteness)
-        assert isinstance(second_run_metrics[0], FactualCorrectnessCompleteness)
-        assert isinstance(second_run_metrics[1], FactualCorrectnessCompleteness)
+        assert isinstance(first_run_metrics[0], FactualPrecisionRecall)
+        assert isinstance(first_run_metrics[1], FactualPrecisionRecall)
+        assert isinstance(second_run_metrics[0], FactualPrecisionRecall)
+        assert isinstance(second_run_metrics[1], FactualPrecisionRecall)
 
-        fc1 = cast(FactualCorrectnessCompleteness, first_run_metrics[0])
-        fc2 = cast(FactualCorrectnessCompleteness, first_run_metrics[1])
-        fc3 = cast(FactualCorrectnessCompleteness, second_run_metrics[0])
-        fc4 = cast(FactualCorrectnessCompleteness, second_run_metrics[1])
+        fc1 = cast(FactualPrecisionRecall, first_run_metrics[0])
+        fc2 = cast(FactualPrecisionRecall, first_run_metrics[1])
+        fc3 = cast(FactualPrecisionRecall, second_run_metrics[0])
+        fc4 = cast(FactualPrecisionRecall, second_run_metrics[1])
 
         # Within a single call, factual metrics share the same cache
         assert fc1.cache is fc2.cache

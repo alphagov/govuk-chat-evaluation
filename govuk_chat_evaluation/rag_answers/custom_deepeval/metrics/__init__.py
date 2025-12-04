@@ -1,14 +1,14 @@
-from .factual_correctness_completeness import (
-    FactualCorrectnessCompleteness,
-    Mode as FactualCorrectnessCompletenessMode,
+from .factual_precision_recall import (
+    FactualPrecisionRecall,
+    Mode as FactualPrecisionRecallMode,
     FactClassificationCache,
 )
 from .context_relevancy import ContextRelevancyMetric
 from .coherence import CoherenceMetric
 
 __all__ = [
-    "FactualCorrectnessCompleteness",
-    "FactualCorrectnessCompletenessMode",
+    "FactualPrecisionRecall",
+    "FactualPrecisionRecallMode",
     "FactClassificationCache",
     "ContextRelevancyMetric",
     "CoherenceMetric",
