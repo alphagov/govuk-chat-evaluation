@@ -5,33 +5,37 @@ input_path: data/rag_answers.jsonl
 metrics:
   - name: faithfulness
     threshold: 1.0
-    model: gpt-4o
+    model: openai.gpt-oss-120b-1:0
     # other available values are:
     # model: eu.amazon.nova-micro-v1:0
     # model: eu.amazon.nova-pro-v1:0
+    # model: gpt-4o-mini
+    # model: gpt-4o
+    # model: openai.gpt-oss-20b-1:0
+    # model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: bias
     threshold: 0.0
-    model: gpt-4o
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: relevance
     threshold: 0.8
-    model: gpt-4o
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: factual_precision
     threshold: 1.0
-    model: gpt-4o
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: factual_recall
     threshold: 1.0
-    model: gpt-4o
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: context_relevancy
     threshold: 0.8
-    model: eu.amazon.nova-pro-v1:0
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
   - name: coherence
     threshold: 0.8
-    model: eu.amazon.nova-pro-v1:0
+    model: openai.gpt-oss-120b-1:0
     temperature: 0.0
 n_runs: 2
