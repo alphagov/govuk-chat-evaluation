@@ -9,10 +9,6 @@ from unittest.mock import MagicMock
 
 import pytest
 from typeguard import check_type, TypeCheckError
-from govuk_chat_evaluation.rag_answers.data_models import (
-    LLMJudgeModel,
-    LLMJudgeModelConfig,
-)
 
 
 load_dotenv(".env.aws")
@@ -47,21 +43,6 @@ def mock_or_use_openai_api_key(request, monkeypatch):
     else:
         # set a fake API key but only when not running real OpenAI tests
         monkeypatch.setenv("OPENAI_API_KEY", "fake-api-key-for-testing")
-
-
-@pytest.fixture(scope="session")
-def require_bedrock_credentials():
-    if not os.getenv("AWS_SESSION_TOKEN"):
-        raise RuntimeError("AWS Bedrock credentials not configured.")
-
-
-@pytest.fixture(scope="session")
-def bedrock_openai_judge(require_bedrock_credentials):
-    config = LLMJudgeModelConfig(
-        model=LLMJudgeModel.GPT_OSS_20B,
-        temperature=0.0,
-    )
-    return config.instantiate_llm_judge()
 
 
 def assert_csv_exists_with_headers(file_path: Path, *expected_headers: str):
