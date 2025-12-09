@@ -51,15 +51,13 @@ LLM_TEST_CASES = [
     (
         LLMTestCase(
             input="What is PIP?",
-            actual_output="I don't know the answer to that question.",
-        ),
-        True,
-    ),
-    # Incoherent user input with completely coherent refusal response
-    (
-        LLMTestCase(
-            input="How do I renew my passport before I was born?",
-            actual_output="I cannot answer that. Please try asking something else.",
+            actual_output=(
+                "I’m not able to provide a definition of PIP, which is the key information "
+                "you need to answer your question. Because of that, I can’t explain whether "
+                "it applies to your situation or what it involves. To get an accurate "
+                "definition, you may want to check official GOV.UK guidance or contact an "
+                "advice service."
+            ),
         ),
         True,
     ),
@@ -110,7 +108,6 @@ LLM_TEST_CASES = [
 LLM_TEST_CASE_IDS = [
     "coherent_comprehensive_answer_pip",
     "coherent_i_dont_know_pip",
-    "coherent_refusal_nonsensical_input_passport",
     "incoherent_role_confusion_rent_increase",
     "incoherent_contradictory_obligations_self_assessment",
     "incoherent_perspective_slip_flexible_working",

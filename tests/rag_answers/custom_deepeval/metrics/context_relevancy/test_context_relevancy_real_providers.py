@@ -38,7 +38,7 @@ STRUCTURED_CONTEXT = StructuredContext(
 LLM_TEST_CASES = [
     (
         LLMTestCase(
-            input="What is the UK's inflation rate?",
+            input="What is the UK's inflation rate in 2024?",
             actual_output="The inflation rate in the UK is 3.4%.",
             additional_metadata={"structured_contexts": [STRUCTURED_CONTEXT]},
         ),
@@ -46,12 +46,17 @@ LLM_TEST_CASES = [
     ),
     (
         LLMTestCase(
-            input="Tell me about France.",
+            input="Tell me about inflation in France.",
             actual_output="It's a country in Europe.",
             additional_metadata={"structured_contexts": [STRUCTURED_CONTEXT]},
         ),
         0.0,
     ),
+]
+
+LLM_TEST_CASE_IDS = [
+    "uk_inflation_rate_relevant",
+    "france_inflation_irrelevant",
 ]
 
 
@@ -68,6 +73,7 @@ class TestContextRelevancyRealProviders:
     @pytest.mark.parametrize(
         "llm_test_case, expected_score",
         LLM_TEST_CASES,
+        ids=LLM_TEST_CASE_IDS,
     )
     @pytest.mark.asyncio
     async def test_context_relevancy_score(
