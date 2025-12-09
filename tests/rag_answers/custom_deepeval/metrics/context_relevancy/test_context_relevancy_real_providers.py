@@ -38,8 +38,8 @@ STRUCTURED_CONTEXT = StructuredContext(
 LLM_TEST_CASES = [
     (
         LLMTestCase(
-            input="What is the UK's inflation rate in 2024?",
-            actual_output="The inflation rate in the UK is 3.4%.",
+            input="What was the UK's inflation rate in 2024?",
+            actual_output="The inflation rate in the UK was 3.4%.",
             additional_metadata={"structured_contexts": [STRUCTURED_CONTEXT]},
         ),
         1.0,
@@ -47,7 +47,7 @@ LLM_TEST_CASES = [
     (
         LLMTestCase(
             input="Tell me about inflation in France.",
-            actual_output="It's a country in Europe.",
+            actual_output="I do not have information about inflation in France.",
             additional_metadata={"structured_contexts": [STRUCTURED_CONTEXT]},
         ),
         0.0,
