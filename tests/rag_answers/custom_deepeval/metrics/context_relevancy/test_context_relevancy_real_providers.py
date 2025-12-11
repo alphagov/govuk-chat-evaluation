@@ -29,7 +29,7 @@ STRUCTURED_CONTEXT = StructuredContext(
     title="Uk inflation data",
     heading_hierarchy=["Inflation", "2024"],
     description="Inflation data by year for the UK. Published by Office for National Statistics.",
-    html_content="<p>The inflation rate in the UK is 3.4%. This in an official document published on GOV.UK</p>",
+    html_content="<p>The inflation rate in the UK is 3.4%. This in an official document by the Office for National Statistics, published on GOV.UK</p>",
     exact_path="https://gov.uk/inflation-data",
     base_path="https://gov.uk/inflation-data",
 )

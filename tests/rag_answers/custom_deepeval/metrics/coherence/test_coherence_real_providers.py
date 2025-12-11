@@ -97,8 +97,8 @@ LLM_TEST_CASES = [
             actual_output=(
                 "You can make a flexible working request after 26 weeks of employment. "
                 "Write to your employer explaining the changes you want. "
-                "As an employer, you must consider the request and respond within 2 months. "
-                "You should include when you want the changes to start and how they'll affect your work."
+                "As you are the employer, you must consider the employee's request and respond within 2 months. "
+                "In your request to your employer, you should include when you want the changes to start and how they'll affect your work."
             ),
         ),
         False,
