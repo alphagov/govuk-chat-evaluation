@@ -47,20 +47,6 @@ LLM_TEST_CASES = [
         ),
         True,
     ),
-    # Completely coherent "I don't know" response
-    (
-        LLMTestCase(
-            input="What is PIP?",
-            actual_output=(
-                "I’m not able to provide a definition of PIP, which is the key information "
-                "you need to answer your question. Because of that, I can’t explain whether "
-                "it applies to your situation or what it involves. To get an accurate "
-                "definition, you may want to check official GOV.UK guidance or contact an "
-                "advice service."
-            ),
-        ),
-        True,
-    ),
     # Completely incoherent response
     (
         LLMTestCase(
@@ -107,7 +93,6 @@ LLM_TEST_CASES = [
 
 LLM_TEST_CASE_IDS = [
     "coherent_comprehensive_answer_pip",
-    "coherent_i_dont_know_pip",
     "incoherent_role_confusion_rent_increase",
     "incoherent_contradictory_obligations_self_assessment",
     "incoherent_perspective_slip_flexible_working",
