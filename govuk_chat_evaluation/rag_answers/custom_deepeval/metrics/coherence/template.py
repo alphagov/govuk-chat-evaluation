@@ -45,9 +45,11 @@ Input:
 Actual Output:
 {actual_output}
 
-Return your evaluation strictly as a JSON object with the following fields:
-- "reason": your reasoning and assessment of the response’s coherence.
-- "score": a numeric value between {min_score} and {max_score}, assigned according to the rubric and your reasoning above.
+Return your evaluation strictly as a JSON object with EXACTLY these fields:
+{{
+  "reason": "<your reasoning and assessment of the response’s coherence>",
+  "score": "<a numeric value between {min_score} and {max_score}, assigned according to the rubric and your reasoning above>"
+}}
 
 Only return valid JSON. Do not include any other commentary or formatting.
 

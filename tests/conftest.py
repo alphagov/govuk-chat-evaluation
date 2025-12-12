@@ -11,6 +11,7 @@ import pytest
 from typeguard import check_type, TypeCheckError
 
 
+load_dotenv(".env.aws")
 load_dotenv()
 
 FROZEN_TIME = datetime.now().replace(microsecond=0)

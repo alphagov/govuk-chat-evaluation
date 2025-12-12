@@ -93,8 +93,7 @@ class LLMJudgeModelConfig(BaseModel):
             case LLMJudgeModel.GPT_4O_MINI | LLMJudgeModel.GPT_4O:
                 return GPTModel(model=self.model.value, temperature=self.temperature)
             case LLMJudgeModel.GPT_OSS_20B | LLMJudgeModel.GPT_OSS_120B:
-                # OpenAI Bedrock models aren't available on eu-west-1 yet, so default to eu-north-1.
-                region = os.getenv("AWS_BEDROCK_REGION", "eu-north-1")
+                region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
                 model = AmazonBedrockModel(
                     model_id=self.model.value,
                     region_name=region,

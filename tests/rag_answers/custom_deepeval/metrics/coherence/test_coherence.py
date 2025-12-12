@@ -191,13 +191,13 @@ class TestCoherenceMetric:
             mock_test_case: LLMTestCase,
         ):
             mock_native_model.a_generate = AsyncMock(
-                return_value=(CoherenceJudgement(score=4, reason="Almost there"), 0.0)
+                return_value=(CoherenceJudgement(score=3, reason="Almost there"), 0.0)
             )
             metric = CoherenceMetric(model=mock_native_model)
 
             await metric.a_measure(mock_test_case, _show_indicator=False)
 
-            assert metric.score == pytest.approx(0.75)
+            assert metric.score == pytest.approx(0.5)
             assert metric.success is False
 
             mock_native_model.a_generate = AsyncMock(

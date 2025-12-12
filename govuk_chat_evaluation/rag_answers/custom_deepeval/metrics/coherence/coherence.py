@@ -15,7 +15,7 @@ from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from .schema import CoherenceJudgement
 from .template import CoherenceTemplate, SCORE_RANGE
 
-COHERENCE_THRESHOLD = 1.0  # require a perfect rubric score
+COHERENCE_THRESHOLD = 0.75
 
 
 class CoherenceMetric(BaseMetric):
