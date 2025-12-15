@@ -458,7 +458,7 @@ requires-dist = [
     { name = "aiobotocore", specifier = ">=2.24.2" },
     { name = "botocore", specifier = ">=1.40.18" },
     { name = "click", specifier = ">=8.1.8" },
-    { name = "deepeval", specifier = ">=2.6.6" },
+    { name = "deepeval", specifier = ">=3.7.5" },
     { name = "matplotlib", specifier = ">=3.10" },
     { name = "numpy", specifier = ">=2.2.4" },
     { name = "pandas", specifier = ">=2.2.3" },
