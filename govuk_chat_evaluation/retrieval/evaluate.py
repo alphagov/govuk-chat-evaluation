@@ -39,7 +39,7 @@ class EvaluationResult(BaseModel):
     def y_pred(self) -> list[int]:
         return [int(path in self.actual_exact_paths) for path in self.all_paths]
 
-    def _safe_binary_metric(
+    def _safe_classification_metric(
         self, metric_fn: Callable[..., float], **kwargs: Any
     ) -> float:
         if not self.all_paths:
@@ -71,25 +71,25 @@ class EvaluationResult(BaseModel):
         ]
 
     def precision(self) -> float:
-        return self._safe_binary_metric(
+        return self._safe_classification_metric(
             precision_score,
             zero_division=np.nan,  # type: ignore
         )
 
     def recall(self) -> float:
-        return self._safe_binary_metric(
+        return self._safe_classification_metric(
             recall_score,
             zero_division=np.nan,  # type: ignore
         )
 
     def f1_score(self) -> float:
-        return self._safe_binary_metric(
+        return self._safe_classification_metric(
             f1_score,
             zero_division=np.nan,  # type: ignore
         )
 
     def f2_score(self) -> float:
-        return self._safe_binary_metric(
+        return self._safe_classification_metric(
             fbeta_score,
             beta=2,
             zero_division=np.nan,  # type: ignore

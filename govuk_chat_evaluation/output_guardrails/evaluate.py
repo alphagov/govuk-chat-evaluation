@@ -94,7 +94,7 @@ class AggregateResults:
 
     def _metric_per_guardrail(self, metric_function):
         expected_vectors, actual_vectors = self._expected_actual_guardrails_vectors
-        if not self.guardrail_names or not expected_vectors:
+        if not expected_vectors:
             return []
 
         return metric_function(
