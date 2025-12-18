@@ -23,6 +23,9 @@ jobs:
   test:
     name: Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -43,6 +46,24 @@ jobs:
         run: uv run pytest -m 'real_openai' tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - if: |
+          github.actor != 'dependabot[bot]' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        name: Configure AWS Credentials (OIDC) for Bedrock
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: ${{ secrets.GOVUK_TEST_BEDROCK_CI_ROLE_ARN }}
+          aws-region: eu-west-1
+          role-session-name: GovUKChatEvalBedrockCI
+
+      - if: |
+          github.actor != 'dependabot[bot]' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        name: Run real_bedrock tests
+        env:
+          AWS_BEDROCK_REGION: eu-west-1
+        run: uv run pytest -m 'real_bedrock' tests
 
   lint:
     name: Lint
