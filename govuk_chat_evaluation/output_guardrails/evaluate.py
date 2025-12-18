@@ -56,6 +56,9 @@ class AggregateResults:
 
     @cached_property
     def _expected_actual_triggered_lists(self) -> tuple[list[int], list[int]]:
+        if not self.evaluation_results:
+            return [], []
+
         pairs_list = [
             (
                 int(evaluation_result.expected_triggered),
@@ -85,10 +88,14 @@ class AggregateResults:
 
     def _triggered_metric(self, metric_function):
         expected, actual = self._expected_actual_triggered_lists
+        if not expected:
+            return float("nan")
         return metric_function(expected, actual, zero_division=np.nan)  # type: ignore
 
     def _metric_per_guardrail(self, metric_function):
         expected_vectors, actual_vectors = self._expected_actual_guardrails_vectors
+        if not self.guardrail_names or not expected_vectors:
+            return []
 
         return metric_function(
             expected_vectors,
