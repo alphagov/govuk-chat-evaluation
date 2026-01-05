@@ -59,7 +59,15 @@ class ContextRelevancyMetric(BaseMetric):
         _in_component: bool = False,
         **kwargs,  # DeepEval may introduce new kwargs that we don't use
     ) -> float:
-        check_llm_test_case_params(test_case, self._required_params, self)
+        check_llm_test_case_params(
+            test_case,
+            self._required_params,
+            None,
+            None,
+            self,
+            self.model,
+            test_case.multimodal,
+        )
 
         if self.using_native_model:
             self.evaluation_cost = 0.0
