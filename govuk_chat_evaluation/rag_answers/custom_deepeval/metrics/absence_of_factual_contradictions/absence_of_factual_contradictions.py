@@ -56,7 +56,15 @@ class AbsenceOfFactualContradictions(BaseMetric):
         _in_component: bool = False,
         **kwargs,
     ) -> float:
-        check_llm_test_case_params(test_case, self._required_params, self)
+        check_llm_test_case_params(
+            test_case,
+            self._required_params,
+            None,
+            None,
+            self,
+            self.model,
+            test_case.multimodal,
+        )
 
         with metric_progress_indicator(
             self,

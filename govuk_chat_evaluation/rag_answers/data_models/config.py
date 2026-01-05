@@ -63,8 +63,8 @@ class LLMJudgeModelConfig(BaseModel):
             case LLMJudgeModel.AMAZON_NOVA_MICRO_1:
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
                 model = AmazonBedrockModel(
-                    model_id=self.model.value,
-                    region_name=region,
+                    model=self.model.value,
+                    region=region,
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,
@@ -74,8 +74,8 @@ class LLMJudgeModelConfig(BaseModel):
             case LLMJudgeModel.AMAZON_NOVA_PRO_1:
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
                 model = AmazonBedrockModel(
-                    model_id=self.model.value,
-                    region_name=region,
+                    model=self.model.value,
+                    region=region,
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,
@@ -95,8 +95,8 @@ class LLMJudgeModelConfig(BaseModel):
             case LLMJudgeModel.GPT_OSS_20B | LLMJudgeModel.GPT_OSS_120B:
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
                 model = AmazonBedrockModel(
-                    model_id=self.model.value,
-                    region_name=region,
+                    model=self.model.value,
+                    region=region,
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,

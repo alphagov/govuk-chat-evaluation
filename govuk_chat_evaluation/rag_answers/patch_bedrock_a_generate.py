@@ -28,7 +28,7 @@ async def a_generate_filters_non_text_responses(self, prompt, schema=None):
         client = await self._ensure_client()
 
         response = await client.converse(
-            modelId=self.model_id,
+            modelId=self.get_model_name(),
             messages=payload["messages"],
             inferenceConfig=payload["inferenceConfig"],
         )
