@@ -10,11 +10,13 @@ from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
 
 @pytest.fixture
 def model():
-    model = AmazonBedrockModel.__new__(AmazonBedrockModel)
-    model.model_id = "bedrock-model"
-    model.input_token_cost = 0
-    model.output_token_cost = 0
-    model.generation_kwargs = {}
+    model = AmazonBedrockModel(
+        model="bedrock-model",
+        cost_per_input_token=0,
+        cost_per_output_token=0,
+        region="eu-west-2",
+        generation_kwargs={},
+    )
 
     return model
 
