@@ -1,4 +1,4 @@
-from typing import Type, cast
+from typing import Type, cast, Optional
 
 from deepeval.metrics import BaseMetric
 from deepeval.metrics.indicator import metric_progress_indicator
@@ -104,10 +104,11 @@ class CoherenceMetric(BaseMetric):
     ) -> CoherenceJudgement:
         if self.using_native_model:
             result, cost = cast(
-                tuple[CoherenceJudgement, float],
+                tuple[CoherenceJudgement, Optional[float]],
                 await self.model.a_generate(prompt, schema=schema),
             )
-            self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
+            if isinstance(cost, float):
+                self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
             return result
 
         try:

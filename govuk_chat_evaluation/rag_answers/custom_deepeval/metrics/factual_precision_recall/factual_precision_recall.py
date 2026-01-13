@@ -158,7 +158,7 @@ class FactualPrecisionRecall(BaseMetric):
             res, cost = await self.model.a_generate(
                 prompt, schema=FactClassificationResult
             )
-            if isinstance(cost, (int, float)):
+            if isinstance(cost, float):
                 self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
             classified_facts = res.classified_facts  # type: ignore[arg-type]
         else:

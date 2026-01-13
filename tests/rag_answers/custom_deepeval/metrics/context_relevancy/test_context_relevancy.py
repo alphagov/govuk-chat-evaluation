@@ -210,6 +210,28 @@ class TestContextRelevancyMetric:
             await metric.a_measure(mock_test_case)
             assert metric.evaluation_cost == pytest.approx(0.2)
 
+        @pytest.mark.asyncio
+        async def test_with_native_model_when_a_generate_returns_none_for_cost(
+            self,
+            mock_native_model,
+            mock_test_case,
+            sample_truths,
+            sample_information_needs,
+            sample_verdicts,
+            sample_reason,
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, None),
+                (sample_information_needs, None),
+                (sample_verdicts, None),
+                (sample_reason, None),
+            ]
+
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            await metric.a_measure(mock_test_case)
+
+            assert metric.evaluation_cost == 0.0
+
         @pytest.mark.parametrize(
             "threshold, expected_success",
             [

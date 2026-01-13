@@ -149,6 +149,29 @@ class TestAbsenceOfFactualContradictions:
             # 4 calls * 0.1 cost = 0.4
             assert metric.evaluation_cost == 0.4
 
+        @pytest.mark.asyncio
+        async def test_with_native_model_when_a_generate_returns_none_for_cost(
+            self,
+            mock_native_model,
+            mock_test_case,
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (TruthCollection(truths=["t1"]), None),
+                (ClaimCollection(claims=["c1"]), None),
+                (
+                    VerdictCollection(
+                        verdicts=[Verdict(verdict="yes"), Verdict(verdict="no")]
+                    ),
+                    None,
+                ),
+                (ScoreReason(reason="reason"), None),
+            ]
+
+            metric = AbsenceOfFactualContradictions(model=mock_native_model)
+            await metric.a_measure(mock_test_case)
+
+            assert metric.evaluation_cost is None
+
         @pytest.mark.parametrize(
             "threshold, expected_success",
             [

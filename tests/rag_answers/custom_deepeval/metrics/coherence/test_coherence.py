@@ -78,6 +78,21 @@ class TestCoherenceMetric:
             assert metric.evaluation_cost == pytest.approx(0.2)
 
         @pytest.mark.asyncio
+        async def test_with_native_model_when_a_generate_returns_none_for_cost(
+            self,
+            mock_native_model: Mock,
+            mock_test_case: LLMTestCase,
+        ):
+            mock_native_model.a_generate = AsyncMock(
+                return_value=(CoherenceJudgement(score=4, reason="Good"), None)
+            )
+            metric = CoherenceMetric(model=mock_native_model)
+
+            await metric.a_measure(mock_test_case, _show_indicator=False)
+
+            assert metric.evaluation_cost == 0.0
+
+        @pytest.mark.asyncio
         async def test_with_non_native_model_skips_cost_tracking(
             self,
             mock_non_native_model: Mock,
