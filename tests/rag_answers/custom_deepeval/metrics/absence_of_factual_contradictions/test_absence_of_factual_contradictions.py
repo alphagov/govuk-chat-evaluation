@@ -170,7 +170,7 @@ class TestAbsenceOfFactualContradictions:
             metric = AbsenceOfFactualContradictions(model=mock_native_model)
             await metric.a_measure(mock_test_case)
 
-            assert metric.evaluation_cost is None
+            assert metric.evaluation_cost == 0.0
 
         @pytest.mark.parametrize(
             "threshold, expected_success",

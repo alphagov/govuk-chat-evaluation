@@ -66,6 +66,9 @@ class AbsenceOfFactualContradictions(BaseMetric):
             test_case.multimodal,
         )
 
+        if self.using_native_model:
+            self.evaluation_cost = 0.0
+
         with metric_progress_indicator(
             self,
             async_mode=True,
