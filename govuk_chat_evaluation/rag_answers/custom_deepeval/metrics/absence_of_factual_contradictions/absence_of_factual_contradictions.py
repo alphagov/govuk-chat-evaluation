@@ -1,4 +1,4 @@
-from typing import List, Type, TypeVar, cast
+from typing import List, Type, TypeVar, cast, Optional
 from pydantic import BaseModel
 
 from deepeval.test_case import (
@@ -65,6 +65,9 @@ class AbsenceOfFactualContradictions(BaseMetric):
             self.model,
             test_case.multimodal,
         )
+
+        if self.using_native_model:
+            self.evaluation_cost = 0.0
 
         with metric_progress_indicator(
             self,
@@ -141,10 +144,11 @@ class AbsenceOfFactualContradictions(BaseMetric):
     ) -> SchemaType:
         if self.using_native_model:
             result, cost = cast(
-                tuple[SchemaType, float],
+                tuple[SchemaType, Optional[float]],
                 await self.model.a_generate(prompt, schema=schema),
             )
-            self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
+            if isinstance(cost, float):
+                self.evaluation_cost = (self.evaluation_cost or 0.0) + cost
             return result
         else:
             try:
