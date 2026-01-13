@@ -65,6 +65,7 @@ class LLMJudgeModelConfig(BaseModel):
                 model = AmazonBedrockModel(
                     model=self.model.value,
                     region=region,
+                    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,
@@ -76,6 +77,7 @@ class LLMJudgeModelConfig(BaseModel):
                 model = AmazonBedrockModel(
                     model=self.model.value,
                     region=region,
+                    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,
@@ -97,6 +99,7 @@ class LLMJudgeModelConfig(BaseModel):
                 model = AmazonBedrockModel(
                     model=self.model.value,
                     region=region,
+                    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
                     generation_kwargs={
                         "temperature": self.temperature,
                         "maxTokens": 6000,
