@@ -21,36 +21,32 @@ async def a_generate_filters_non_text_responses(self, prompt, schema=None):
     See: https://github.com/confident-ai/deepeval/pull/2328
 
     The original a_generate method can be found here:
-    https://github.com/confident-ai/deepeval/blob/main/deepeval/models/llms/amazon_bedrock_model.py#L69
+    https://github.com/confident-ai/deepeval/blob/main/deepeval/models/llms/amazon_bedrock_model.py#L162
     """
-    try:
-        payload = self.get_converse_request_body(prompt)
-        client = await self._ensure_client()
+    payload = self.get_converse_request_body(prompt)
+    client = await self._ensure_client()
 
-        response = await client.converse(
-            modelId=self.get_model_name(),
-            messages=payload["messages"],
-            inferenceConfig=payload["inferenceConfig"],
+    response = await client.converse(
+        modelId=self.get_model_name(),
+        messages=payload["messages"],
+        inferenceConfig=payload["inferenceConfig"],
+    )
+
+    message_text = next(
+        (
+            item["text"]
+            for item in response["output"]["message"]["content"]
+            if "text" in item
         )
+    )
 
-        message_text = next(
-            (
-                item["text"]
-                for item in response["output"]["message"]["content"]
-                if "text" in item
-            )
-        )
+    cost = self.calculate_cost(
+        response["usage"]["inputTokens"],
+        response["usage"]["outputTokens"],
+    )
 
-        cost = self.calculate_cost(
-            response["usage"]["inputTokens"],
-            response["usage"]["outputTokens"],
-        )
-
-        if schema is None:
-            return message_text, cost
-        else:
-            json_output = trim_and_load_json(message_text)
-            return schema.model_validate(json_output), cost
-
-    finally:
-        await self.close()
+    if schema is None:
+        return message_text, cost
+    else:
+        json_output = trim_and_load_json(message_text)
+        return schema.model_validate(json_output), cost
