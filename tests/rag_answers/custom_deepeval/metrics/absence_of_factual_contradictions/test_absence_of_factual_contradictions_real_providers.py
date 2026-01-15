@@ -12,11 +12,6 @@ from govuk_chat_evaluation.rag_answers.data_models import (
 
 PROVIDERS = [
     pytest.param(
-        LLMJudgeModelConfig(model=LLMJudgeModel.GPT_4O, temperature=0.0),
-        id="openai_gpt-4o",
-        marks=pytest.mark.real_openai,
-    ),
-    pytest.param(
         LLMJudgeModelConfig(model=LLMJudgeModel.GPT_OSS_120B, temperature=0.0),
         id="bedrock_gpt-oss-120b",
         marks=pytest.mark.real_bedrock,
@@ -46,11 +41,9 @@ LLM_TEST_CASES = [
 
 class TestAbsenceOfFactualContradictionsRealProviders:
     """
-    Exercises the AbsenceOfFactualContradictions metric against real providers
-    (OpenAI or Bedrock OpenAI).
-    Requires corresponding credentials; selection is via markers:
+    Exercises the AbsenceOfFactualContradictions metric against a real Bedrock provider.
+    Requires AWS credentials; selection is via marker:
 
-        uv run pytest -m 'real_openai'
         uv run pytest -m 'real_bedrock'
     """
 
