@@ -50,7 +50,6 @@ packages = ["govuk_chat_evaluation"]
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 markers = [
-  "real_openai: run the tests that test against a real OpenAI API",
   "real_bedrock: run the tests that test against a real AWS Bedrock API"
 ]
-addopts = "-m 'not real_openai and not real_bedrock'"
+addopts = "-m 'not real_bedrock'"
