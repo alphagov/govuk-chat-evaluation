@@ -1,6 +1,7 @@
 import click
 from dotenv import load_dotenv
 
+from .file_system import project_root
 from . import jailbreak_guardrails
 from . import output_guardrails
 from . import question_router
@@ -8,7 +9,7 @@ from . import rag_answers
 from . import retrieval
 from . import topic_tagger
 
-load_dotenv(".env.aws")
+load_dotenv(project_root() / ".env.aws")
 load_dotenv()
 
 
