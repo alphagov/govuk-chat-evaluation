@@ -27,6 +27,7 @@ from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import 
 from govuk_chat_evaluation.rag_answers.patch_bedrock_a_generate import (
     a_generate_filters_non_text_responses,
 )
+from govuk_chat_evaluation.aws_credentials import AwsCredentialCheckResult
 
 
 def test_config_monkeypatches_amazong_bedrock_model_a_generate_on_initialisation():
@@ -255,3 +256,104 @@ class TestTaskConfig:
 
         # Across calls, a fresh cache is created
         assert fc1.cache is not fc3.cache
+
+    def test_requires_bedrock_credentials_false_for_openai(self, mock_input_data):
+        config_dict = {
+            "what": "Test",
+            "generate": False,
+            "provider": None,
+            "input_path": mock_input_data,
+            "metrics": [
+                {
+                    "name": "faithfulness",
+                    "threshold": 0.8,
+                    "model": "gpt-4o-mini",
+                    "temperature": 0.0,
+                }
+            ],
+            "n_runs": 1,
+        }
+
+        config = TaskConfig(**config_dict)
+
+        assert config.requires_bedrock_credentials() is False
+
+    def test_requires_bedrock_credentials_true_for_bedrock(self, mock_input_data):
+        config_dict = {
+            "what": "Test",
+            "generate": False,
+            "provider": None,
+            "input_path": mock_input_data,
+            "metrics": [
+                {
+                    "name": "faithfulness",
+                    "threshold": 0.8,
+                    "model": "openai.gpt-oss-120b-1:0",
+                    "temperature": 0.0,
+                }
+            ],
+            "n_runs": 1,
+        }
+
+        config = TaskConfig(**config_dict)
+
+        assert config.requires_bedrock_credentials() is True
+
+    def test_ensure_bedrock_credentials_noop_when_not_required(
+        self, mock_input_data, mocker
+    ):
+        config = TaskConfig(
+            what="Test",
+            generate=False,
+            provider=None,
+            input_path=mock_input_data,
+            metrics=[
+                MetricConfig(
+                    name=MetricName.FAITHFULNESS,
+                    threshold=0.5,
+                    llm_judge=LLMJudgeModelConfig(
+                        model=LLMJudgeModel.GPT_4O_MINI, temperature=0.0
+                    ),
+                )
+            ],
+            n_runs=1,
+        )
+
+        mocked_check = mocker.patch(
+            "govuk_chat_evaluation.rag_answers.data_models.config.ensure_aws_credentials"
+        )
+
+        config.ensure_bedrock_credentials()
+
+        mocked_check.assert_not_called()
+
+    def test_ensure_bedrock_credentials_raises_on_failure(
+        self, mock_input_data, mocker
+    ):
+        config = TaskConfig(
+            what="Test",
+            generate=False,
+            provider=None,
+            input_path=mock_input_data,
+            metrics=[
+                MetricConfig(
+                    name=MetricName.FAITHFULNESS,
+                    threshold=0.5,
+                    llm_judge=LLMJudgeModelConfig(
+                        model=LLMJudgeModel.GPT_OSS_120B, temperature=0.0
+                    ),
+                )
+            ],
+            n_runs=1,
+        )
+
+        mocker.patch(
+            "govuk_chat_evaluation.rag_answers.data_models.config.ensure_aws_credentials",
+            return_value=AwsCredentialCheckResult(ok=False, error="ExpiredToken"),
+        )
+
+        with pytest.raises(config_module.BedrockCredentialsError) as exc_info:
+            config.ensure_bedrock_credentials()
+
+        assert "AWS Bedrock judge models" in str(exc_info.value)
+        assert "ExpiredToken" in str(exc_info.value)

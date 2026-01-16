@@ -4,6 +4,8 @@ from typing import Any
 import os
 
 from ...config import BaseConfig
+from ...file_system import project_root
+from ...aws_credentials import ensure_aws_credentials
 from deepeval.metrics import (
     FaithfulnessMetric,
     BiasMetric,
@@ -44,6 +46,22 @@ class LLMJudgeModel(str, Enum):
     GEMINI_15_FLASH = "gemini-1.5-flash-002"
     GPT_OSS_20B = "openai.gpt-oss-20b-1:0"
     GPT_OSS_120B = "openai.gpt-oss-120b-1:0"
+
+
+BEDROCK_JUDGE_MODELS: set[LLMJudgeModel] = {
+    LLMJudgeModel.AMAZON_NOVA_MICRO_1,
+    LLMJudgeModel.AMAZON_NOVA_PRO_1,
+    LLMJudgeModel.GPT_OSS_20B,
+    LLMJudgeModel.GPT_OSS_120B,
+}
+
+
+def is_bedrock_judge_model(model: LLMJudgeModel) -> bool:
+    return model in BEDROCK_JUDGE_MODELS
+
+
+class BedrockCredentialsError(RuntimeError):
+    pass
 
 
 # This is a monkey patch to ensure that responses from Bedrock OpenAI
@@ -136,6 +154,41 @@ class TaskConfig(BaseConfig):
     @model_validator(mode="after")
     def run_validatons(self):
         return self._validate_fields_required_for_generate("provider")
+
+    def requires_bedrock_credentials(self) -> bool:
+        return any(
+            is_bedrock_judge_model(metric.llm_judge.model) for metric in self.metrics
+        )
+
+    def ensure_bedrock_credentials(self) -> None:
+        if not self.requires_bedrock_credentials():
+            return
+
+        result = ensure_aws_credentials(project_root())
+
+        if result.ok:
+            return
+
+        models = sorted(
+            {
+                metric.llm_judge.model.value
+                for metric in self.metrics
+                if is_bedrock_judge_model(metric.llm_judge.model)
+            }
+        )
+        script_command = "./scripts/export_aws_credentials.sh"
+        env_path = project_root() / ".env.aws"
+
+        message_lines = [
+            f"This evaluation uses AWS Bedrock judge models: {', '.join(models)}.",
+            "Tried to fetch AWS credentials automatically, but still couldn't validate them.",
+            f"Run: {script_command} (optionally with a role) or set AWS_* environment variables.",
+            f"Expected credentials file at: {env_path}",
+        ]
+        if result.error:
+            message_lines.append(f"Credential check error: {result.error}")
+
+        raise BedrockCredentialsError("\n".join(message_lines))
 
     def metric_instances(self) -> list[BaseMetric]:
         """Return the list of runtime metric objects for evaluation."""
