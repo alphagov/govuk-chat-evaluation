@@ -5,10 +5,12 @@ from typing import cast
 import click
 
 from ..config import apply_click_options_to_command, config_from_cli_args
+from ..aws_credentials import AwsCredentialScriptError
 from ..file_system import write_config_file_for_reuse
 from .evaluate import evaluate_and_output_results
 from .generate import generate_and_write_dataset
 from .data_models import TaskConfig
+from .data_models.config import BedrockCredentialsError
 from ..output import initialise_output
 
 
@@ -28,6 +30,11 @@ def main(**cli_args):
         config_cls=TaskConfig,
         cli_args=cli_args,
     )
+
+    try:
+        config.ensure_bedrock_credentials()
+    except (BedrockCredentialsError, AwsCredentialScriptError) as exc:
+        raise click.ClickException(str(exc)) from exc
 
     output_dir = initialise_output("rag_answers", start_time)
 
