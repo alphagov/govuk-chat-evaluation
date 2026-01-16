@@ -9,6 +9,7 @@ from ..file_system import write_config_file_for_reuse
 from .evaluate import evaluate_and_output_results
 from .generate import generate_and_write_dataset
 from .data_models import TaskConfig
+from .data_models.config import BedrockCredentialsError
 from ..output import initialise_output
 
 
@@ -38,6 +39,9 @@ def main(**cli_args):
     else:
         evaluate_path = config.input_path
 
-    evaluate_and_output_results(output_dir, evaluate_path, config)
+    try:
+        evaluate_and_output_results(output_dir, evaluate_path, config)
+    except BedrockCredentialsError as exc:
+        raise click.ClickException(str(exc)) from exc
 
     write_config_file_for_reuse(output_dir, config)
