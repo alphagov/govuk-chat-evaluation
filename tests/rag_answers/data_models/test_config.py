@@ -27,6 +27,7 @@ from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import 
 from govuk_chat_evaluation.rag_answers.patch_bedrock_a_generate import (
     a_generate_filters_non_text_responses,
 )
+from govuk_chat_evaluation.aws_credentials import AwsCredentialCheckResult
 
 
 def test_config_monkeypatches_amazong_bedrock_model_a_generate_on_initialisation():
@@ -94,8 +95,12 @@ class TestMetricConfig:
         ],
     )
     def test_build_metric_instantiates_llm_model(
-        self, judge_model, expected_llm_cls, task_config
+        self, judge_model, expected_llm_cls, task_config, mocker
     ):
+        aws_check = mocker.patch(
+            "govuk_chat_evaluation.rag_answers.data_models.config.check_aws_credentials",
+            return_value=AwsCredentialCheckResult(ok=True),
+        )
         metric_config = MetricConfig(
             name=MetricName.FAITHFULNESS,
             threshold=0.5,
@@ -103,6 +108,15 @@ class TestMetricConfig:
         )
         metric = task_config._build_metric(metric_config, FactClassificationCache())
         assert isinstance(metric.model, expected_llm_cls)
+        if judge_model in {
+            LLMJudgeModel.AMAZON_NOVA_MICRO_1,
+            LLMJudgeModel.AMAZON_NOVA_PRO_1,
+            LLMJudgeModel.GPT_OSS_20B,
+            LLMJudgeModel.GPT_OSS_120B,
+        }:
+            aws_check.assert_called_once()
+        else:
+            aws_check.assert_not_called()
 
     @pytest.mark.parametrize(
         "judge_model",
@@ -116,6 +130,10 @@ class TestMetricConfig:
     def test_build_metric_monkeypatches_bedrock_models(
         self, mocker, judge_model, task_config
     ):
+        aws_check = mocker.patch(
+            "govuk_chat_evaluation.rag_answers.data_models.config.check_aws_credentials",
+            return_value=AwsCredentialCheckResult(ok=True),
+        )
         retry_path = (
             "govuk_chat_evaluation.rag_answers.data_models.config."
             "attach_invalid_json_retry_to_model"
@@ -133,6 +151,7 @@ class TestMetricConfig:
         metric = task_config._build_metric(metric_config, FactClassificationCache())
 
         wrapped_retry.assert_called_once_with(metric.model)
+        aws_check.assert_called_once()
 
     def test_get_metric_instance_invalid_enum(self):
         config_dict = {
@@ -255,3 +274,20 @@ class TestTaskConfig:
 
         # Across calls, a fresh cache is created
         assert fc1.cache is not fc3.cache
+
+    def test_instantiate_llm_judge_raises_on_bedrock_credentials_error(self, mocker):
+        mocker.patch(
+            "govuk_chat_evaluation.rag_answers.data_models.config.check_aws_credentials",
+            return_value=AwsCredentialCheckResult(ok=False, error="ExpiredToken"),
+        )
+
+        llm_config = LLMJudgeModelConfig(
+            model=LLMJudgeModel.GPT_OSS_120B, temperature=0.0
+        )
+
+        with pytest.raises(config_module.BedrockCredentialsError) as exc_info:
+            llm_config.instantiate_llm_judge()
+
+        message = str(exc_info.value)
+        assert "ExpiredToken" in message
+        assert "export_aws_credentials.sh" in message

@@ -3,6 +3,7 @@ from click.testing import CliRunner
 
 from govuk_chat_evaluation.rag_answers.cli import main
 from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
+from govuk_chat_evaluation.rag_answers.data_models.config import BedrockCredentialsError
 
 # ─── Fixtures
 
@@ -76,3 +77,16 @@ def test_main_doesnt_generate_results(mock_config_file, mock_data_generation):
 
     assert result.exit_code == 0, result.output
     mock_data_generation.assert_not_called()
+
+
+def test_main_exits_on_bedrock_credentials_error(mock_config_file, mocker):
+    mocker.patch(
+        "govuk_chat_evaluation.rag_answers.cli.evaluate_and_output_results",
+        side_effect=BedrockCredentialsError("No valid AWS credentials."),
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(main, [mock_config_file])
+
+    assert result.exit_code != 0
+    assert "No valid AWS credentials." in result.output

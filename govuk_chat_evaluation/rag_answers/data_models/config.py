@@ -4,6 +4,8 @@ from typing import Any
 import os
 
 from ...config import BaseConfig
+from ...file_system import project_root
+from ...aws_credentials import check_aws_credentials
 from deepeval.metrics import (
     FaithfulnessMetric,
     BiasMetric,
@@ -46,6 +48,29 @@ class LLMJudgeModel(str, Enum):
     GPT_OSS_120B = "openai.gpt-oss-120b-1:0"
 
 
+class BedrockCredentialsError(RuntimeError):
+    pass
+
+
+def _ensure_bedrock_credentials(*, region: str) -> None:
+    result = check_aws_credentials(region=region)
+    if result.ok:
+        return
+
+    script_command = "./scripts/export_aws_credentials.sh"
+    env_path = project_root() / ".env.aws"
+    message_lines = [
+        "Missing or invalid AWS credentials for AWS Bedrock judge model.",
+        f"Region: {region}",
+        f"Run: {script_command} (optionally with a role) or set AWS_* environment variables.",
+        f"Expected credentials file at: {env_path}",
+    ]
+    if result.error:
+        message_lines.append(f"Credential check error: {result.error}")
+
+    raise BedrockCredentialsError("\n".join(message_lines))
+
+
 # This is a monkey patch to ensure that responses from Bedrock OpenAI
 # that contain reasoningContent are handled correctly.
 # A PR has been submitted to deepeval to include this fix upstream.
@@ -60,20 +85,16 @@ class LLMJudgeModelConfig(BaseModel):
     def instantiate_llm_judge(self):
         """Return the LLM judge model instance."""
         match self.model:
-            case LLMJudgeModel.AMAZON_NOVA_MICRO_1:
+            case (
+                LLMJudgeModel.AMAZON_NOVA_MICRO_1
+                | LLMJudgeModel.AMAZON_NOVA_PRO_1
+                | LLMJudgeModel.GPT_OSS_20B
+                | LLMJudgeModel.GPT_OSS_120B
+            ):
                 region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
-                model = AmazonBedrockModel(
-                    model=self.model.value,
+                _ensure_bedrock_credentials(
                     region=region,
-                    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
-                    generation_kwargs={
-                        "temperature": self.temperature,
-                        "maxTokens": 6000,
-                    },
                 )
-                return attach_invalid_json_retry_to_model(model)
-            case LLMJudgeModel.AMAZON_NOVA_PRO_1:
-                region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
                 model = AmazonBedrockModel(
                     model=self.model.value,
                     region=region,
@@ -94,18 +115,6 @@ class LLMJudgeModelConfig(BaseModel):
                 )
             case LLMJudgeModel.GPT_4O_MINI | LLMJudgeModel.GPT_4O:
                 return GPTModel(model=self.model.value, temperature=self.temperature)
-            case LLMJudgeModel.GPT_OSS_20B | LLMJudgeModel.GPT_OSS_120B:
-                region = os.getenv("AWS_BEDROCK_REGION", "eu-west-1")
-                model = AmazonBedrockModel(
-                    model=self.model.value,
-                    region=region,
-                    aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
-                    generation_kwargs={
-                        "temperature": self.temperature,
-                        "maxTokens": 6000,
-                    },
-                )
-                return attach_invalid_json_retry_to_model(model)
 
 
 class MetricConfig(BaseModel):
