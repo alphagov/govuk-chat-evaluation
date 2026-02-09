@@ -44,7 +44,7 @@ jobs:
           github.actor != 'dependabot[bot]' &&
           (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         name: Configure AWS Credentials (OIDC) for Bedrock
-        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.GOVUK_TEST_BEDROCK_CI_ROLE_ARN }}
           aws-region: eu-west-1
