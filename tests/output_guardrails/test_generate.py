@@ -15,7 +15,7 @@ from govuk_chat_evaluation.output_guardrails.evaluate import EvaluationResult
 @pytest.fixture
 def run_rake_task_mock(mocker):
     async def default_side_effect(_, env):
-        if env["INPUT"] == "Question 1":
+        if env["INPUT"] == "This answer contains inappropriate content.":
             return {
                 "triggered": True,
                 "answer_guardrails_failures": ["appropriate_language", "political"],
@@ -41,7 +41,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
 ):
     generate_inputs = [
         GenerateInput(
-            question="Question 1",
+            message="This answer contains inappropriate content.",
             expected_triggered=True,
             expected_guardrails={
                 "appropriate_language": True,
@@ -50,7 +50,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             },
         ),
         GenerateInput(
-            question="Question 2",
+            message="This is a safe and appropriate answer.",
             expected_triggered=False,
             expected_guardrails={
                 "appropriate_language": False,
@@ -60,7 +60,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
     ]
     expected_results = [
         EvaluationResult(
-            question="Question 1",
+            message="This answer contains inappropriate content.",
             expected_triggered=True,
             actual_triggered=True,
             expected_guardrails={
@@ -76,7 +76,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             model="model_name",
         ),
         EvaluationResult(
-            question="Question 2",
+            message="This is a safe and appropriate answer.",
             expected_triggered=False,
             actual_triggered=False,
             expected_guardrails={
@@ -94,8 +94,8 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         "answer_guardrails", None, generate_inputs
     )
 
-    assert sorted(expected_results, key=lambda r: r.question) == sorted(
-        actual_results, key=lambda r: r.question
+    assert sorted(expected_results, key=lambda r: r.message) == sorted(
+        actual_results, key=lambda r: r.message
     )
 
 
@@ -104,7 +104,7 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
 ):
     generate_inputs = [
         GenerateInput(
-            question="Question 1",
+            message="This answer contains inappropriate content.",
             expected_triggered=True,
             expected_guardrails={"appropriate_language": True},
         ),
@@ -113,7 +113,7 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
 
     run_rake_task_mock.assert_called_with(
         "evaluation:generate_output_guardrail_response[answer_guardrails]",
-        {"INPUT": "Question 1"},
+        {"INPUT": "This answer contains inappropriate content."},
     )
 
 
@@ -122,7 +122,7 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
 ):
     generate_inputs = [
         GenerateInput(
-            question="Question 1",
+            message="This answer contains inappropriate content.",
             expected_triggered=True,
             expected_guardrails={"appropriate_language": True},
         ),
@@ -133,7 +133,10 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
 
     run_rake_task_mock.assert_called_with(
         "evaluation:generate_output_guardrail_response[answer_guardrails]",
-        {"INPUT": "Question 1", "BEDROCK_CLAUDE_GUARDRAILS_MODEL": "claude_sonnet_4_0"},
+        {
+            "INPUT": "This answer contains inappropriate content.",
+            "BEDROCK_CLAUDE_GUARDRAILS_MODEL": "claude_sonnet_4_0",
+        },
     )
 
 

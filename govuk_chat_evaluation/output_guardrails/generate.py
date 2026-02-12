@@ -10,7 +10,7 @@ from typing import Optional
 
 
 class GenerateInput(BaseModel):
-    question: str
+    message: str
     expected_triggered: bool
     expected_guardrails: dict[str, bool]
 
@@ -37,7 +37,7 @@ def generate_inputs_to_evaluation_results(
     generate a result"""
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
-        env = {"INPUT": input.question}
+        env = {"INPUT": input.message}
         if claude_generation_model:
             env["BEDROCK_CLAUDE_GUARDRAILS_MODEL"] = claude_generation_model
 
@@ -52,7 +52,7 @@ def generate_inputs_to_evaluation_results(
             actual_guardrails[guardrail] = guardrail in triggered_guardrails
 
         return EvaluationResult(
-            question=input.question,
+            message=input.message,
             expected_triggered=input.expected_triggered,
             actual_triggered=len(triggered_guardrails) > 0,
             expected_guardrails=input.expected_guardrails,
