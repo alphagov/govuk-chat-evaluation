@@ -9,7 +9,7 @@ from ..file_system import jsonl_to_models, write_generated_to_output
 
 
 class GenerateInput(BaseModel):
-    question: str
+    message: str
     expected_triggered: bool
     expected_guardrails: dict[str, bool]
 
@@ -29,14 +29,14 @@ def generate_inputs_to_evaluation_results(
     generate a result"""
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
-        env = {"INPUT": input.question}
+        env = {"INPUT": input.message}
         result = await run_rake_task(
             f"evaluation:generate_output_guardrail_response[{provider},{guardrail_type}]",
             env,
         )
 
         return EvaluationResult(
-            question=input.question,
+            message=input.message,
             expected_triggered=input.expected_triggered,
             actual_triggered=result["triggered"],
             expected_guardrails=input.expected_guardrails,

@@ -13,7 +13,7 @@ import logging
 
 
 class EvaluationResult(BaseModel):
-    question: str
+    message: str
     expected_triggered: bool
     actual_triggered: bool
     expected_guardrails: dict[str, bool]
