@@ -7,14 +7,14 @@ import pytest
 def mock_input_data(mock_project_root):
     data = [
         {
-            "question": "Question 1",
+            "message": "Safe Answer",
             "expected_triggered": True,
             "actual_triggered": True,
             "expected_guardrails": {"appropriate_language": True, "political": True},
             "actual_guardrails": {"appropriate_language": True, "political": True},
         },
         {
-            "question": "Question 2",
+            "message": "Unsafe Answer",
             "expected_triggered": False,
             "actual_triggered": True,
             "expected_guardrails": {"appropriate_language": False},

@@ -17,7 +17,7 @@ from govuk_chat_evaluation.output_guardrails.evaluate import (
 @pytest.fixture
 def result_true_positive() -> EvaluationResult:  # type: ignore
     return EvaluationResult(
-        question="TP",
+        message="TP",
         expected_triggered=True,
         actual_triggered=True,
         expected_guardrails={"g1": True, "g3": True},
@@ -28,7 +28,7 @@ def result_true_positive() -> EvaluationResult:  # type: ignore
 @pytest.fixture
 def result_false_positive() -> EvaluationResult:  # type: ignore
     return EvaluationResult(
-        question="FP",
+        message="FP",
         expected_triggered=False,
         actual_triggered=True,
         expected_guardrails={"g1": False, "g3": False},
@@ -39,7 +39,7 @@ def result_false_positive() -> EvaluationResult:  # type: ignore
 @pytest.fixture
 def result_false_negative() -> EvaluationResult:  # type: ignore
     return EvaluationResult(
-        question="FN",
+        message="FN",
         expected_triggered=True,
         actual_triggered=False,
         expected_guardrails={"g1": True, "g3": True},
@@ -50,7 +50,7 @@ def result_false_negative() -> EvaluationResult:  # type: ignore
 @pytest.fixture
 def result_true_negative() -> EvaluationResult:  # type: ignore
     return EvaluationResult(
-        question="TN",
+        message="TN",
         expected_triggered=False,
         actual_triggered=False,
         expected_guardrails={"g1": False, "g3": False},
@@ -61,7 +61,7 @@ def result_true_negative() -> EvaluationResult:  # type: ignore
 @pytest.fixture
 def result_mixed_guardrails() -> EvaluationResult:
     return EvaluationResult(
-        question="Mixed",
+        message="Mixed",
         expected_triggered=True,
         actual_triggered=True,
         expected_guardrails={"g1": True, "g2": False, "g3": True},
@@ -93,7 +93,7 @@ class TestEvaluationResult:
     def test_for_csv(self, result_mixed_guardrails):
         result = result_mixed_guardrails
         expected_csv_dict = {
-            "question": "Mixed",
+            "message": "Mixed",
             "expected_triggered": True,
             "actual_triggered": True,
             "expected_guardrails": {"g1": True, "g2": False, "g3": True},
@@ -158,42 +158,42 @@ class TestAggregateResults:
         """Fixture providing sample results for per-guardrail testing."""
         return [
             EvaluationResult(
-                question="Q1",
+                message="Answer 1: multiple guardrails triggered correctly",
                 expected_triggered=True,
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": False, "g3": True},
                 actual_guardrails={"g1": True, "g2": False, "g3": True},
             ),
             EvaluationResult(
-                question="Q2",
+                message="Answer 2: one guardrail false positive",
                 expected_triggered=True,
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": False, "g3": False},
                 actual_guardrails={"g1": True, "g2": True, "g3": False},
             ),
             EvaluationResult(
-                question="Q3",
+                message="Answer 3: one guardrail false negative",
                 expected_triggered=True,
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": True, "g3": True},
                 actual_guardrails={"g1": True, "g2": True, "g3": False},
             ),
             EvaluationResult(
-                question="Q4",
+                message="Answer 4: safe response with no issues",
                 expected_triggered=False,
                 actual_triggered=False,
                 expected_guardrails={"g1": False, "g2": False, "g3": False},
                 actual_guardrails={"g1": False, "g2": False, "g3": False},
             ),
             EvaluationResult(
-                question="Q5",
+                message="Answer 5: safe but incorrectly flagged",
                 expected_triggered=False,
                 actual_triggered=True,
                 expected_guardrails={"g1": False, "g2": False, "g3": False},
                 actual_guardrails={"g1": True, "g2": False, "g3": False},
             ),
             EvaluationResult(
-                question="Q6",
+                message="Answer 6: unsafe but not detected",
                 expected_triggered=True,
                 actual_triggered=False,
                 expected_guardrails={"g1": False, "g2": True, "g3": False},
@@ -241,9 +241,9 @@ class TestAggregateResults:
         precision = aggregate.precision_per_guardrail()
 
         # Calculate based on vectors: TP / (TP + FP)
-        # g1: TP=3 (Q1,Q2,Q3), FP=1 (Q5) -> P=3/4 = 0.75
-        # g2: TP=1 (Q3), FP=1 (Q2) -> P=1/2 = 0.5
-        # g3: TP=1 (Q1), FP=0 -> P=1/1 = 1.0
+        # g1: TP=3 (first 3 answers), FP=1 (Answer 5) -> P=3/4 = 0.75
+        # g2: TP=1 (Answer 3), FP=1 (Answer 2) -> P=1/2 = 0.5
+        # g3: TP=1 (Answer 1), FP=0 -> P=1/1 = 1.0
         expected_precision = [0.75, 0.5, 1.0]
         assert precision == approx(expected_precision)
 
@@ -257,9 +257,9 @@ class TestAggregateResults:
         recall = aggregate.recall_per_guardrail()
 
         # Calculate based on vectors: TP / (TP + FN)
-        # g1: TP=3 (Q1,Q2,Q3), FN=0 -> R = 3/3 = 1.0
-        # g2: TP=1 (Q3), FN=1 (Q6) -> R = 1/2 = 0.5
-        # g3: TP=1 (Q1), FN=1 (Q3) -> R = 1/2 = 0.5
+        # g1: TP=3 (first 3 answers), FN=0 -> R = 3/3 = 1.0
+        # g2: TP=1 (Answer 3), FN=1 (Answer 6) -> R = 1/2 = 0.5
+        # g3: TP=1 (Answer 1), FN=1 (Answer 3) -> R = 1/2 = 0.5
         expected_recall = [1.0, 0.5, 0.5]
         assert recall == approx(expected_recall)
 
@@ -338,28 +338,28 @@ def mock_evaluation_data_file(tmp_path):
     file_path = tmp_path / "evaluation_data.jsonl"
     data = [
         {
-            "question": "Question 1",
+            "message": "Answer with violations detected",
             "expected_triggered": True,
             "actual_triggered": True,
             "expected_guardrails": {"g1": True, "g2": False},
             "actual_guardrails": {"g1": True, "g2": False},
         },
         {
-            "question": "Question 2",
+            "message": "Another answer with different violations",
             "expected_triggered": True,
             "actual_triggered": False,
             "expected_guardrails": {"g1": False, "g2": True},
             "actual_guardrails": {"g1": False, "g2": False},
         },
         {
-            "question": "Question 3",
+            "message": "Safe answer with no issues",
             "expected_triggered": False,
             "actual_triggered": False,
             "expected_guardrails": {"g1": False, "g2": False},
             "actual_guardrails": {"g1": False, "g2": False},
         },
         {
-            "question": "Question 4",
+            "message": "Answer incorrectly flagged as unsafe",
             "expected_triggered": False,
             "actual_triggered": True,
             "expected_guardrails": {"g1": False, "g2": False},
@@ -388,7 +388,7 @@ def test_evaluate_and_output_results_writes_results(
         headers = next(reader, None)
 
         assert headers is not None
-        assert "question" in headers
+        assert "message" in headers
 
 
 def test_evaluate_and_output_results_writes_aggregates(

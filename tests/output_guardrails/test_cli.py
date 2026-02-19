@@ -55,14 +55,14 @@ def mock_config_file(tmp_path, mock_input_data):
 def mock_data_generation(mocker):
     return_value = [
         EvaluationResult(
-            question="Question",
+            message="Unsafe Answer",
             expected_triggered=True,
             actual_triggered=True,
             expected_guardrails={"appropriate_language": True},
             actual_guardrails={"appropriate_language": True},
         ),
         EvaluationResult(
-            question="Question",
+            message="Safe Answer",
             expected_triggered=False,
             actual_triggered=False,
             expected_guardrails={"appropriate_language": False},
