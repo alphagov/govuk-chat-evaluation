@@ -24,14 +24,7 @@ from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics import (
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
     CoherenceMetric,
 )
-from govuk_chat_evaluation.rag_answers.patch_bedrock_a_generate import (
-    a_generate_filters_non_text_responses,
-)
 from govuk_chat_evaluation.aws_credentials import AwsCredentialCheckResult
-
-
-def test_config_monkeypatches_amazong_bedrock_model_a_generate_on_initialisation():
-    assert AmazonBedrockModel.a_generate == a_generate_filters_non_text_responses
 
 
 class TestMetricConfig:
