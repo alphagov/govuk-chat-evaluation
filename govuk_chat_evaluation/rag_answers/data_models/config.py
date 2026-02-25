@@ -23,7 +23,6 @@ from ..custom_deepeval.metrics import (
     CoherenceMetric,
     FactClassificationCache,
 )
-from ..patch_bedrock_a_generate import a_generate_filters_non_text_responses
 
 
 class MetricName(str, Enum):
@@ -69,13 +68,6 @@ def _ensure_bedrock_credentials(*, region: str) -> None:
         message_lines.append(f"Credential check error: {result.error}")
 
     raise BedrockCredentialsError("\n".join(message_lines))
-
-
-# This is a monkey patch to ensure that responses from Bedrock OpenAI
-# that contain reasoningContent are handled correctly.
-# A PR has been submitted to deepeval to include this fix upstream.
-# See: https://github.com/confident-ai/deepeval/pull/2328
-AmazonBedrockModel.a_generate = a_generate_filters_non_text_responses
 
 
 class LLMJudgeModelConfig(BaseModel):
