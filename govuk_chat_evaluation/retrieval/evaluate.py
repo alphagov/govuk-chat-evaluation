@@ -21,11 +21,12 @@ DECIMAL_PLACES = 4
 class EvaluationResult(BaseModel):
     question: str
     expected_exact_paths: list[str]
-    actual_exact_paths_and_scores: list[dict[str, Any]]
+    expected_chunk_uids: list[str]
+    actual_chunk_uids_exact_paths_and_scores: list[dict[str, Any]]
 
     @property
     def actual_exact_paths(self) -> list[str]:
-        return [item["exact_path"] for item in self.actual_exact_paths_and_scores]
+        return [item["exact_path"] for item in self.actual_chunk_uids_exact_paths_and_scores]
 
     @property
     def all_paths(self) -> list[str]:
@@ -50,7 +51,7 @@ class EvaluationResult(BaseModel):
     def false_positive_cases(self) -> list[dict[str, float]]:
         return [
             {item["exact_path"]: item["weighted_score"]}
-            for item in self.actual_exact_paths_and_scores
+            for item in self.actual_chunk_uids_exact_paths_and_scores
             if item["exact_path"] not in self.expected_exact_paths
         ]
 
@@ -66,7 +67,7 @@ class EvaluationResult(BaseModel):
     def true_positive_cases(self) -> list[dict[str, float]]:
         return [
             {item["exact_path"]: item["weighted_score"]}
-            for item in self.actual_exact_paths_and_scores
+            for item in self.actual_chunk_uids_exact_paths_and_scores
             if item["exact_path"] in self.expected_exact_paths
         ]
 
@@ -99,7 +100,7 @@ class EvaluationResult(BaseModel):
         return {
             "question": self.question,
             "expected_exact_paths": self.expected_exact_paths,
-            "actual_exact_paths_and_scores": self.actual_exact_paths_and_scores,
+            "actual_chunk_uids_exact_paths_and_scores": self.actual_chunk_uids_exact_paths_and_scores,
             "precision": round(self.precision(), DECIMAL_PLACES),
             "recall": round(self.recall(), DECIMAL_PLACES),
             "f1_score": round(self.f1_score(), DECIMAL_PLACES),
