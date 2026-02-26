@@ -32,25 +32,33 @@ class EvaluationResult(BaseModel):
     actual_chunk_uids_exact_paths_and_scores: list[ChunkScores]
 
     @property
-    def actual_exact_paths(self) -> list[str]:
-        return [item.exact_path for item in self.actual_chunk_uids_exact_paths_and_scores]
+    def actual_chunk_uids(self) -> list[str]:
+        return [
+            item.chunk_uid for item in self.actual_chunk_uids_exact_paths_and_scores
+        ]
 
     @property
-    def all_paths(self) -> list[str]:
-        return list(set(self.expected_exact_paths + self.actual_exact_paths))
+    def all_chunk_uids(self) -> list[str]:
+        return list(set(self.expected_chunk_uids + self.actual_chunk_uids))
 
     @property
     def y_true(self) -> list[int]:
-        return [int(path in self.expected_exact_paths) for path in self.all_paths]
+        return [
+            int(chunk_uid in self.expected_chunk_uids)
+            for chunk_uid in self.all_chunk_uids
+        ]
 
     @property
     def y_pred(self) -> list[int]:
-        return [int(path in self.actual_exact_paths) for path in self.all_paths]
+        return [
+            int(chunk_uid in self.actual_chunk_uids)
+            for chunk_uid in self.all_chunk_uids
+        ]
 
     def _safe_classification_metric(
         self, metric_fn: Callable[..., float], **kwargs: Any
     ) -> float:
-        if not self.all_paths:
+        if not self.all_chunk_uids:
             return float("nan")
         return metric_fn(self.y_true, self.y_pred, **kwargs)
 
@@ -59,15 +67,15 @@ class EvaluationResult(BaseModel):
         return [
             {item.exact_path: item.weighted_score}
             for item in self.actual_chunk_uids_exact_paths_and_scores
-            if item.exact_path not in self.expected_exact_paths
+            if item.chunk_uid not in self.expected_chunk_uids
         ]
 
     @property
     def false_negative_cases(self) -> list[dict[str, float]]:
         return [
             {path: float("nan")}
-            for path in self.expected_exact_paths
-            if path not in self.actual_exact_paths
+            for path, uid in zip(self.expected_exact_paths, self.expected_chunk_uids)
+            if uid not in self.actual_chunk_uids
         ]
 
     @property
@@ -75,7 +83,7 @@ class EvaluationResult(BaseModel):
         return [
             {item.exact_path: item.weighted_score}
             for item in self.actual_chunk_uids_exact_paths_and_scores
-            if item.exact_path in self.expected_exact_paths
+            if item.chunk_uid in self.expected_chunk_uids
         ]
 
     def precision(self) -> float:
