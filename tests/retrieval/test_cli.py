@@ -3,7 +3,7 @@ import yaml
 from click.testing import CliRunner
 
 from govuk_chat_evaluation.retrieval.cli import main, Config
-from govuk_chat_evaluation.retrieval.evaluate import EvaluationResult
+from govuk_chat_evaluation.retrieval.evaluate import EvaluationResult, ChunkScores
 
 
 class TestConfig:
@@ -57,8 +57,18 @@ def mock_data_generation(mocker):
             expected_exact_paths=["/foo", "/bar"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/foo", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/bar", "chunk_uid": "uid2", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/foo",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/bar",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         ),
         EvaluationResult(
@@ -66,7 +76,12 @@ def mock_data_generation(mocker):
             expected_exact_paths=["/foo"],
             expected_chunk_uids=["uid1"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/bar", "chunk_uid": "uid", "weighted_score": 0.9, "original_score": 0.9}
+                ChunkScores(
+                    exact_path="/bar",
+                    chunk_uid="uid3",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
             ],
         ),
     ]

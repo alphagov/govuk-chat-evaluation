@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .evaluate import EvaluationResult
+from .evaluate import EvaluationResult, ChunkScores
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
 
@@ -36,12 +36,12 @@ def generate_inputs_to_evaluation_results(
             env,
         )
         exact_paths_chunks_and_scores = [
-            {
-                "exact_path": item["exact_path"],
-                "chunk_uid": item["chunk_uid"],
-                "weighted_score": item["weighted_score"],
-                "original_score": item["original_score"],
-            }
+            ChunkScores(
+                exact_path=item["exact_path"],
+                chunk_uid=item["chunk_uid"],
+                weighted_score=item["weighted_score"],
+                original_score=item["original_score"],
+            )
             for item in result
         ]
 

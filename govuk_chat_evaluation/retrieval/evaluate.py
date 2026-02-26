@@ -18,15 +18,22 @@ import logging
 DECIMAL_PLACES = 4
 
 
+class ChunkScores(BaseModel):
+    exact_path: str
+    chunk_uid: str
+    weighted_score: float
+    original_score: float
+
+
 class EvaluationResult(BaseModel):
     question: str
     expected_exact_paths: list[str]
     expected_chunk_uids: list[str]
-    actual_chunk_uids_exact_paths_and_scores: list[dict[str, Any]]
+    actual_chunk_uids_exact_paths_and_scores: list[ChunkScores]
 
     @property
     def actual_exact_paths(self) -> list[str]:
-        return [item["exact_path"] for item in self.actual_chunk_uids_exact_paths_and_scores]
+        return [item.exact_path for item in self.actual_chunk_uids_exact_paths_and_scores]
 
     @property
     def all_paths(self) -> list[str]:
@@ -50,9 +57,9 @@ class EvaluationResult(BaseModel):
     @property
     def false_positive_cases(self) -> list[dict[str, float]]:
         return [
-            {item["exact_path"]: item["weighted_score"]}
+            {item.exact_path: item.weighted_score}
             for item in self.actual_chunk_uids_exact_paths_and_scores
-            if item["exact_path"] not in self.expected_exact_paths
+            if item.exact_path not in self.expected_exact_paths
         ]
 
     @property
@@ -66,9 +73,9 @@ class EvaluationResult(BaseModel):
     @property
     def true_positive_cases(self) -> list[dict[str, float]]:
         return [
-            {item["exact_path"]: item["weighted_score"]}
+            {item.exact_path: item.weighted_score}
             for item in self.actual_chunk_uids_exact_paths_and_scores
-            if item["exact_path"] in self.expected_exact_paths
+            if item.exact_path in self.expected_exact_paths
         ]
 
     def precision(self) -> float:
@@ -97,10 +104,14 @@ class EvaluationResult(BaseModel):
         )
 
     def for_csv(self) -> dict[str, Any]:
+        tuples = []
+        for item in self.actual_chunk_uids_exact_paths_and_scores:
+            tuples.append((item.exact_path, item.chunk_uid, item.weighted_score))
         return {
             "question": self.question,
             "expected_exact_paths": self.expected_exact_paths,
-            "actual_chunk_uids_exact_paths_and_scores": self.actual_chunk_uids_exact_paths_and_scores,
+            "expected_chunk_uids": self.expected_chunk_uids,
+            "actual_chunk_uids_exact_paths_and_scores": tuples,
             "precision": round(self.precision(), DECIMAL_PLACES),
             "recall": round(self.recall(), DECIMAL_PLACES),
             "f1_score": round(self.f1_score(), DECIMAL_PLACES),

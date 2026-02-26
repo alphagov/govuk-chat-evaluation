@@ -8,6 +8,7 @@ from govuk_chat_evaluation.retrieval.generate import (
     generate_and_write_dataset,
     GenerateInput,
     EvaluationResult,
+    ChunkScores,
 )
 
 
@@ -71,13 +72,12 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         GenerateInput(
             question="Question 1",
             expected_exact_paths=["/foo"],
-            expected_chunk_uids=["uid1"]
-
+            expected_chunk_uids=["uid1"],
         ),
         GenerateInput(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
-            expected_chunk_uids=["uid4", "uid5"]
+            expected_chunk_uids=["uid4", "uid5"],
         ),
     ]
     expected_results = [
@@ -86,9 +86,24 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             expected_exact_paths=["/foo"],
             expected_chunk_uids=["uid1"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/foo", "chunk_uid": "uid1", "weighted_score": 1.0, "original_score": 1.5},
-                {"exact_path": "/bar", "chunk_uid": "uid2", "weighted_score": 0.8, "original_score": 0.9},
-                {"exact_path": "/baz", "chunk_uid": "uid3", "weighted_score": 0.5, "original_score": 0.4},
+                ChunkScores(
+                    exact_path="/foo",
+                    chunk_uid="uid1",
+                    weighted_score=1.0,
+                    original_score=1.5,
+                ),
+                ChunkScores(
+                    exact_path="/bar",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/baz",
+                    chunk_uid="uid3",
+                    weighted_score=0.5,
+                    original_score=0.4,
+                ),
             ],
         ),
         EvaluationResult(
@@ -96,8 +111,18 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid4", "weighted_score": 1.0, "original_score": 1.1},
-                {"exact_path": "/path2", "chunk_uid": "uid5", "weighted_score": 0.9, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid4",
+                    weighted_score=1.0,
+                    original_score=1.1,
+                ),
+                ChunkScores(
+                    exact_path="/path2",
+                    chunk_uid="uid5",
+                    weighted_score=0.9,
+                    original_score=0.8,
+                ),
             ],
         ),
     ]

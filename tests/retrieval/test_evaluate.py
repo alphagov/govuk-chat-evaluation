@@ -8,6 +8,7 @@ import pytest
 from govuk_chat_evaluation.retrieval.evaluate import (
     AggregateResults,
     EvaluationResult,
+    ChunkScores,
     evaluate_and_output_results,
 )
 
@@ -19,7 +20,12 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2", "/path3", "/path4"],
             expected_chunk_uids=["uid1", "uid2", "uid3", "uid4"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9}
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                )
             ],
         )
 
@@ -28,14 +34,8 @@ class TestEvaluationResult:
             {
                 "question": "Test question",
                 "expected_exact_paths": ["/path1", "/path2", "/path3", "/path4"],
-                "actual_chunk_uids_exact_paths_and_scores": [
-                    {
-                        "exact_path": "/path1",
-                        "chunk_uid": "uid1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    }
-                ],
+                "expected_chunk_uids": ["uid1", "uid2", "uid3", "uid4"],
+                "actual_chunk_uids_exact_paths_and_scores": [("/path1", "uid1", 0.9)],
                 "precision": 1.0,
                 "recall": 0.25,
                 "f1_score": 0.4,
@@ -56,7 +56,12 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9}
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
             ],
         )
 
@@ -68,8 +73,18 @@ class TestEvaluationResult:
             expected_exact_paths=[],
             expected_chunk_uids=[],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid2", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         )
 
@@ -81,10 +96,30 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path2", "chunk_uid": "uid2", "weighted_score": 0.8, "original_score": 0.8},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.7, "original_score": 0.7},
-                {"exact_path": "/path4", "chunk_uid": "uid4", "weighted_score": 0.6, "original_score": 0.6},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path2",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.7,
+                    original_score=0.7,
+                ),
+                ChunkScores(
+                    exact_path="/path4",
+                    chunk_uid="uid4",
+                    weighted_score=0.6,
+                    original_score=0.6,
+                ),
             ],
         )
 
@@ -106,9 +141,24 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.8, "original_score": 0.8},
-                {"exact_path": "/path4", "chunk_uid": "uid4", "weighted_score": 0.7, "original_score": 0.7},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
+                ChunkScores(
+                    exact_path="/path4",
+                    chunk_uid="uid4",
+                    weighted_score=0.7,
+                    original_score=0.7,
+                ),
             ],
         )
 
@@ -130,8 +180,18 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         )
 
@@ -153,8 +213,18 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         )
 
@@ -166,8 +236,18 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         )
 
@@ -179,8 +259,18 @@ class TestEvaluationResult:
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
             actual_chunk_uids_exact_paths_and_scores=[
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.8, "original_score": 0.8},
+                ChunkScores(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    original_score=0.9,
+                ),
+                ChunkScores(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    original_score=0.8,
+                ),
             ],
         )
 
@@ -196,18 +286,18 @@ class TestAggregateResults:
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
                 actual_chunk_uids_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "chunk_uid": "uid1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "chunk_uid": "uid2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
+                    ChunkScores(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        original_score=0.9,
+                    ),
+                    ChunkScores(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        original_score=0.8,
+                    ),
                 ],
             ),
             EvaluationResult(
@@ -215,12 +305,12 @@ class TestAggregateResults:
                 expected_exact_paths=["/path1"],
                 expected_chunk_uids=["uid1"],
                 actual_chunk_uids_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path3",
-                        "chunk_uid": "uid3",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    }
+                    ChunkScores(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.9,
+                        original_score=0.9,
+                    ),
                 ],
             ),
             EvaluationResult(
@@ -228,12 +318,12 @@ class TestAggregateResults:
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
                 actual_chunk_uids_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "chunk_uid": "uid1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
+                    ChunkScores(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        original_score=0.9,
+                    ),
                 ],
             ),
             EvaluationResult(
@@ -241,24 +331,24 @@ class TestAggregateResults:
                 expected_exact_paths=["/path1"],
                 expected_chunk_uids=["uid1"],
                 actual_chunk_uids_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "chunk_uid": "uid1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "chunk_uid": "uid2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
-                    {
-                        "exact_path": "/path3",
-                        "chunk_uid": "uid3",
-                        "weighted_score": 0.7,
-                        "original_score": 0.7,
-                    },
+                    ChunkScores(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        original_score=0.9,
+                    ),
+                    ChunkScores(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        original_score=0.8,
+                    ),
+                    ChunkScores(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.7,
+                        original_score=0.7,
+                    ),
                 ],
             ),
             EvaluationResult(
@@ -266,23 +356,24 @@ class TestAggregateResults:
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
                 actual_chunk_uids_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "chunk_uid": "uid1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "chunk_uid": "uid2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
-                    {
-                        "exact_path": "/path3",
-                        "weighted_score": 0.7,
-                        "original_score": 0.7,
-                    },
+                    ChunkScores(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        original_score=0.9,
+                    ),
+                    ChunkScores(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        original_score=0.8,
+                    ),
+                    ChunkScores(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.7,
+                        original_score=0.7,
+                    ),
                 ],
             ),
         ]
@@ -378,8 +469,18 @@ def mock_evaluation_data_file(tmp_path):
             "expected_exact_paths": ["/path1", "/path2"],
             "expected_chunk_uids": ["uid1", "uid2"],
             "actual_chunk_uids_exact_paths_and_scores": [
-                {"exact_path": "/path1", "chunk_uid": "uid1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path2", "chunk_uid": "uid2", "weighted_score": 0.8, "original_score": 0.8},
+                {
+                    "exact_path": "/path1",
+                    "chunk_uid": "uid1",
+                    "weighted_score": 0.9,
+                    "original_score": 0.9,
+                },
+                {
+                    "exact_path": "/path2",
+                    "chunk_uid": "uid2",
+                    "weighted_score": 0.8,
+                    "original_score": 0.8,
+                },
             ],
         },
         {
@@ -387,7 +488,12 @@ def mock_evaluation_data_file(tmp_path):
             "expected_exact_paths": ["/path1"],
             "expected_chunk_uids": ["uid1"],
             "actual_chunk_uids_exact_paths_and_scores": [
-                {"exact_path": "/path3", "chunk_uid": "uid3", "weighted_score": 0.9, "original_score": 0.9}
+                {
+                    "exact_path": "/path3",
+                    "chunk_uid": "uid3",
+                    "weighted_score": 0.9,
+                    "original_score": 0.9,
+                }
             ],
         },
     ]
