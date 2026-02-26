@@ -35,6 +35,7 @@ class TestMetricConfig:
             generate=False,
             provider=None,
             input_path=mock_input_data,
+            claude_generation_model=None,
             metrics=[],
             n_runs=1,
         )
@@ -169,6 +170,7 @@ class TestTaskConfig:
                 generate=True,
                 provider=None,
                 input_path=mock_input_data,
+                claude_generation_model=None,
                 metrics=[],
                 n_runs=1,
             )
@@ -179,6 +181,7 @@ class TestTaskConfig:
             generate=False,
             provider=None,
             input_path=mock_input_data,
+            claude_generation_model=None,
             metrics=[],
             n_runs=1,
         )
@@ -188,6 +191,7 @@ class TestTaskConfig:
             generate=True,
             provider="openai",
             input_path=mock_input_data,
+            claude_generation_model=None,
             metrics=[],
             n_runs=1,
         )

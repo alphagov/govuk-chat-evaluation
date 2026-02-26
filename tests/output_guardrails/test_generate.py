@@ -96,7 +96,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results(
-        "openai", "answer_guardrails", generate_inputs
+        "openai", "answer_guardrails", None, generate_inputs
     )
 
     assert sorted(expected_results, key=lambda r: r.question) == sorted(
@@ -115,7 +115,7 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
         ),
     ]
     generate_inputs_to_evaluation_results(
-        "openai", "answer_guardrails", generate_inputs
+        "openai", "answer_guardrails", None, generate_inputs
     )
 
     run_rake_task_mock.assert_called_with(
@@ -124,10 +124,30 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
     )
 
 
+def test_generate_models_with_claude_generation_model_populates_model_env_var_for_rake_task(
+    run_rake_task_mock,
+):
+    generate_inputs = [
+        GenerateInput(
+            question="Question 1",
+            expected_triggered=True,
+            expected_guardrails={"appropriate_language": True},
+        ),
+    ]
+    generate_inputs_to_evaluation_results(
+        "claude", "answer_guardrails", "claude_sonnet_4_0", generate_inputs
+    )
+
+    run_rake_task_mock.assert_called_with(
+        "evaluation:generate_output_guardrail_response[claude,answer_guardrails]",
+        {"INPUT": "Question 1", "BEDROCK_CLAUDE_GUARDRAILS_MODEL": "claude_sonnet_4_0"},
+    )
+
+
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
     path = generate_and_write_dataset(
-        mock_input_data, "openai", "answer_guardrails", mock_project_root
+        mock_input_data, "openai", "answer_guardrails", None, mock_project_root
     )
     assert path.exists()
     with open(path, "r") as file:

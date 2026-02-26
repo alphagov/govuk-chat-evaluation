@@ -44,6 +44,7 @@ def mock_config_file(tmp_path, mock_input_data):
         "generate": True,
         "provider": "openai",
         "input_path": str(mock_input_data),
+        "claude_generation_model": "claude_sonnet_4_0",
         "metrics": [
             {
                 "name": "faithfulness",

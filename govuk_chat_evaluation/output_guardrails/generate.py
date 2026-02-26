@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from .evaluate import EvaluationResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
+from typing import Optional
 
 
 class GenerateInput(BaseModel):
@@ -15,21 +16,33 @@ class GenerateInput(BaseModel):
 
 
 def generate_and_write_dataset(
-    input_path: Path, provider: str, guardrail_type: str, output_dir: Path
+    input_path: Path,
+    provider: str,
+    guardrail_type: str,
+    claude_generation_model: Optional[str],
+    output_dir: Path,
 ):
     models = jsonl_to_models(input_path, GenerateInput)
-    generated = generate_inputs_to_evaluation_results(provider, guardrail_type, models)
+    generated = generate_inputs_to_evaluation_results(
+        provider, guardrail_type, claude_generation_model, models
+    )
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_results(
-    provider: str, guardrail_type: str, generate_inputs: list[GenerateInput]
+    provider: str,
+    guardrail_type: str,
+    claude_generation_model: Optional[str],
+    generate_inputs: list[GenerateInput],
 ) -> list[EvaluationResult]:
     """Asynchronously run rake tasks for each GenerateInput instance to
     generate a result"""
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
         env = {"INPUT": input.question}
+        if claude_generation_model:
+            env["BEDROCK_CLAUDE_GUARDRAILS_MODEL"] = claude_generation_model
+
         result = await run_rake_task(
             f"evaluation:generate_output_guardrail_response[{provider},{guardrail_type}]",
             env,
