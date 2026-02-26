@@ -21,6 +21,7 @@ class Config(BaseConfig):
         ...,
         description="Type of output guardrail to evaluate: 'answer_guardrails' or 'question_router_guardrails'",
     )
+    claude_generation_model: BaseConfig.GenericFields.claude_generation_model
 
     @model_validator(mode="after")
     def run_validatons(self) -> Self:
@@ -51,6 +52,7 @@ def main(**cli_args):
             config.input_path,
             cast(str, config.provider),
             config.guardrail_type,
+            config.claude_generation_model,
             output_dir,
         )
     else:

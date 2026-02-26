@@ -4,7 +4,6 @@ from click.testing import CliRunner
 from govuk_chat_evaluation.rag_answers.cli import main
 from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 from govuk_chat_evaluation.rag_answers.data_models.config import BedrockCredentialsError
-
 # ─── Fixtures
 
 
@@ -54,6 +53,17 @@ def test_main_creates_output_files(mock_output_directory, mock_config_file):
 
     for filename in expected_files:
         assert (mock_output_directory / filename).exists()
+
+
+def test_main_passes_claude_generation_model_to_generate_and_write_dataset(
+    mock_config_file, mock_data_generation
+):
+    runner = CliRunner()
+    runner.invoke(main, [mock_config_file])
+    claude_generation_model = mock_data_generation.call_args[0][1]
+
+    mock_data_generation.assert_called_once()
+    assert claude_generation_model == "claude_sonnet_4_0"
 
 
 @pytest.mark.usefixtures("mock_deepeval_evaluate")

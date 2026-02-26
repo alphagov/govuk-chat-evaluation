@@ -35,6 +35,16 @@ class BaseConfig(BaseModel):
         input_path = Annotated[
             FilePath, Field(..., description="Path to the data file used to evaluate")
         ]
+        claude_generation_model = Annotated[
+            Optional[str],
+            Field(
+                None,
+                description=(
+                    "Which Claude model to use for generating the data when the provider is Claude, e.g. "
+                    "claude_sonnet_4_0 or claude_haiku_4_5. If not specified, the default model will be used."
+                ),
+            ),
+        ]
 
     def _validate_fields_required_for_generate(self, *fields) -> Self:
         if getattr(self, "generate", False):

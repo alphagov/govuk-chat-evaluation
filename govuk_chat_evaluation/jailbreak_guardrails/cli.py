@@ -17,6 +17,7 @@ class Config(BaseConfig):
     generate: BaseConfig.GenericFields.generate
     provider: BaseConfig.GenericFields.provider_openai_or_claude
     input_path: BaseConfig.GenericFields.input_path
+    claude_generation_model: BaseConfig.GenericFields.claude_generation_model
 
     @model_validator(mode="after")
     def run_validatons(self) -> Self:
@@ -44,7 +45,10 @@ def main(**cli_args):
 
     if config.generate:
         evaluate_path = generate_and_write_dataset(
-            config.input_path, cast(str, config.provider), output_dir
+            config.input_path,
+            cast(str, config.provider),
+            config.claude_generation_model,
+            output_dir=output_dir,
         )
     else:
         evaluate_path = config.input_path

@@ -2,3 +2,4 @@ what: Evaluating jailbreak guardrails
 generate: true
 provider: claude
 input_path: data/jailbreak_guardrails.jsonl
+claude_generation_model: ~

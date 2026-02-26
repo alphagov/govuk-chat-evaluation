@@ -14,6 +14,7 @@ class TestConfig:
                 generate=True,
                 provider=None,
                 input_path=mock_input_data,
+                claude_generation_model=None,
             )
 
         Config(
@@ -21,6 +22,7 @@ class TestConfig:
             generate=False,
             provider=None,
             input_path=mock_input_data,
+            claude_generation_model=None,
         )
 
         Config(
@@ -28,6 +30,7 @@ class TestConfig:
             generate=True,
             provider="openai",
             input_path=mock_input_data,
+            claude_generation_model=None,
         )
 
 
@@ -39,6 +42,7 @@ def mock_config_file(tmp_path, mock_input_data):
         "generate": True,
         "provider": "claude",
         "input_path": str(mock_input_data),
+        "claude_generation_model": "claude_sonnet_4_0",
     }
     file_path = tmp_path / "config.yaml"
     with open(file_path, "w") as file:
@@ -95,6 +99,17 @@ def test_main_creates_output_files(
     assert config_file.exists()
     assert confusion_matrix_file.exists()
     assert miscategorised_cases_file.exists()
+
+
+def test_main_passes_claude_generation_model_to_generate_and_write_dataset(
+    mock_config_file, mock_data_generation
+):
+    runner = CliRunner()
+    runner.invoke(main, [mock_config_file])
+    claude_generation_model = mock_data_generation.call_args[0][1]
+
+    mock_data_generation.assert_called_once()
+    assert claude_generation_model == "claude_sonnet_4_0"
 
 
 def test_main_generates_results(

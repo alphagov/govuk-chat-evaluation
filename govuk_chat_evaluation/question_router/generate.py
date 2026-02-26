@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from .evaluate import EvaluationResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
+from typing import Optional
 
 
 class GenerateInput(BaseModel):
@@ -13,20 +14,32 @@ class GenerateInput(BaseModel):
     expected_outcome: str
 
 
-def generate_and_write_dataset(input_path: Path, provider: str, output_dir: Path):
+def generate_and_write_dataset(
+    input_path: Path,
+    provider: str,
+    claude_generation_model: Optional[str],
+    output_dir: Path,
+):
     models = jsonl_to_models(Path(input_path), GenerateInput)
-    generated = generate_inputs_to_evaluation_results(provider, models)
+    generated = generate_inputs_to_evaluation_results(
+        provider, claude_generation_model, models
+    )
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_results(
-    provider: str, generate_inputs: list[GenerateInput]
+    provider: str,
+    claude_generation_model: Optional[str],
+    generate_inputs: list[GenerateInput],
 ) -> list[EvaluationResult]:
     """Asynchronously run rake tasks for each GenerateInput instance to
     generate a result"""
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
         env = {"INPUT": input.question}
+        if claude_generation_model:
+            env["BEDROCK_CLAUDE_QUESTION_ROUTER_MODEL"] = claude_generation_model
+
         result = await run_rake_task(
             f"evaluation:generate_question_routing_response[{provider}]",
             env,

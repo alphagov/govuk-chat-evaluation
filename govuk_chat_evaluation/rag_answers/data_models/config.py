@@ -131,6 +131,7 @@ class TaskConfig(BaseConfig):
     generate: BaseConfig.GenericFields.generate
     provider: BaseConfig.GenericFields.provider_openai_or_claude
     input_path: BaseConfig.GenericFields.input_path
+    claude_generation_model: BaseConfig.GenericFields.claude_generation_model
     metrics: list[MetricConfig]
     n_runs: int
 
