@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .evaluate import EvaluationResult
+from .evaluate import EvaluationResult, ChunkScores
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
 
@@ -11,6 +11,7 @@ from ..file_system import jsonl_to_models, write_generated_to_output
 class GenerateInput(BaseModel):
     question: str
     expected_exact_paths: list[str]
+    expected_chunk_uids: list[str]
 
 
 def generate_and_write_dataset(
@@ -34,19 +35,21 @@ def generate_inputs_to_evaluation_results(
             "evaluation:search_results_for_question",
             env,
         )
-        exact_paths_and_scores = [
-            {
-                "exact_path": item["exact_path"],
-                "weighted_score": item["weighted_score"],
-                "original_score": item["original_score"],
-            }
+        exact_paths_chunks_and_scores = [
+            ChunkScores(
+                exact_path=item["exact_path"],
+                chunk_uid=item["chunk_uid"],
+                weighted_score=item["weighted_score"],
+                original_score=item["original_score"],
+            )
             for item in result
         ]
 
         return EvaluationResult(
             question=input.question,
             expected_exact_paths=input.expected_exact_paths,
-            actual_exact_paths_and_scores=exact_paths_and_scores,
+            expected_chunk_uids=input.expected_chunk_uids,
+            actual_chunk_uids_exact_paths_and_scores=exact_paths_chunks_and_scores,
         )
 
     return asyncio.run(

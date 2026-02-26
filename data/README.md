@@ -10,7 +10,7 @@ When creating new evaluation data sets or running evaluation ad-hoc, each data s
 
 The evaluation pipeline enables generating the 'actual' response by an LLM-based component (e.g. jailbreak component, structured_answer component) on the fly by setting 'generate: true' in the config file for an evaluation task. Conversely, when setting 'generate: false', the data set supplied for the evaluation task already has to contain the 'actual' responses.
 
-All data sets must be provided as a .jsonl file, where **each line** represents a single case to be evaluated formatted as a JSON object, i.e. each file is a list of JSON objects. 
+All data sets must be provided as a .jsonl file, where **each line** represents a single case to be evaluated formatted as a JSON object, i.e. each file is a list of JSON objects.
 
 Below we will define the required fields for all evaluation tasks, and both the 'generate: true' and 'generate: false' scenario.
 
@@ -73,12 +73,12 @@ In all cases: additional fields beyond those listed are permitted but will be ig
     "question": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
-        "sensitive_financial_matters": true, 
-        "appropriate_language": false, 
-        "political": false, 
-        "unsupported_statements": false, 
-        "contains_pii": false, 
-        "illegal": true, 
+        "sensitive_financial_matters": true,
+        "appropriate_language": false,
+        "political": false,
+        "unsupported_statements": false,
+        "contains_pii": false,
+        "illegal": true,
         "inappropriate_style": false}
 }
 ```
@@ -90,22 +90,22 @@ In all cases: additional fields beyond those listed are permitted but will be ig
     "question": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
-        "sensitive_financial_matters": true, 
-        "appropriate_language": false, 
-        "political": false, 
-        "unsupported_statements": false, 
-        "contains_pii": false, 
-        "illegal": true, 
+        "sensitive_financial_matters": true,
+        "appropriate_language": false,
+        "political": false,
+        "unsupported_statements": false,
+        "contains_pii": false,
+        "illegal": true,
         "inappropriate_style": false},
         "expected_triggered": true,
     "actual_triggered": true,
     "actual_guardrails": {
-        "sensitive_financial_matters": true, 
-        "appropriate_language": false, 
-        "political": false, 
-        "unsupported_statements": false, 
-        "contains_pii": false, 
-        "illegal": true, 
+        "sensitive_financial_matters": true,
+        "appropriate_language": false,
+        "political": false,
+        "unsupported_statements": false,
+        "contains_pii": false,
+        "illegal": true,
         "inappropriate_style": false}
 }
 ```
@@ -159,9 +159,9 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 ### Example: 'generate: true'
 
 For:
-* relevance 
-* faithfulness  
-* context_relevancy 
+* relevance
+* faithfulness
+* context_relevancy
 * coherence
 
 
@@ -185,9 +185,9 @@ For:
 ### Example: 'generate: false'
 
 For:
-* relevance 
-* faithfulness  
-* context_relevancy 
+* relevance
+* faithfulness
+* context_relevancy
 * coherence
 
 ```json
@@ -233,13 +233,14 @@ For:
 |-------|------|-------------|
 | `question` | `string` | The question or input to evaluate. |
 | `expected_exact_paths` | `list[string]` | List of expected exact_paths of chunks. |
-| `actual_exact_paths_and_scores` | `list[object]` | List of actual exact_paths and similarity score information of chunks retrieved by the retrieval component. |
+| `actual_chunk_uids_exact_paths_and_scores` | `list[ChunkScores]` | List of actual exact_paths, chunk_uids and similarity score information of chunks retrieved by the retrieval component. |
 
-actual_exact_paths_and_scores object:
+ ChunkScores attributes:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `exact_path` | `string` | The exact_path of a chunk. |
+| `chunk_uid` | `string` | The uid associated with the chunk. This is generated in the GOV.UK Chat Ruby application.
 | `weighted_score` | `float` | The weighted_score of the chunk. |
 | `original_score` | `float` | The cosine similarity score of the chunk relative to the question. |
 
@@ -248,7 +249,8 @@ actual_exact_paths_and_scores object:
 ```json
 {
     "question": "Example question to eveluate.",
-    "expected_exact_paths": "/example-exact-path-to#chunk"
+    "expected_exact_paths": "/example-exact-path-to#chunk",
+    "expected_chunk_uids": "uid1"
 }
 ```
 
@@ -258,8 +260,9 @@ actual_exact_paths_and_scores object:
 {
     "question": "Example question to evaluate.",
     "expected_exact_paths": "/example-exact-path-to#chunk",
-    "actual_exact_paths_and_scores": {
+    "actual_chunk_uids_exact_paths_and_scores": {
         "exact_path": "/example-exact-path-to#chunk",
+        "chunk_uid": "uid1",
         "weighted_score": 0.9,
         "original_score": 0.85
     }
