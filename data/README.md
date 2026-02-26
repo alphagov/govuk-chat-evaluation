@@ -48,8 +48,8 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `question` | `string` | **The answer** (!) we want to evaluate against the output guardrails. |
-| `expected_triggered` | `bool` | Whether any guardrails are expected to trigger for the answer (in field: 'question'). |
+| `message` | `string` | **The answer** (!) we want to evaluate against the output guardrails. |
+| `expected_triggered` | `bool` | Whether any guardrails are expected to trigger for the answer (in field: 'message'). |
 | `expected_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail expected to trigger, `false` = not expected. |
 | `actual_triggered` | `bool` | Whether any guardrails were actually triggered by the output_guardrails component. |
 | `actual_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail triggered, `false` = not triggered. |
@@ -70,7 +70,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 
 ```json
 {
-    "question": "Example answer to test the output guardrails.",
+    "message": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
         "sensitive_financial_matters": true, 
@@ -87,7 +87,7 @@ In all cases: additional fields beyond those listed are permitted but will be ig
 
 ```json
 {
-    "question": "Example answer to test the output guardrails.",
+    "message": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
         "sensitive_financial_matters": true, 
