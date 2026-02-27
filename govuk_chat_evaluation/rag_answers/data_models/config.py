@@ -19,6 +19,7 @@ from ..invalid_json_retry import attach_invalid_json_retry_to_model
 from ..custom_deepeval.metrics import (
     FactualPrecisionRecall,
     FactualPrecisionRecallMode,
+    AbsenceOfFactualContradictions,
     ContextRelevancyMetric,
     CoherenceMetric,
     FactClassificationCache,
@@ -31,6 +32,7 @@ class MetricName(str, Enum):
     BIAS = "bias"
     FACTUAL_PRECISION = "factual_precision"
     FACTUAL_RECALL = "factual_recall"
+    ABSENCE_OF_FACTUAL_CONTRADICTIONS = "absence_of_factual_contradictions"
     CONTEXT_RELEVANCY = "context_relevancy"
     COHERENCE = "coherence"
     # others to add
@@ -171,6 +173,10 @@ class TaskConfig(BaseConfig):
                     model=model,
                     mode=FactualPrecisionRecallMode.RECALL,
                     cache=fact_classification_cache,
+                )
+            case MetricName.ABSENCE_OF_FACTUAL_CONTRADICTIONS:
+                return AbsenceOfFactualContradictions(
+                    threshold=metric.threshold, model=model
                 )
             case MetricName.CONTEXT_RELEVANCY:
                 return ContextRelevancyMetric(threshold=metric.threshold, model=model)

@@ -31,6 +31,10 @@ metrics:
     threshold: 1.0
     model: openai.gpt-oss-120b-1:0
     temperature: 0.0
+  - name: absence_of_factual_contradictions
+    threshold: 1.0
+    model: openai.gpt-oss-120b-1:0
+    temperature: 0.0
   - name: context_relevancy
     threshold: 0.8
     model: openai.gpt-oss-120b-1:0
