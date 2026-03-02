@@ -40,13 +40,13 @@ class TestEvaluationResult:
                 "recall": 0.25,
                 "f1_score": 0.4,
                 "f2_score": 0.2941,
-                "true_positives": [{"/path1": 0.9}],
-                "false_negatives": [
-                    {"/path2": float("nan")},
-                    {"/path3": float("nan")},
-                    {"/path4": float("nan")},
+                "true_positives_exact_paths": ["/path1"],
+                "false_negatives_exact_paths": [
+                    "/path2",
+                    "/path3",
+                    "/path4",
                 ],
-                "false_positives": [],
+                "false_positives_exact_paths": [],
             },
         )
 
@@ -228,7 +228,7 @@ class TestEvaluationResult:
             ],
         )
 
-        assert result.false_positive_cases == [{"/path3": 0.8}]
+        assert result.false_positives_exact_paths == ["/path3"]
 
     def test_false_negatives(self):
         result = EvaluationResult(
@@ -251,7 +251,7 @@ class TestEvaluationResult:
             ],
         )
 
-        np.testing.assert_equal(result.false_negative_cases, [{"/path2": float("nan")}])
+        np.testing.assert_equal(result.false_negative_exact_paths, ["/path2"])
 
     def test_true_positives(self):
         result = EvaluationResult(
@@ -274,7 +274,7 @@ class TestEvaluationResult:
             ],
         )
 
-        assert result.true_positive_cases == [{"/path1": 0.9}]
+        assert result.true_positive_exact_paths == ["/path1"]
 
 
 class TestAggregateResults:

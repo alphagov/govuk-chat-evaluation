@@ -63,25 +63,25 @@ class EvaluationResult(BaseModel):
         return metric_fn(self.y_true, self.y_pred, **kwargs)
 
     @property
-    def false_positive_cases(self) -> list[dict[str, float]]:
+    def false_positives_exact_paths(self) -> list[str]:
         return [
-            {item.exact_path: item.weighted_score}
+            item.exact_path
             for item in self.actual_search_results
             if item.chunk_uid not in self.expected_chunk_uids
         ]
 
     @property
-    def false_negative_cases(self) -> list[dict[str, float]]:
+    def false_negative_exact_paths(self) -> list[str]:
         return [
-            {path: float("nan")}
+            path
             for path, uid in zip(self.expected_exact_paths, self.expected_chunk_uids)
             if uid not in self.actual_chunk_uids
         ]
 
     @property
-    def true_positive_cases(self) -> list[dict[str, float]]:
+    def true_positive_exact_paths(self) -> list[str]:
         return [
-            {item.exact_path: item.weighted_score}
+            item.exact_path
             for item in self.actual_search_results
             if item.chunk_uid in self.expected_chunk_uids
         ]
@@ -131,9 +131,9 @@ class EvaluationResult(BaseModel):
             "recall": round(self.recall(), DECIMAL_PLACES),
             "f1_score": round(self.f1_score(), DECIMAL_PLACES),
             "f2_score": round(self.f2_score(), DECIMAL_PLACES),
-            "true_positives": self.true_positive_cases,
-            "false_negatives": self.false_negative_cases,
-            "false_positives": self.false_positive_cases,
+            "true_positives_exact_paths": self.true_positive_exact_paths,
+            "false_negatives_exact_paths": self.false_negative_exact_paths,
+            "false_positives_exact_paths": self.false_positives_exact_paths,
         }
 
 
