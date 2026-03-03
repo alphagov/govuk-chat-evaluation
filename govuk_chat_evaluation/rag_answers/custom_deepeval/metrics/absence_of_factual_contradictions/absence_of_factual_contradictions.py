@@ -102,22 +102,37 @@ class AbsenceOfFactualContradictions(BaseMetric):
 
     async def _generate_truths(self, expected_output: str) -> TruthCollection:
         prompt = self.evaluation_template.generate_truths(text=expected_output)
-        return await self._generate_result_from_model(prompt, schema=TruthCollection)
+
+        truth_collection = await self._generate_result_from_model(
+            prompt, schema=TruthCollection
+        )
+        if len(truth_collection.truths) == 0:
+            raise ValueError("No truths extracted from expected output.")
+        return truth_collection
 
     async def _generate_claims(self, actual_output: str) -> ClaimCollection:
         prompt = self.evaluation_template.generate_claims(text=actual_output)
-        return await self._generate_result_from_model(prompt, schema=ClaimCollection)
+
+        claim_collection = await self._generate_result_from_model(
+            prompt, schema=ClaimCollection
+        )
+        if len(claim_collection.claims) == 0:
+            raise ValueError("No claims extracted from actual output.")
+        return claim_collection
 
     async def _generate_verdicts(
         self, claims: ClaimCollection, truths: TruthCollection
     ) -> VerdictCollection:
-        if len(claims.claims) == 0:
-            return VerdictCollection(verdicts=[])
-
         prompt = self.evaluation_template.generate_verdicts(
             claims=claims.claims, ground_truth=truths.truths
         )
-        return await self._generate_result_from_model(prompt, schema=VerdictCollection)
+
+        verdict_collection = await self._generate_result_from_model(
+            prompt, schema=VerdictCollection
+        )
+        if len(verdict_collection.verdicts) == 0:
+            raise ValueError("No verdicts generated.")
+        return verdict_collection
 
     async def _generate_reason(
         self, score: float, verdicts: VerdictCollection

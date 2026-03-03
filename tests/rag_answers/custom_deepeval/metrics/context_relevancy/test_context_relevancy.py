@@ -110,6 +110,52 @@ class TestContextRelevancyMetric:
                 await metric.a_measure(invalid_case)
 
         @pytest.mark.asyncio
+        async def test_empty_truths_raises_error(
+            self, mock_native_model, mock_test_case
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (TruthCollection(truths=[]), 0.1)
+            ]
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            with pytest.raises(
+                ValueError, match="No truths extracted from the context."
+            ):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
+        async def test_empty_information_needs_raises_error(
+            self, mock_native_model, mock_test_case, sample_truths
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, 0.1),
+                (InformationNeedsCollection(information_needs=[]), 0.1),
+            ]
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            with pytest.raises(
+                ValueError, match="No information needs extracted from the input."
+            ):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
+        async def test_empty_verdicts_raises_error(
+            self,
+            mock_native_model,
+            mock_test_case,
+            sample_truths,
+            sample_information_needs,
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, 0.1),
+                (sample_information_needs, 0.1),
+                (VerdictCollection(verdicts=[]), 0.1),
+            ]
+            metric = ContextRelevancyMetric(model=mock_native_model)
+            with pytest.raises(
+                ValueError, match="No verdicts generated for the information needs."
+            ):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
         async def test_no_additional_metadata_raises_error(self, mock_native_model):
             metric = ContextRelevancyMetric(model=mock_native_model)
             invalid_case = LLMTestCase(

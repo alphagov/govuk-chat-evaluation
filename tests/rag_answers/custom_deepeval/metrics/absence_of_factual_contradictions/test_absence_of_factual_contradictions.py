@@ -94,6 +94,46 @@ class TestAbsenceOfFactualContradictions:
                 await metric.a_measure(invalid_case)
 
         @pytest.mark.asyncio
+        async def test_empty_truths_raises_error(
+            self, mock_native_model, mock_test_case
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (TruthCollection(truths=[]), 0.1)
+            ]
+            metric = AbsenceOfFactualContradictions(model=mock_native_model)
+            with pytest.raises(
+                ValueError, match="No truths extracted from expected output."
+            ):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
+        async def test_empty_claims_raises_error(
+            self, mock_native_model, mock_test_case, sample_truths
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, 0.1),
+                (ClaimCollection(claims=[]), 0.1),
+            ]
+            metric = AbsenceOfFactualContradictions(model=mock_native_model)
+            with pytest.raises(
+                ValueError, match="No claims extracted from actual output."
+            ):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
+        async def test_empty_verdicts_raises_error(
+            self, mock_native_model, mock_test_case, sample_truths, sample_claims
+        ):
+            mock_native_model.a_generate.side_effect = [
+                (sample_truths, 0.1),
+                (sample_claims, 0.1),
+                (VerdictCollection(verdicts=[]), 0.1),
+            ]
+            metric = AbsenceOfFactualContradictions(model=mock_native_model)
+            with pytest.raises(ValueError, match="No verdicts generated."):
+                await metric.a_measure(mock_test_case)
+
+        @pytest.mark.asyncio
         @patch(
             "govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.absence_of_factual_contradictions.absence_of_factual_contradictions.metric_progress_indicator"
         )
