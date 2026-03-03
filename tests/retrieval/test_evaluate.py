@@ -8,6 +8,7 @@ import pytest
 from govuk_chat_evaluation.retrieval.evaluate import (
     AggregateResults,
     EvaluationResult,
+    SearchResult,
     evaluate_and_output_results,
 )
 
@@ -17,8 +18,14 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2", "/path3", "/path4"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9}
+            expected_chunk_uids=["uid1", "uid2", "uid3", "uid4"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                )
             ],
         )
 
@@ -27,24 +34,19 @@ class TestEvaluationResult:
             {
                 "question": "Test question",
                 "expected_exact_paths": ["/path1", "/path2", "/path3", "/path4"],
-                "actual_exact_paths_and_scores": [
-                    {
-                        "exact_path": "/path1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    }
-                ],
+                "expected_chunk_uids": ["uid1", "uid2", "uid3", "uid4"],
+                "actual_search_results": [("/path1", "uid1", 0.9, 0.9)],
                 "precision": 1.0,
                 "recall": 0.25,
                 "f1_score": 0.4,
                 "f2_score": 0.2941,
-                "true_positives": [{"/path1": 0.9}],
-                "false_negatives": [
-                    {"/path2": float("nan")},
-                    {"/path3": float("nan")},
-                    {"/path4": float("nan")},
+                "true_positives_exact_paths": ["/path1"],
+                "false_negatives_exact_paths": [
+                    "/path2",
+                    "/path3",
+                    "/path4",
                 ],
-                "false_positives": [],
+                "false_positives_exact_paths": [],
             },
         )
 
@@ -52,8 +54,14 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9}
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
             ],
         )
 
@@ -63,9 +71,20 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=[],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=[],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
             ],
         )
 
@@ -75,11 +94,32 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path2", "weighted_score": 0.8, "original_score": 0.8},
-                {"exact_path": "/path3", "weighted_score": 0.7, "original_score": 0.7},
-                {"exact_path": "/path4", "weighted_score": 0.6, "original_score": 0.6},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path2",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    semantic_score=0.8,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.7,
+                    semantic_score=0.6,
+                ),
+                SearchResult(
+                    exact_path="/path4",
+                    chunk_uid="uid4",
+                    weighted_score=0.6,
+                    semantic_score=0.5,
+                ),
             ],
         )
 
@@ -89,7 +129,8 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[],
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[],
         )
 
         assert np.isnan(result.precision())
@@ -98,10 +139,26 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
-                {"exact_path": "/path4", "weighted_score": 0.7, "original_score": 0.7},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
+                SearchResult(
+                    exact_path="/path4",
+                    chunk_uid="uid4",
+                    weighted_score=0.7,
+                    semantic_score=0.6,
+                ),
             ],
         )
 
@@ -111,7 +168,8 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=[],
-            actual_exact_paths_and_scores=[],
+            expected_chunk_uids=[],
+            actual_search_results=[],
         )
 
         assert np.isnan(result.f1_score())
@@ -120,9 +178,20 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
             ],
         )
 
@@ -132,7 +201,8 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=[],
-            actual_exact_paths_and_scores=[],
+            expected_chunk_uids=[],
+            actual_search_results=[],
         )
 
         assert np.isnan(result.f2_score())
@@ -141,37 +211,70 @@ class TestEvaluationResult:
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
             ],
         )
 
-        assert result.false_positive_cases == [{"/path3": 0.8}]
+        assert result.false_positives_exact_paths == ["/path3"]
 
     def test_false_negatives(self):
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
             ],
         )
 
-        np.testing.assert_equal(result.false_negative_cases, [{"/path2": float("nan")}])
+        np.testing.assert_equal(result.false_negative_exact_paths, ["/path2"])
 
     def test_true_positives(self):
         result = EvaluationResult(
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path3", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/path3",
+                    chunk_uid="uid3",
+                    weighted_score=0.8,
+                    semantic_score=0.7,
+                ),
             ],
         )
 
-        assert result.true_positive_cases == [{"/path1": 0.9}]
+        assert result.true_positive_exact_paths == ["/path1"]
 
 
 class TestAggregateResults:
@@ -181,81 +284,96 @@ class TestAggregateResults:
             EvaluationResult(
                 question="Q1",
                 expected_exact_paths=["/path1", "/path2"],
-                actual_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
+                expected_chunk_uids=["uid1", "uid2"],
+                actual_search_results=[
+                    SearchResult(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        semantic_score=0.9,
+                    ),
+                    SearchResult(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        semantic_score=0.8,
+                    ),
                 ],
             ),
             EvaluationResult(
                 question="Q2",
                 expected_exact_paths=["/path1"],
-                actual_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path3",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    }
+                expected_chunk_uids=["uid1"],
+                actual_search_results=[
+                    SearchResult(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.9,
+                        semantic_score=0.9,
+                    ),
                 ],
             ),
             EvaluationResult(
                 question="Q3",
                 expected_exact_paths=["/path1", "/path2"],
-                actual_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
+                expected_chunk_uids=["uid1", "uid2"],
+                actual_search_results=[
+                    SearchResult(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        semantic_score=0.9,
+                    ),
                 ],
             ),
             EvaluationResult(
                 question="Q4",
                 expected_exact_paths=["/path1"],
-                actual_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
-                    {
-                        "exact_path": "/path3",
-                        "weighted_score": 0.7,
-                        "original_score": 0.7,
-                    },
+                expected_chunk_uids=["uid1"],
+                actual_search_results=[
+                    SearchResult(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        semantic_score=0.9,
+                    ),
+                    SearchResult(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        semantic_score=0.8,
+                    ),
+                    SearchResult(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.7,
+                        semantic_score=0.6,
+                    ),
                 ],
             ),
             EvaluationResult(
                 question="Q5",
                 expected_exact_paths=["/path1", "/path2"],
-                actual_exact_paths_and_scores=[
-                    {
-                        "exact_path": "/path1",
-                        "weighted_score": 0.9,
-                        "original_score": 0.9,
-                    },
-                    {
-                        "exact_path": "/path2",
-                        "weighted_score": 0.8,
-                        "original_score": 0.8,
-                    },
-                    {
-                        "exact_path": "/path3",
-                        "weighted_score": 0.7,
-                        "original_score": 0.7,
-                    },
+                expected_chunk_uids=["uid1", "uid2"],
+                actual_search_results=[
+                    SearchResult(
+                        exact_path="/path1",
+                        chunk_uid="uid1",
+                        weighted_score=0.9,
+                        semantic_score=0.9,
+                    ),
+                    SearchResult(
+                        exact_path="/path2",
+                        chunk_uid="uid2",
+                        weighted_score=0.8,
+                        semantic_score=0.8,
+                    ),
+                    SearchResult(
+                        exact_path="/path3",
+                        chunk_uid="uid3",
+                        weighted_score=0.7,
+                        semantic_score=0.6,
+                    ),
                 ],
             ),
         ]
@@ -349,16 +467,33 @@ def mock_evaluation_data_file(tmp_path):
         {
             "question": "Question 1",
             "expected_exact_paths": ["/path1", "/path2"],
-            "actual_exact_paths_and_scores": [
-                {"exact_path": "/path1", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/path2", "weighted_score": 0.8, "original_score": 0.8},
+            "expected_chunk_uids": ["uid1", "uid2"],
+            "actual_search_results": [
+                {
+                    "exact_path": "/path1",
+                    "chunk_uid": "uid1",
+                    "weighted_score": 0.9,
+                    "semantic_score": 0.7,
+                },
+                {
+                    "exact_path": "/path2",
+                    "chunk_uid": "uid2",
+                    "weighted_score": 0.8,
+                    "semantic_score": 0.8,
+                },
             ],
         },
         {
             "question": "Question 2",
             "expected_exact_paths": ["/path1"],
-            "actual_exact_paths_and_scores": [
-                {"exact_path": "/path3", "weighted_score": 0.9, "original_score": 0.9}
+            "expected_chunk_uids": ["uid1"],
+            "actual_search_results": [
+                {
+                    "exact_path": "/path3",
+                    "chunk_uid": "uid3",
+                    "weighted_score": 0.9,
+                    "semantic_score": 0.9,
+                }
             ],
         },
     ]

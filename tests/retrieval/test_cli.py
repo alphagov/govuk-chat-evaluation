@@ -3,7 +3,10 @@ import yaml
 from click.testing import CliRunner
 
 from govuk_chat_evaluation.retrieval.cli import main, Config
-from govuk_chat_evaluation.retrieval.evaluate import EvaluationResult
+from govuk_chat_evaluation.retrieval.evaluate import (
+    EvaluationResult,
+    SearchResult,
+)
 
 
 class TestConfig:
@@ -55,16 +58,33 @@ def mock_data_generation(mocker):
         EvaluationResult(
             question="Question",
             expected_exact_paths=["/foo", "/bar"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/foo", "weighted_score": 0.9, "original_score": 0.9},
-                {"exact_path": "/bar", "weighted_score": 0.8, "original_score": 0.8},
+            expected_chunk_uids=["uid1", "uid2"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/foo",
+                    chunk_uid="uid1",
+                    weighted_score=0.9,
+                    semantic_score=0.7,
+                ),
+                SearchResult(
+                    exact_path="/bar",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    semantic_score=0.8,
+                ),
             ],
         ),
         EvaluationResult(
             question="Question",
             expected_exact_paths=["/foo"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/bar", "weighted_score": 0.9, "original_score": 0.9}
+            expected_chunk_uids=["uid1"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/bar",
+                    chunk_uid="uid3",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
             ],
         ),
     ]

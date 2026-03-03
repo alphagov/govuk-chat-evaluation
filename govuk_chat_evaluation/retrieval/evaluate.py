@@ -18,56 +18,72 @@ import logging
 DECIMAL_PLACES = 4
 
 
+class SearchResult(BaseModel):
+    exact_path: str
+    chunk_uid: str
+    weighted_score: float
+    semantic_score: float
+
+
 class EvaluationResult(BaseModel):
     question: str
+    # expected_exact_paths is only used for exporting purposes since it's more human readable
+    # than using chunk_uids, but all calculations are done using expected_chunk_uids and actual_chunk_uids.
     expected_exact_paths: list[str]
-    actual_exact_paths_and_scores: list[dict[str, Any]]
+    expected_chunk_uids: list[str]
+    actual_search_results: list[SearchResult]
 
     @property
-    def actual_exact_paths(self) -> list[str]:
-        return [item["exact_path"] for item in self.actual_exact_paths_and_scores]
+    def actual_chunk_uids(self) -> list[str]:
+        return [item.chunk_uid for item in self.actual_search_results]
 
     @property
-    def all_paths(self) -> list[str]:
-        return list(set(self.expected_exact_paths + self.actual_exact_paths))
+    def all_chunk_uids(self) -> list[str]:
+        return list(set(self.expected_chunk_uids + self.actual_chunk_uids))
 
     @property
     def y_true(self) -> list[int]:
-        return [int(path in self.expected_exact_paths) for path in self.all_paths]
+        return [
+            int(chunk_uid in self.expected_chunk_uids)
+            for chunk_uid in self.all_chunk_uids
+        ]
 
     @property
     def y_pred(self) -> list[int]:
-        return [int(path in self.actual_exact_paths) for path in self.all_paths]
+        return [
+            int(chunk_uid in self.actual_chunk_uids)
+            for chunk_uid in self.all_chunk_uids
+        ]
 
     def _safe_classification_metric(
         self, metric_fn: Callable[..., float], **kwargs: Any
     ) -> float:
-        if not self.all_paths:
+        if not self.all_chunk_uids:
             return float("nan")
         return metric_fn(self.y_true, self.y_pred, **kwargs)
 
     @property
-    def false_positive_cases(self) -> list[dict[str, float]]:
+    def false_positives_exact_paths(self) -> list[str]:
         return [
-            {item["exact_path"]: item["weighted_score"]}
-            for item in self.actual_exact_paths_and_scores
-            if item["exact_path"] not in self.expected_exact_paths
+            item.exact_path
+            for item in self.actual_search_results
+            if item.chunk_uid not in self.expected_chunk_uids
         ]
 
     @property
-    def false_negative_cases(self) -> list[dict[str, float]]:
+    def false_negative_exact_paths(self) -> list[str]:
         return [
-            {path: float("nan")}
-            for path in self.expected_exact_paths
-            if path not in self.actual_exact_paths
+            path
+            for path, uid in zip(self.expected_exact_paths, self.expected_chunk_uids)
+            if uid not in self.actual_chunk_uids
         ]
 
     @property
-    def true_positive_cases(self) -> list[dict[str, float]]:
+    def true_positive_exact_paths(self) -> list[str]:
         return [
-            {item["exact_path"]: item["weighted_score"]}
-            for item in self.actual_exact_paths_and_scores
-            if item["exact_path"] in self.expected_exact_paths
+            item.exact_path
+            for item in self.actual_search_results
+            if item.chunk_uid in self.expected_chunk_uids
         ]
 
     def precision(self) -> float:
@@ -96,17 +112,28 @@ class EvaluationResult(BaseModel):
         )
 
     def for_csv(self) -> dict[str, Any]:
+        tuples = []
+        for item in self.actual_search_results:
+            tuples.append(
+                (
+                    item.exact_path,
+                    item.chunk_uid,
+                    item.weighted_score,
+                    item.semantic_score,
+                )
+            )
         return {
             "question": self.question,
             "expected_exact_paths": self.expected_exact_paths,
-            "actual_exact_paths_and_scores": self.actual_exact_paths_and_scores,
+            "expected_chunk_uids": self.expected_chunk_uids,
+            "actual_search_results": tuples,
             "precision": round(self.precision(), DECIMAL_PLACES),
             "recall": round(self.recall(), DECIMAL_PLACES),
             "f1_score": round(self.f1_score(), DECIMAL_PLACES),
             "f2_score": round(self.f2_score(), DECIMAL_PLACES),
-            "true_positives": self.true_positive_cases,
-            "false_negatives": self.false_negative_cases,
-            "false_positives": self.false_positive_cases,
+            "true_positives_exact_paths": self.true_positive_exact_paths,
+            "false_negatives_exact_paths": self.false_negative_exact_paths,
+            "false_positives_exact_paths": self.false_positives_exact_paths,
         }
 
 

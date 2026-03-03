@@ -8,6 +8,7 @@ from govuk_chat_evaluation.retrieval.generate import (
     generate_and_write_dataset,
     GenerateInput,
     EvaluationResult,
+    SearchResult,
 )
 
 
@@ -18,36 +19,40 @@ def run_rake_task_mock(mocker):
             return [
                 {
                     "exact_path": "/foo",
+                    "chunk_uid": "uid1",
                     "plain_content": "Content for foo",
                     "weighted_score": 1.0,
-                    "original_score": 1.5,
+                    "semantic_score": 1.0,
                 },
                 {
                     "exact_path": "/bar",
+                    "chunk_uid": "uid2",
                     "plain_content": "Content for bar",
                     "weighted_score": 0.8,
-                    "original_score": 0.9,
+                    "semantic_score": 0.9,
                 },
                 {
                     "exact_path": "/baz",
-                    "plain_content": "Content for baz",
+                    "chunk_uid": "uid3",
                     "weighted_score": 0.5,
-                    "original_score": 0.4,
+                    "semantic_score": 0.5,
                 },
             ]
         else:
             return [
                 {
                     "exact_path": "/path1",
+                    "chunk_uid": "uid4",
                     "plain_content": "Content for path1",
                     "weighted_score": 1.0,
-                    "original_score": 1.1,
+                    "semantic_score": 1.0,
                 },
                 {
                     "exact_path": "/path2",
+                    "chunk_uid": "uid5",
                     "plain_content": "Content for path2",
                     "weighted_score": 0.9,
-                    "original_score": 0.8,
+                    "semantic_score": 0.9,
                 },
             ]
 
@@ -66,28 +71,57 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         GenerateInput(
             question="Question 1",
             expected_exact_paths=["/foo"],
+            expected_chunk_uids=["uid1"],
         ),
         GenerateInput(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
+            expected_chunk_uids=["uid4", "uid5"],
         ),
     ]
     expected_results = [
         EvaluationResult(
             question="Question 1",
             expected_exact_paths=["/foo"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/foo", "weighted_score": 1.0, "original_score": 1.5},
-                {"exact_path": "/bar", "weighted_score": 0.8, "original_score": 0.9},
-                {"exact_path": "/baz", "weighted_score": 0.5, "original_score": 0.4},
+            expected_chunk_uids=["uid1"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/foo",
+                    chunk_uid="uid1",
+                    weighted_score=1.0,
+                    semantic_score=1.0,
+                ),
+                SearchResult(
+                    exact_path="/bar",
+                    chunk_uid="uid2",
+                    weighted_score=0.8,
+                    semantic_score=0.9,
+                ),
+                SearchResult(
+                    exact_path="/baz",
+                    chunk_uid="uid3",
+                    weighted_score=0.5,
+                    semantic_score=0.5,
+                ),
             ],
         ),
         EvaluationResult(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
-            actual_exact_paths_and_scores=[
-                {"exact_path": "/path1", "weighted_score": 1.0, "original_score": 1.1},
-                {"exact_path": "/path2", "weighted_score": 0.9, "original_score": 0.8},
+            expected_chunk_uids=["uid4", "uid5"],
+            actual_search_results=[
+                SearchResult(
+                    exact_path="/path1",
+                    chunk_uid="uid4",
+                    weighted_score=1.0,
+                    semantic_score=1.0,
+                ),
+                SearchResult(
+                    exact_path="/path2",
+                    chunk_uid="uid5",
+                    weighted_score=0.9,
+                    semantic_score=0.9,
+                ),
             ],
         ),
     ]
@@ -105,6 +139,7 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
         GenerateInput(
             question="Question 1",
             expected_exact_paths=["/foo", "/bar"],
+            expected_chunk_uids=["uid1", "uid2"],
         ),
     ]
 
