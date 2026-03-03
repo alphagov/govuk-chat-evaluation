@@ -11,9 +11,6 @@ class VerdictCollection(BaseModel):
     verdicts: List[Verdict]
 
     def score_verdicts(self) -> float:
-        if len(self.verdicts) == 0:
-            return 1.0
-
         quality_count = sum(1 for verdict in self.verdicts if verdict.verdict != "no")
         return float(quality_count / len(self.verdicts))
 

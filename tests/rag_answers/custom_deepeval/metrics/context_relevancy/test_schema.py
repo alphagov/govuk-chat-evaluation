@@ -25,12 +25,6 @@ class TestVerdictCollection:
             score = verdict_collection.score_verdicts()
             assert score == 0.0
 
-        def test_score_verdicts_empty(self):
-            verdict_collection = VerdictCollection(verdicts=[])
-
-            score = verdict_collection.score_verdicts()
-            assert score == 1.0
-
     class TestUnmetNeeds:
         def test_unmet_needs_with_no_verdicts(self):
             verdict1 = Verdict(verdict="yes", reason=None)

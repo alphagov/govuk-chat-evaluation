@@ -125,31 +125,46 @@ class ContextRelevancyMetric(BaseMetric):
         prompt = self.evaluation_template.truths(
             retrieval_context=retrieval_context,
         )
-        return await self._generate_result_from_model(prompt, schema=TruthCollection)
+
+        truths_collection = await self._generate_result_from_model(
+            prompt, schema=TruthCollection
+        )
+        if len(truths_collection.truths) == 0:
+            raise ValueError("No truths extracted from the context.")
+
+        return truths_collection
 
     async def _generate_information_needs(
         self, input: str
     ) -> InformationNeedsCollection:
         prompt = self.evaluation_template.information_needs(input=input)
-        return await self._generate_result_from_model(
+
+        information_needs_collection = await self._generate_result_from_model(
             prompt, schema=InformationNeedsCollection
         )
+        if len(information_needs_collection.information_needs) == 0:
+            raise ValueError("No information needs extracted from the input.")
+
+        return information_needs_collection
 
     async def _generate_verdicts(
         self,
         information_needs_collection: InformationNeedsCollection,
         truth_collection: TruthCollection,
     ) -> VerdictCollection:
-        if len(information_needs_collection.information_needs) == 0:
-            return VerdictCollection(verdicts=[])
-
         extracted_truths = [truth.model_dump() for truth in truth_collection.truths]
         prompt = self.evaluation_template.verdicts(
             information_needs=information_needs_collection.information_needs,
             extracted_truths=extracted_truths,
         )
 
-        return await self._generate_result_from_model(prompt, schema=VerdictCollection)
+        verdicts_collection = await self._generate_result_from_model(
+            prompt, schema=VerdictCollection
+        )
+        if len(verdicts_collection.verdicts) == 0:
+            raise ValueError("No verdicts generated for the information needs.")
+
+        return verdicts_collection
 
     def _calculate_score(self, verdicts: VerdictCollection) -> float:
         score = verdicts.score_verdicts()
