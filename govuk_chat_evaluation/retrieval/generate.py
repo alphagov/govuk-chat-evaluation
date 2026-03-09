@@ -35,14 +35,15 @@ def generate_inputs_to_evaluation_results(
             "evaluation:search_results_for_question",
             env,
         )
+        results = result["results"]
         exact_paths_chunks_and_scores = [
             SearchResult(
                 exact_path=item["exact_path"],
                 chunk_uid=item["chunk_uid"],
                 weighted_score=item["weighted_score"],
-                semantic_score=item["semantic_score"],
+                semantic_score=item["score"],
             )
-            for item in result
+            for item in results
         ]
 
         return EvaluationResult(
