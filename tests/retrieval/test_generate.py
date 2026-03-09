@@ -157,6 +157,30 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
     )
 
 
+def test_generate_inputs_to_evaluation_results_includes_opensearch_index_in_env_when_present(
+    run_rake_task_mock,
+):
+    generate_inputs = [
+        GenerateInput(
+            question="Question 1",
+            expected_exact_paths=["/foo", "/bar"],
+            expected_chunk_uids=["uid1", "uid2"],
+            opensearch_index="custom-index",
+        ),
+    ]
+
+    generate_inputs_to_evaluation_results("titan", generate_inputs)
+
+    run_rake_task_mock.assert_called_with(
+        "evaluation:search_results_for_question",
+        {
+            "INPUT": "Question 1",
+            "EMBEDDING_PROVIDER": "titan",
+            "OPENSEARCH_INDEX": "custom-index",
+        },
+    )
+
+
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
     path = generate_and_write_dataset(mock_input_data, "titan", mock_project_root)
