@@ -43,7 +43,7 @@ def run_rake_task_mock(mocker):
             }
         else:
             return {
-                "opensearch_index": "test-index",
+                "opensearch_index": "custom-index",
                 "results": [
                     {
                         "exact_path": "/path1",
@@ -83,6 +83,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
+            opensearch_index="custom-index",
         ),
     ]
     expected_results = [
@@ -90,6 +91,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 1",
             expected_exact_paths=["/foo"],
             expected_chunk_uids=["uid1"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/foo",
@@ -115,6 +117,8 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
+            expected_opensearch_index="custom-index",
+            actual_opensearch_index="custom-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",

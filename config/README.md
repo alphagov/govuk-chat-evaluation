@@ -41,3 +41,16 @@ There may be situations where you want to run an evaluation using an unsupported
 3. Add the model to the `MODEL_IDS` constant in the [BedrockModels module](https://github.com/alphagov/govuk-chat/blob/806a05dc9093d7c1ba2089086576e6a1094f484e/lib/bedrock_models.rb#L1). The key used should match the model key used in step 1.
 4. Update the array in the [SUPPORTED_MODELS constant](https://github.com/search?q=repo%3Aalphagov%2Fgovuk-chat+SUPPORTED_MODELS&type=code) for the relevant component to include the new model.
 5. Follow the guidance above on updating the configuration or passing the model via a CLI argument.
+
+### Configuring the retrieval OpenSearch index
+
+You can configure which OpenSearch index to use when generating an input by updating the JSON to include an additional key–value pair where the key is `opensearch_index` and the value is the index you would like to use:
+
+```
+{"opensearch_index": "<opensearch-index-name>", ...}
+```
+
+This value is used to populate the `OPENSEARCH_INDEX` environment variable in Chat, which scopes OpenSearch requests to the specified index.
+
+You will still need to configure the [OPENSEARCH_URL, OPENSEARCH_USERNAME and OPENSEARCH_PASSWORD environment variables](https://github.com/alphagov/govuk-chat/blob/09daea62fa3319f527bf734f40fead2f7c928595/.env.example#L5-L7) in your local Ruby application
+so that they point to the correct OpenSearch cluster.

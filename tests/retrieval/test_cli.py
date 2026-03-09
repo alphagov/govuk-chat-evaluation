@@ -59,6 +59,7 @@ def mock_data_generation(mocker):
             question="Question",
             expected_exact_paths=["/foo", "/bar"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/foo",
@@ -78,6 +79,7 @@ def mock_data_generation(mocker):
             question="Question",
             expected_exact_paths=["/foo"],
             expected_chunk_uids=["uid1"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/bar",

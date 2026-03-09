@@ -39,6 +39,7 @@ def generate_inputs_to_evaluation_results(
             "evaluation:search_results_for_question",
             env,
         )
+        actual_opensearch_index = result["opensearch_index"]
         results = result["results"]
         exact_paths_chunks_and_scores = [
             SearchResult(
@@ -54,7 +55,9 @@ def generate_inputs_to_evaluation_results(
             question=input.question,
             expected_exact_paths=input.expected_exact_paths,
             expected_chunk_uids=input.expected_chunk_uids,
+            expected_opensearch_index=input.opensearch_index,
             actual_search_results=exact_paths_chunks_and_scores,
+            actual_opensearch_index=actual_opensearch_index,
         )
 
     return asyncio.run(
