@@ -16,45 +16,51 @@ from govuk_chat_evaluation.retrieval.generate import (
 def run_rake_task_mock(mocker):
     async def default_side_effect(_, env):
         if env["INPUT"] == "Question 1":
-            return [
-                {
-                    "exact_path": "/foo",
-                    "chunk_uid": "uid1",
-                    "plain_content": "Content for foo",
-                    "weighted_score": 1.0,
-                    "semantic_score": 1.0,
-                },
-                {
-                    "exact_path": "/bar",
-                    "chunk_uid": "uid2",
-                    "plain_content": "Content for bar",
-                    "weighted_score": 0.8,
-                    "semantic_score": 0.9,
-                },
-                {
-                    "exact_path": "/baz",
-                    "chunk_uid": "uid3",
-                    "weighted_score": 0.5,
-                    "semantic_score": 0.5,
-                },
-            ]
+            return {
+                "opensearch_index": "test-index",
+                "results": [
+                    {
+                        "exact_path": "/foo",
+                        "chunk_uid": "uid1",
+                        "weighted_score": 1.0,
+                        "score": 1.0,
+                    },
+                    {
+                        "exact_path": "/bar",
+                        "chunk_uid": "uid2",
+                        "weighted_score": 0.8,
+                        "score": 0.9,
+                    },
+                    {
+                        "exact_path": "/baz",
+                        "chunk_uid": "uid3",
+                        "weighted_score": 0.5,
+                        "score": 0.5,
+                    },
+                ],
+                "rejected_results": [],
+                "metrics": {},
+            }
         else:
-            return [
-                {
-                    "exact_path": "/path1",
-                    "chunk_uid": "uid4",
-                    "plain_content": "Content for path1",
-                    "weighted_score": 1.0,
-                    "semantic_score": 1.0,
-                },
-                {
-                    "exact_path": "/path2",
-                    "chunk_uid": "uid5",
-                    "plain_content": "Content for path2",
-                    "weighted_score": 0.9,
-                    "semantic_score": 0.9,
-                },
-            ]
+            return {
+                "opensearch_index": "custom-index",
+                "results": [
+                    {
+                        "exact_path": "/path1",
+                        "chunk_uid": "uid4",
+                        "weighted_score": 1.0,
+                        "score": 1.0,
+                    },
+                    {
+                        "exact_path": "/path2",
+                        "chunk_uid": "uid5",
+                        "weighted_score": 0.9,
+                        "score": 0.9,
+                    },
+                ],
+                "rejected_results": [],
+                "metrics": {},
+            }
 
     mock = mocker.patch(
         "govuk_chat_evaluation.retrieval.generate.run_rake_task",
@@ -77,6 +83,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
+            opensearch_index="custom-index",
         ),
     ]
     expected_results = [
@@ -84,6 +91,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 1",
             expected_exact_paths=["/foo"],
             expected_chunk_uids=["uid1"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/foo",
@@ -109,6 +117,8 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
+            expected_opensearch_index="custom-index",
+            actual_opensearch_index="custom-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -148,6 +158,30 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
     run_rake_task_mock.assert_called_with(
         "evaluation:search_results_for_question",
         {"INPUT": "Question 1", "EMBEDDING_PROVIDER": "titan"},
+    )
+
+
+def test_generate_inputs_to_evaluation_results_includes_opensearch_index_in_env_when_present(
+    run_rake_task_mock,
+):
+    generate_inputs = [
+        GenerateInput(
+            question="Question 1",
+            expected_exact_paths=["/foo", "/bar"],
+            expected_chunk_uids=["uid1", "uid2"],
+            opensearch_index="custom-index",
+        ),
+    ]
+
+    generate_inputs_to_evaluation_results("titan", generate_inputs)
+
+    run_rake_task_mock.assert_called_with(
+        "evaluation:search_results_for_question",
+        {
+            "INPUT": "Question 1",
+            "EMBEDDING_PROVIDER": "titan",
+            "OPENSEARCH_INDEX": "custom-index",
+        },
     )
 
 

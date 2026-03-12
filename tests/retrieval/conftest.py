@@ -10,6 +10,8 @@ def mock_input_data(mock_project_root):
             "question": "Question 1",
             "expected_exact_paths": ["/foo", "/bar"],
             "expected_chunk_uids": ["uid1", "uid2"],
+            "expected_opensearch_index": None,
+            "actual_opensearch_index": "test-index",
             "actual_search_results": [
                 {
                     "exact_path": "/foo",
@@ -29,6 +31,8 @@ def mock_input_data(mock_project_root):
             "question": "Question 2",
             "expected_exact_paths": ["/foo"],
             "expected_chunk_uids": ["uid1"],
+            "expected_opensearch_index": None,
+            "actual_opensearch_index": "test-index",
             "actual_search_results": [
                 {
                     "exact_path": "/bar",
@@ -42,6 +46,8 @@ def mock_input_data(mock_project_root):
             "question": "Question 3",
             "expected_exact_paths": ["/foo"],
             "expected_chunk_uids": ["uid1"],
+            "expected_opensearch_index": None,
+            "actual_opensearch_index": "test-index",
             "actual_search_results": [],
         },
     ]

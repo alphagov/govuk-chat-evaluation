@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel
 from sklearn.metrics import (
@@ -31,6 +31,8 @@ class EvaluationResult(BaseModel):
     # than using chunk_uids, but all calculations are done using expected_chunk_uids and actual_chunk_uids.
     expected_exact_paths: list[str]
     expected_chunk_uids: list[str]
+    expected_opensearch_index: Optional[str] = None
+    actual_opensearch_index: str
     actual_search_results: list[SearchResult]
 
     @property
@@ -127,6 +129,8 @@ class EvaluationResult(BaseModel):
             "expected_exact_paths": self.expected_exact_paths,
             "expected_chunk_uids": self.expected_chunk_uids,
             "actual_search_results": tuples,
+            "expected_opensearch_index": self.expected_opensearch_index,
+            "actual_opensearch_index": self.actual_opensearch_index,
             "precision": round(self.precision(), DECIMAL_PLACES),
             "recall": round(self.recall(), DECIMAL_PLACES),
             "f1_score": round(self.f1_score(), DECIMAL_PLACES),

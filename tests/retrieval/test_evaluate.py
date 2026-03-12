@@ -19,6 +19,8 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2", "/path3", "/path4"],
             expected_chunk_uids=["uid1", "uid2", "uid3", "uid4"],
+            expected_opensearch_index="test-index-1",
+            actual_opensearch_index="test-index-2",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -36,6 +38,8 @@ class TestEvaluationResult:
                 "expected_exact_paths": ["/path1", "/path2", "/path3", "/path4"],
                 "expected_chunk_uids": ["uid1", "uid2", "uid3", "uid4"],
                 "actual_search_results": [("/path1", "uid1", 0.9, 0.9)],
+                "expected_opensearch_index": "test-index-1",
+                "actual_opensearch_index": "test-index-2",
                 "precision": 1.0,
                 "recall": 0.25,
                 "f1_score": 0.4,
@@ -55,6 +59,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -72,6 +77,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=[],
             expected_chunk_uids=[],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -95,6 +101,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -130,6 +137,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[],
         )
 
@@ -140,6 +148,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -169,6 +178,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=[],
             expected_chunk_uids=[],
+            actual_opensearch_index="test-index",
             actual_search_results=[],
         )
 
@@ -179,6 +189,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -202,6 +213,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=[],
             expected_chunk_uids=[],
+            actual_opensearch_index="test-index",
             actual_search_results=[],
         )
 
@@ -212,6 +224,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -235,6 +248,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -258,6 +272,7 @@ class TestEvaluationResult:
             question="Test question",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid1", "uid2"],
+            actual_opensearch_index="test-index",
             actual_search_results=[
                 SearchResult(
                     exact_path="/path1",
@@ -285,6 +300,7 @@ class TestAggregateResults:
                 question="Q1",
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
+                actual_opensearch_index="test-index",
                 actual_search_results=[
                     SearchResult(
                         exact_path="/path1",
@@ -304,6 +320,7 @@ class TestAggregateResults:
                 question="Q2",
                 expected_exact_paths=["/path1"],
                 expected_chunk_uids=["uid1"],
+                actual_opensearch_index="test-index",
                 actual_search_results=[
                     SearchResult(
                         exact_path="/path3",
@@ -317,6 +334,7 @@ class TestAggregateResults:
                 question="Q3",
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
+                actual_opensearch_index="test-index",
                 actual_search_results=[
                     SearchResult(
                         exact_path="/path1",
@@ -330,6 +348,7 @@ class TestAggregateResults:
                 question="Q4",
                 expected_exact_paths=["/path1"],
                 expected_chunk_uids=["uid1"],
+                actual_opensearch_index="test-index",
                 actual_search_results=[
                     SearchResult(
                         exact_path="/path1",
@@ -355,6 +374,7 @@ class TestAggregateResults:
                 question="Q5",
                 expected_exact_paths=["/path1", "/path2"],
                 expected_chunk_uids=["uid1", "uid2"],
+                actual_opensearch_index="test-index",
                 actual_search_results=[
                     SearchResult(
                         exact_path="/path1",
@@ -468,6 +488,8 @@ def mock_evaluation_data_file(tmp_path):
             "question": "Question 1",
             "expected_exact_paths": ["/path1", "/path2"],
             "expected_chunk_uids": ["uid1", "uid2"],
+            "expected_opensearch_index": None,
+            "actual_opensearch_index": "test-index",
             "actual_search_results": [
                 {
                     "exact_path": "/path1",
@@ -487,6 +509,8 @@ def mock_evaluation_data_file(tmp_path):
             "question": "Question 2",
             "expected_exact_paths": ["/path1"],
             "expected_chunk_uids": ["uid1"],
+            "expected_opensearch_index": None,
+            "actual_opensearch_index": "test-index",
             "actual_search_results": [
                 {
                     "exact_path": "/path3",
