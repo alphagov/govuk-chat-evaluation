@@ -76,6 +76,16 @@ class TestEvaluationTestCase:
         assert "VAT" in llm_test_case.retrieval_context[0]
         assert "Some HTML about VAT" in llm_test_case.retrieval_context[0]
 
+        assert isinstance(llm_test_case.additional_metadata, dict)
+        assert (
+            llm_test_case.additional_metadata["expected_opensearch_index"]
+            == evaluation_test_case.expected_opensearch_index
+        )
+        assert (
+            llm_test_case.additional_metadata["actual_opensearch_index"]
+            == evaluation_test_case.actual_opensearch_index
+        )
+
 
 class TestGenerateInput:
     def test_generate_input_id_defaults_to_uuid(self):
