@@ -66,6 +66,7 @@ def generate_inputs_to_evaluation_test_cases(
             llm_answer=result["message"],
             structured_contexts=structured_contexts,
             expected_opensearch_index=input.expected_opensearch_index,
+            actual_opensearch_index=result["opensearch_index"],
         )
 
     return asyncio.run(

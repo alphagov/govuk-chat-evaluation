@@ -17,12 +17,17 @@ def mock_input_data(mock_project_root):
             "llm_answer": "Hi",
             "ideal_answer": "Hello",
             "structured_contexts": [],
+            "expected_opensearch_index": "test-index-1",
+            "actual_opensearch_index": "test-index-2",
         },
         {
             "question": "Question 2",
             "llm_answer": "Bye",
             "ideal_answer": "Bye",
             "structured_contexts": [],
+            "structured_contexts": [],
+            "expected_opensearch_index": "test-index-2",
+            "actual_opensearch_index": "test-index-2",
         },
     ]
 

@@ -44,6 +44,7 @@ class GenerateInput(BaseModel):
 class EvaluationTestCase(GenerateInput):
     llm_answer: str
     structured_contexts: list[StructuredContext]
+    actual_opensearch_index: str
 
     def to_llm_test_case(self) -> LLMTestCase:
         return LLMTestCase(

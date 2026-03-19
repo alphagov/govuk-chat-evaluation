@@ -60,6 +60,8 @@ class TestEvaluationTestCase:
             ideal_answer=ideal_answer,
             llm_answer="Fine",
             structured_contexts=[structured_context],
+            actual_opensearch_index="test-index",
+            expected_opensearch_index="test-index",
         )
 
         llm_test_case = evaluation_test_case.to_llm_test_case()
