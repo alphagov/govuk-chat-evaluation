@@ -200,3 +200,27 @@ class TestConvertDeepEvalOutput:
         )
 
         assert results[0].retrieval_context == []
+
+    def test_raises_key_error_if_actual_opensearch_index_missing_from_metadata(
+        self, mock_deepeval_results
+    ):
+        test_cases = mock_deepeval_results[0]
+        first_test_case = test_cases[0]
+        first_test_case.additional_metadata = {"expected_opensearch_index": "index_1"}
+
+        with pytest.raises(KeyError) as exc_info:
+            convert_deepeval_output_to_evaluation_results([test_cases])
+
+        assert "actual_opensearch_index" in str(exc_info.value)
+
+    def test_raises_key_error_if_expected_opensearch_index_missing_from_metadata(
+        self, mock_deepeval_results
+    ):
+        test_cases = mock_deepeval_results[0]
+        first_test_case = test_cases[0]
+        first_test_case.additional_metadata = {"actual_opensearch_index": "index_1"}
+
+        with pytest.raises(KeyError) as exc_info:
+            convert_deepeval_output_to_evaluation_results([test_cases])
+
+        assert "expected_opensearch_index" in str(exc_info.value)

@@ -50,6 +50,7 @@ class TestAggregateResults:
                     RunMetricOutput(run=0, metric="bias", score=0.1),
                     RunMetricOutput(run=0, metric="bias", score=0.0),
                 ],
+                actual_opensearch_index="test-index",
             ),
             EvaluationResult(
                 id="Test2",
@@ -67,6 +68,7 @@ class TestAggregateResults:
                     RunMetricOutput(run=0, metric="bias", score=0.2),
                     RunMetricOutput(run=1, metric="bias", score=0.1),
                 ],
+                actual_opensearch_index="test-index",
             ),
         ]
 
@@ -187,6 +189,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
             run_metric_outputs=[
                 RunMetricOutput(run=0, metric="faithfulness", score=1.0),
             ],
+            actual_opensearch_index="test-index",
         ),
         EvaluationResult(
             id="fails",
@@ -202,6 +205,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
                     error="rate limited",
                 ),
             ],
+            actual_opensearch_index="test-index",
         ),
     ]
     mocker.patch(

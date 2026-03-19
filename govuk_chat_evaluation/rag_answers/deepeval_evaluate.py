@@ -33,6 +33,8 @@ class EvaluationResult:
     actual_output: str
     retrieval_context: list[str]
     run_metric_outputs: list[RunMetricOutput]
+    actual_opensearch_index: str
+    expected_opensearch_index: Optional[str] = None
     expected_output: Optional[str] = None
 
 
@@ -122,6 +124,8 @@ def convert_deepeval_output_to_evaluation_results(
                 input='input_1',
                 actual_output='actual_output_1',
                 expected_output='expected_output_1',
+                actual_opensearch_index='actual_opensearch_index_1',
+                expected_opensearch_index='expected_opensearch_index_1',
                 retrieval_context=['context_1'],
                 evaluation_results=[
                     RunMetricOutput(
@@ -181,6 +185,10 @@ def convert_deepeval_output_to_evaluation_results(
                         )
                     )
 
+        additional_metadata = sample_result.additional_metadata or {}
+        expected_opensearch_index = additional_metadata["expected_opensearch_index"]
+        actual_opensearch_index = additional_metadata["actual_opensearch_index"]
+
         aggregated_results.append(
             EvaluationResult(
                 id=sample_result.name,
@@ -189,6 +197,8 @@ def convert_deepeval_output_to_evaluation_results(
                 expected_output=sample_result.expected_output,
                 retrieval_context=sample_result.retrieval_context or [],
                 run_metric_outputs=evaluation_outputs,
+                expected_opensearch_index=expected_opensearch_index,
+                actual_opensearch_index=actual_opensearch_index,
             )
         )
 

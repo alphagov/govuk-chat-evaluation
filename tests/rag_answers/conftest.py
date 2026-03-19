@@ -97,6 +97,7 @@ def mock_deepeval_results():
             ],
             success=True,
             conversational=False,
+            additional_metadata={"expected_opensearch_index": "test-index", "actual_opensearch_index": "test-index"},
         )
 
         results.append(result)
