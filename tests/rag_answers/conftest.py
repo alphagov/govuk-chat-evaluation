@@ -25,7 +25,6 @@ def mock_input_data(mock_project_root):
             "llm_answer": "Bye",
             "ideal_answer": "Bye",
             "structured_contexts": [],
-            "structured_contexts": [],
             "expected_opensearch_index": "test-index-2",
             "actual_opensearch_index": "test-index-2",
         },
@@ -97,7 +96,10 @@ def mock_deepeval_results():
             ],
             success=True,
             conversational=False,
-            additional_metadata={"expected_opensearch_index": "test-index", "actual_opensearch_index": "test-index"},
+            additional_metadata={
+                "expected_opensearch_index": "test-index",
+                "actual_opensearch_index": "test-index",
+            },
         )
 
         results.append(result)

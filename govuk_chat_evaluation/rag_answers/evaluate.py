@@ -113,13 +113,24 @@ class AggregatedResults:
                         "metric": evaluation_output.metric,
                         "score": evaluation_output.score,
                         "error": evaluation_output.error,
+                        "expected_opensearch_index": eval_result.expected_opensearch_index,
+                        "actual_opensearch_index": eval_result.actual_opensearch_index,
                     }
                 )
 
         df = pd.DataFrame(data)
 
         return (
-            df.groupby(["id", "input", "metric"])["score"]
+            df.groupby(
+                [
+                    "id",
+                    "input",
+                    "expected_opensearch_index",
+                    "actual_opensearch_index",
+                    "metric",
+                ],
+                dropna=False,
+            )["score"]
             .agg(["mean", "std", "count"])
             .unstack()
             .reset_index()
