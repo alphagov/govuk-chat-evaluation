@@ -43,6 +43,8 @@ def generate_inputs_to_evaluation_test_cases(
             env["BEDROCK_CLAUDE_STRUCTURED_ANSWER_COMPOSER_MODEL"] = (
                 claude_generation_model
             )
+        if input.expected_opensearch_index:
+            env["OPENSEARCH_INDEX"] = input.expected_opensearch_index
 
         result = await run_rake_task(
             f"evaluation:generate_rag_structured_answer_response[{provider}]",
@@ -63,6 +65,7 @@ def generate_inputs_to_evaluation_test_cases(
             ideal_answer=input.ideal_answer,
             llm_answer=result["message"],
             structured_contexts=structured_contexts,
+            expected_opensearch_index=input.expected_opensearch_index,
         )
 
     return asyncio.run(

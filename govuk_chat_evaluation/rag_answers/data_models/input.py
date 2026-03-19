@@ -38,6 +38,7 @@ class GenerateInput(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     question: str
     ideal_answer: Optional[str] = None
+    expected_opensearch_index: Optional[str] = None
 
 
 class EvaluationTestCase(GenerateInput):
