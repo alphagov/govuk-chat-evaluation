@@ -19,6 +19,7 @@ def run_rake_task_mock(mocker):
             "secondary_topic": "tax",
             "status": "success",
             "error_message": None,
+            "metrics": {"model": "model_name"},
         },
     )
 
@@ -32,6 +33,7 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
             "secondary_topic": item["actual_secondary_topic"],
             "status": item["status"],
             "error_message": item["error_message"],
+            "metrics": {"model": item["model"]},
         }
         for item in mock_data
     ]
@@ -56,6 +58,7 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
             actual_secondary_topic=item["actual_secondary_topic"],
             status=item["status"],
             error_message=item["error_message"],
+            model=item["model"],
         )
         for item in mock_data
     ]
