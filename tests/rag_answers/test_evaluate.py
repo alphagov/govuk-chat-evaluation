@@ -46,6 +46,7 @@ class TestAggregateResults:
                 actual_output="Yes",
                 expected_output="Yes, VAT is a tax.",
                 retrieval_context=[],
+                model="model_name",
                 run_metric_outputs=[
                     RunMetricOutput(run=0, metric="faithfulness", score=1.0),
                     RunMetricOutput(run=1, metric="faithfulness", score=0.8),
@@ -61,6 +62,7 @@ class TestAggregateResults:
                 actual_output="Completion rate limited",
                 expected_output="Completion rate limited",
                 retrieval_context=[],
+                model="model_name",
                 run_metric_outputs=[
                     RunMetricOutput(run=0, metric="faithfulness", score=1.0),
                     RunMetricOutput(
@@ -133,7 +135,7 @@ class TestAggregateResults:
         agg.export_to_csvs(tmp_path)
 
         assert_csv_exists_with_headers(
-            tmp_path / "tidy_results.csv", "actual_output", "expected_output"
+            tmp_path / "tidy_results.csv", "actual_output", "expected_output", "model"
         )
         assert_csv_exists_with_headers(
             tmp_path / "results_per_input.csv", "mean", "std"
@@ -142,6 +144,12 @@ class TestAggregateResults:
             tmp_path / "results_summary.csv", "metric", "median"
         )
 
+        tidy_results = pd.read_csv(tmp_path / "tidy_results.csv")
+        assert list(tidy_results["model"]) == ["model_name", "model_name"]
+
+        per_input = pd.read_csv(tmp_path / "results_per_input.csv", header=[0, 1])
+        assert ("model", "") not in per_input.columns
+
 
 def test_evaluate_and_output_results_runs_evaluation(
     tmp_path, mock_input_data, mock_evaluation_config, mock_run_deepeval_evaluation
@@ -149,6 +157,16 @@ def test_evaluate_and_output_results_runs_evaluation(
     evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
 
     mock_run_deepeval_evaluation.assert_called_once()
+
+
+@pytest.mark.usefixtures("mock_run_deepeval_evaluation")
+def test_evaluate_and_output_results_writes_generation_model_to_tidy_results(
+    tmp_path, mock_input_data, mock_evaluation_config
+):
+    evaluate_and_output_results(tmp_path, mock_input_data, mock_evaluation_config)
+
+    tidy_results = pd.read_csv(tmp_path / "tidy_results.csv")
+    assert list(tidy_results["model"]) == ["model_name", "model_name"]
 
 
 @pytest.mark.usefixtures("mock_run_deepeval_evaluation")
@@ -174,6 +192,7 @@ def test_evaluate_and_output_results_prints_summary(
 
     captured = caplog.text
     assert "Evaluation Results:" in captured
+    assert "Generation model: model_name" in captured
     assert re.search(r"median\s+mean\s+std", captured)
 
 
@@ -213,6 +232,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
             actual_output="Answer",
             expected_output="Expected",
             retrieval_context=[],
+            model="model_name",
             run_metric_outputs=[
                 RunMetricOutput(run=0, metric="faithfulness", score=1.0),
             ],
@@ -224,6 +244,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
             actual_output="Answer",
             expected_output="Expected",
             retrieval_context=[],
+            model="model_name",
             run_metric_outputs=[
                 RunMetricOutput(
                     run=1,

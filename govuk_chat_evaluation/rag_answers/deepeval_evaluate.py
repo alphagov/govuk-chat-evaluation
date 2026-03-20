@@ -34,6 +34,7 @@ class EvaluationResult:
     retrieval_context: list[str]
     run_metric_outputs: list[RunMetricOutput]
     actual_opensearch_index: str
+    model: str
     expected_opensearch_index: Optional[str] = None
     expected_output: Optional[str] = None
 
@@ -169,6 +170,10 @@ def convert_deepeval_output_to_evaluation_results(
 
         # taking the first TestResult for each input to extract static info
         sample_result = run_results[0][0]
+        if sample_result.additional_metadata is None:
+            raise RuntimeError(
+                f"DeepEval result for {sample_result.name!r} missing additional_metadata"
+            )
 
         for run_idx, results in run_results.items():
             for result in results:
@@ -199,6 +204,7 @@ def convert_deepeval_output_to_evaluation_results(
                 run_metric_outputs=evaluation_outputs,
                 expected_opensearch_index=expected_opensearch_index,
                 actual_opensearch_index=actual_opensearch_index,
+                model=sample_result.additional_metadata["model"],
             )
         )
 

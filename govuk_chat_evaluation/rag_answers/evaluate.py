@@ -86,6 +86,7 @@ def evaluate_and_output_results(
     aggregation.export_to_csvs(output_dir)
 
     logging.info("Evaluation Results:")
+    logging.info("Generation model: %s", models[0].model)
     logging.info(aggregation.summary)
 
 
