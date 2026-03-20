@@ -26,6 +26,7 @@ class EvaluationResult(BaseModel):
     actual_outcome: str
     confidence_score: float
     answer: str | None = None
+    model: str
 
     def for_csv(self) -> dict[str, Any]:
         return {**self.model_dump()}
@@ -34,6 +35,7 @@ class EvaluationResult(BaseModel):
 class AggregateResults:
     def __init__(self, evaluation_results: list[EvaluationResult]):
         self.evaluation_results = evaluation_results
+        self.model = evaluation_results[0].model if evaluation_results else ""
 
     @cached_property
     def classification_labels(self) -> list[str]:
@@ -106,6 +108,7 @@ class AggregateResults:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "Model": self.model,
             "Evaluated": len(self.evaluation_results),
             "Accuracy": self.accuracy(),
             "Precision": self.precision(),

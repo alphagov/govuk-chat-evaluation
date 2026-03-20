@@ -2,11 +2,11 @@ import asyncio
 from pathlib import Path
 
 from pydantic import BaseModel
+from typing import Optional
 
 from .evaluate import EvaluationResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
-from typing import Optional
 
 
 class GenerateInput(BaseModel):
@@ -48,9 +48,10 @@ def generate_inputs_to_evaluation_results(
         return EvaluationResult(
             question=input.question,
             expected_outcome=input.expected_outcome,
-            actual_outcome=result["classification"],
-            confidence_score=result["confidence_score"],
-            answer=result["answer"],
+            actual_outcome=result["question_routing_label"],
+            confidence_score=result["question_routing_confidence_score"],
+            answer=result["message"],
+            model=result["metrics"]["question_routing"]["model"],
         )
 
     return asyncio.run(

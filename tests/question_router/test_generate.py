@@ -16,15 +16,17 @@ def run_rake_task_mock(mocker):
     async def default_side_effect(_, env):
         if env["INPUT"] == "Question 1":
             return {
-                "classification": "genuine_rag",
-                "confidence_score": 0.9,
-                "answer": None,
+                "question_routing_label": "genuine_rag",
+                "question_routing_confidence_score": 0.9,
+                "message": None,
+                "metrics": {"question_routing": {"model": "model_name"}},
             }
         else:
             return {
-                "classification": "greetings",
-                "confidence_score": 0.8,
-                "answer": "This is a greetings answer",
+                "question_routing_label": "greetings",
+                "question_routing_confidence_score": 0.8,
+                "message": "This is a greetings answer",
+                "metrics": {"question_routing": {"model": "model_name"}},
             }
 
     mock = mocker.patch(
@@ -55,6 +57,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             actual_outcome="genuine_rag",
             confidence_score=0.9,
             answer=None,
+            model="model_name",
         ),
         EvaluationResult(
             question="Question 2",
@@ -62,6 +65,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             actual_outcome="greetings",
             confidence_score=0.8,
             answer="This is a greetings answer",
+            model="model_name",
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results(

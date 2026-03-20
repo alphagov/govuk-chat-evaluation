@@ -20,6 +20,7 @@ class TestEvaluationResult:
             actual_outcome="greetings",
             confidence_score=0.9,
             answer=None,
+            model="model_name",
         )
 
         assert result.for_csv() == {
@@ -28,6 +29,7 @@ class TestEvaluationResult:
             "actual_outcome": "greetings",
             "confidence_score": 0.9,
             "answer": None,
+            "model": "model_name",
         }
 
 
@@ -41,6 +43,7 @@ class TestAggregateResults:
                 actual_outcome="genuine_rag",
                 confidence_score=0.95,
                 answer=None,
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q2",
@@ -48,6 +51,7 @@ class TestAggregateResults:
                 actual_outcome="about_mps",
                 confidence_score=0.9,
                 answer="This is an about mps answer",
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q3",
@@ -55,6 +59,7 @@ class TestAggregateResults:
                 actual_outcome="genuine_rag",
                 confidence_score=0.5,
                 answer="This is a character fun answer",
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q4",
@@ -62,6 +67,7 @@ class TestAggregateResults:
                 actual_outcome="about_mps",
                 confidence_score=0.3,
                 answer="This is a character fun answer",
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q5",
@@ -69,6 +75,7 @@ class TestAggregateResults:
                 actual_outcome="genuine_rag",
                 confidence_score=0.5,
                 answer=None,
+                model="model_name",
             ),
         ]
 
@@ -124,6 +131,7 @@ class TestAggregateResults:
     def test_to_dict(self, sample_results):
         aggregate = AggregateResults(sample_results)
         assert aggregate.to_dict() == {
+            "Model": "model_name",
             "Evaluated": len(sample_results),
             "Accuracy": aggregate.accuracy(),
             "Precision": aggregate.precision(),
@@ -161,6 +169,7 @@ def mock_evaluation_data_file(tmp_path):
                 "actual_outcome": "genuine_rag",
                 "confidence_score": 0.95,
                 "answer": None,
+                "model": "model_name",
             },
             {
                 "question": "Question 2",
@@ -168,6 +177,7 @@ def mock_evaluation_data_file(tmp_path):
                 "actual_outcome": "about_mps",
                 "confidence_score": 0.95,
                 "answer": "This is an about mps answer",
+                "model": "model_name",
             },
         ],
     )
@@ -184,6 +194,7 @@ def mock_evaluation_data_with_misclassified_cases_file(tmp_path):
                 "actual_outcome": "about_mps",
                 "confidence_score": 0.95,
                 "answer": "This is an about mps answer",
+                "model": "model_name",
             },
             {
                 "question": "Question 2",
@@ -191,6 +202,7 @@ def mock_evaluation_data_with_misclassified_cases_file(tmp_path):
                 "actual_outcome": "genuine_rag",
                 "confidence_score": 0.95,
                 "answer": None,
+                "model": "model_name",
             },
         ],
     )

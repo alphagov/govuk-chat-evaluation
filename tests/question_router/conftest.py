@@ -11,12 +11,14 @@ def mock_input_data(mock_project_root):
             "expected_outcome": "genuine_rag",
             "actual_outcome": "genuine_rag",
             "confidence_score": 0.95,
+            "model": "model_name",
         },
         {
             "question": "Question 2",
             "expected_outcome": "greetings",
             "actual_outcome": "about_mps",
             "confidence_score": 0.8,
+            "model": "model_name",
         },
     ]
 
