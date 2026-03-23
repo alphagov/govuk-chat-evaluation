@@ -14,7 +14,12 @@ def run_rake_task_mock(mocker):
     return mocker.patch(
         "govuk_chat_evaluation.topic_tagger.generate.run_rake_task",
         new_callable=AsyncMock,
-        return_value={"primary_topic": "benefits", "secondary_topic": "tax"},
+        return_value={
+            "primary_topic": "benefits",
+            "secondary_topic": "tax",
+            "status": "success",
+            "error_message": None,
+        },
     )
 
 
@@ -25,6 +30,8 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
         {
             "primary_topic": item["actual_primary_topic"],
             "secondary_topic": item["actual_secondary_topic"],
+            "status": item["status"],
+            "error_message": item["error_message"],
         }
         for item in mock_data
     ]
@@ -47,6 +54,8 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
             actual_primary_topic=item["actual_primary_topic"],
             expected_secondary_topic=item["expected_secondary_topic"],
             actual_secondary_topic=item["actual_secondary_topic"],
+            status=item["status"],
+            error_message=item["error_message"],
         )
         for item in mock_data
     ]
@@ -107,3 +116,5 @@ def test_generate_and_write_dataset(mock_input_data, mock_project_root):
             assert "actual_primary_topic" in parsed
             assert "expected_secondary_topic" in parsed
             assert "actual_secondary_topic" in parsed
+            assert "status" in parsed
+            assert "error_message" in parsed

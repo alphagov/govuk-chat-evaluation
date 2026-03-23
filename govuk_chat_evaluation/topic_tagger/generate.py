@@ -37,6 +37,8 @@ def generate_inputs_to_evaluation_results(
                 actual_primary_topic=result.get("primary_topic"),
                 expected_secondary_topic=input.expected_secondary_topic,
                 actual_secondary_topic=result.get("secondary_topic"),
+                status=result.get("status"),
+                error_message=result.get("error_message"),
             )
         else:
             raise RuntimeError(f"Unexpected result structure {result!r}")

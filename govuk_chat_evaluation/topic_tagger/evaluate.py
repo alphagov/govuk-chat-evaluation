@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from enum import Enum
 
 from pydantic import BaseModel
 from tabulate import tabulate
@@ -8,12 +9,19 @@ from ..file_system import jsonl_to_models, write_csv_results
 import logging
 
 
+class TopicStatus(str, Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+
+
 class EvaluationResult(BaseModel):
     question: str
+    status: TopicStatus
     expected_primary_topic: str
-    actual_primary_topic: str
+    actual_primary_topic: str | None
     expected_secondary_topic: str | None
     actual_secondary_topic: str | None
+    error_message: str | None = None
 
     @property
     def expected_topics(self) -> set[str]:
@@ -61,24 +69,34 @@ class EvaluationResult(BaseModel):
 
 class AggregateResults:
     def __init__(self, evaluation_results: list[EvaluationResult]):
-        self.evaluation_results = evaluation_results
+        self.success_evaluation_results = [
+            r for r in evaluation_results if r.status == TopicStatus.SUCCESS
+        ]
+        self.error_evaluation_results = [
+            r for r in evaluation_results if r.status == TopicStatus.ERROR
+        ]
         self.correct_primary_and_secondary = sum(
-            r.correct_primary_and_secondary() for r in evaluation_results
+            r.correct_primary_and_secondary() for r in self.success_evaluation_results
         )
         self.correct_topics_any_order = sum(
-            r.correct_topics_any_order() for r in evaluation_results
+            r.correct_topics_any_order() for r in self.success_evaluation_results
         )
         self.matched_true_primary_with_primary = sum(
-            r.matched_true_primary_with_primary() for r in evaluation_results
+            r.matched_true_primary_with_primary()
+            for r in self.success_evaluation_results
         )
         self.matched_true_primary_with_either = sum(
-            r.matched_true_primary_with_either() for r in evaluation_results
+            r.matched_true_primary_with_either()
+            for r in self.success_evaluation_results
         )
-        self.matched_any_topic = sum(r.matched_any_topic() for r in evaluation_results)
+        self.matched_any_topic = sum(
+            r.matched_any_topic() for r in self.success_evaluation_results
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "Evaluated": len(self.evaluation_results),
+            "Evaluated": len(self.success_evaluation_results),
+            "Errored": len(self.error_evaluation_results),
             "Correct Primary and Secondary": self.correct_primary_and_secondary,
             "Correct Topics (any order)": self.correct_topics_any_order,
             "Matched True primary with primary": self.matched_true_primary_with_primary,

@@ -7,6 +7,7 @@ import logging
 from govuk_chat_evaluation.topic_tagger.evaluate import (
     AggregateResults,
     EvaluationResult,
+    TopicStatus,
     evaluate_and_output_results,
 )
 
@@ -20,6 +21,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="benefits",
             expected_secondary_topic="tax",
             actual_secondary_topic="tax",
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="Q2",
@@ -27,6 +29,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="tax",
             expected_secondary_topic="tax",
             actual_secondary_topic="benefits",
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="Q3",
@@ -34,6 +37,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="benefits",
             expected_secondary_topic="tax",
             actual_secondary_topic=None,
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="Q4",
@@ -41,6 +45,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="childcare",
             expected_secondary_topic="benefits",
             actual_secondary_topic="tax",
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="Q5",
@@ -48,6 +53,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="tax",
             expected_secondary_topic="tax",
             actual_secondary_topic=None,
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="Q6",
@@ -55,6 +61,16 @@ def sample_results() -> list[EvaluationResult]:
             actual_primary_topic="tax",
             expected_secondary_topic=None,
             actual_secondary_topic="driving",
+            status=TopicStatus.SUCCESS,
+        ),
+        EvaluationResult(
+            question="Q7",
+            expected_primary_topic="benefits",
+            actual_primary_topic=None,
+            expected_secondary_topic=None,
+            actual_secondary_topic=None,
+            status=TopicStatus.ERROR,
+            error_message="An error occurred while processing the question",
         ),
     ]
 
@@ -107,6 +123,7 @@ class TestEvaluationResult:
             actual_primary_topic="tax",
             expected_secondary_topic=None,
             actual_secondary_topic=None,
+            status=TopicStatus.SUCCESS,
         )
         assert not result.matched_any_topic()
 
@@ -124,6 +141,7 @@ class TestAggregateResults:
         result = aggregate.to_dict()
 
         assert result["Evaluated"] == 6
+        assert result["Errored"] == 1
         assert result["Correct Primary and Secondary"] == 1
         assert result["Correct Topics (any order)"] == 2
         assert result["Matched True primary with primary"] == 2
@@ -134,6 +152,7 @@ class TestAggregateResults:
         aggregate = AggregateResults(sample_results)
         expected_keys = {
             "Evaluated",
+            "Errored",
             "Correct Primary and Secondary",
             "Correct Topics (any order)",
             "Matched True primary with primary",
