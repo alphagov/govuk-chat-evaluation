@@ -11,6 +11,8 @@ def mock_data():
             "actual_primary_topic": "benefits",
             "expected_secondary_topic": "tax",
             "actual_secondary_topic": "tax",
+            "status": "success",
+            "error_message": None,
         },
         {
             "question": "Question 2",
@@ -18,13 +20,17 @@ def mock_data():
             "actual_primary_topic": "tax",
             "expected_secondary_topic": None,
             "actual_secondary_topic": None,
+            "status": "success",
+            "error_message": None,
         },
         {
             "question": "Question 3",
             "expected_primary_topic": "tax",
-            "actual_primary_topic": "benefits",
+            "actual_primary_topic": None,
             "expected_secondary_topic": None,
-            "actual_secondary_topic": "tax",
+            "actual_secondary_topic": None,
+            "status": "error",
+            "error_message": "An error occurred while processing the question",
         },
     ]
 

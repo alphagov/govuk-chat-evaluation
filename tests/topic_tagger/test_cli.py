@@ -3,7 +3,7 @@ import yaml
 from click.testing import CliRunner
 
 from govuk_chat_evaluation.topic_tagger.cli import main
-from govuk_chat_evaluation.topic_tagger.evaluate import EvaluationResult
+from govuk_chat_evaluation.topic_tagger.evaluate import EvaluationResult, TopicStatus
 
 
 @pytest.fixture(autouse=True)
@@ -32,6 +32,7 @@ def mock_data_generation(mocker):
             actual_primary_topic="business",
             expected_secondary_topic="tax",
             actual_secondary_topic="tax",
+            status=TopicStatus.SUCCESS,
         ),
         EvaluationResult(
             question="What benefits am I eligible for?",
@@ -39,6 +40,7 @@ def mock_data_generation(mocker):
             actual_primary_topic="business",
             expected_secondary_topic=None,
             actual_secondary_topic=None,
+            status=TopicStatus.SUCCESS,
         ),
     ]
 
