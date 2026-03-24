@@ -60,6 +60,8 @@ class TestEvaluationTestCase:
             ideal_answer=ideal_answer,
             llm_answer="Fine",
             structured_contexts=[structured_context],
+            actual_opensearch_index="test-index",
+            expected_opensearch_index="test-index",
         )
 
         llm_test_case = evaluation_test_case.to_llm_test_case()
@@ -73,6 +75,16 @@ class TestEvaluationTestCase:
         assert all(isinstance(chunk, str) for chunk in llm_test_case.retrieval_context)
         assert "VAT" in llm_test_case.retrieval_context[0]
         assert "Some HTML about VAT" in llm_test_case.retrieval_context[0]
+
+        assert isinstance(llm_test_case.additional_metadata, dict)
+        assert (
+            llm_test_case.additional_metadata["expected_opensearch_index"]
+            == evaluation_test_case.expected_opensearch_index
+        )
+        assert (
+            llm_test_case.additional_metadata["actual_opensearch_index"]
+            == evaluation_test_case.actual_opensearch_index
+        )
 
 
 class TestGenerateInput:

@@ -3,6 +3,8 @@ import pandas as pd
 import re
 import yaml
 import logging
+import numpy as np
+from pandas.testing import assert_series_equal
 
 from govuk_chat_evaluation.rag_answers.data_models import (
     TaskConfig,
@@ -50,6 +52,8 @@ class TestAggregateResults:
                     RunMetricOutput(run=0, metric="bias", score=0.1),
                     RunMetricOutput(run=0, metric="bias", score=0.0),
                 ],
+                expected_opensearch_index="test-index-1",
+                actual_opensearch_index="test-index-2",
             ),
             EvaluationResult(
                 id="Test2",
@@ -67,6 +71,7 @@ class TestAggregateResults:
                     RunMetricOutput(run=0, metric="bias", score=0.2),
                     RunMetricOutput(run=1, metric="bias", score=0.1),
                 ],
+                actual_opensearch_index="test-index-1",
             ),
         ]
 
@@ -74,10 +79,13 @@ class TestAggregateResults:
         metric_averages = AggregatedResults(
             mock_evaluation_results
         ).per_input_metric_averages
+
         assert isinstance(metric_averages, pd.DataFrame)
         assert list(metric_averages.columns) == [
             ("id", ""),
             ("input", ""),
+            ("expected_opensearch_index", ""),
+            ("actual_opensearch_index", ""),
             ("mean", "bias"),
             ("mean", "faithfulness"),
             ("std", "bias"),
@@ -92,6 +100,27 @@ class TestAggregateResults:
         ]
         assert list(metric_averages[("n_datapoints", "bias")]) == [2, 2]
         assert list(metric_averages[("n_datapoints", "faithfulness")]) == [2, 1]
+
+        expected_opensearch_indexes_rows = pd.Series(
+            ["test-index-1", np.nan], name=("expected_opensearch_index", "")
+        )
+        actual_expected_opensearch_indexes_rows = metric_averages[
+            ("expected_opensearch_index", "")
+        ]
+        expected_actual_opensearch_indexes_rows = pd.Series(
+            ["test-index-2", "test-index-1"], name=("actual_opensearch_index", "")
+        )
+        actual_actual_opensearch_indexes_rows = metric_averages[
+            ("actual_opensearch_index", "")
+        ]
+
+        assert_series_equal(
+            expected_opensearch_indexes_rows, actual_expected_opensearch_indexes_rows
+        )
+        assert_series_equal(
+            expected_actual_opensearch_indexes_rows,
+            actual_actual_opensearch_indexes_rows,
+        )
 
     def test_summary(self, mock_evaluation_results):
         summary = AggregatedResults(mock_evaluation_results).summary
@@ -187,6 +216,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
             run_metric_outputs=[
                 RunMetricOutput(run=0, metric="faithfulness", score=1.0),
             ],
+            actual_opensearch_index="test-index",
         ),
         EvaluationResult(
             id="fails",
@@ -202,6 +232,7 @@ def test_evaluate_and_output_results_logs_metric_errors(
                     error="rate limited",
                 ),
             ],
+            actual_opensearch_index="test-index",
         ),
     ]
     mocker.patch(

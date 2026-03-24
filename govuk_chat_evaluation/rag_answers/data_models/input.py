@@ -38,11 +38,13 @@ class GenerateInput(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     question: str
     ideal_answer: Optional[str] = None
+    expected_opensearch_index: Optional[str] = None
 
 
 class EvaluationTestCase(GenerateInput):
     llm_answer: str
     structured_contexts: list[StructuredContext]
+    actual_opensearch_index: str
 
     def to_llm_test_case(self) -> LLMTestCase:
         return LLMTestCase(
@@ -53,5 +55,9 @@ class EvaluationTestCase(GenerateInput):
             retrieval_context=[
                 ctx.to_flattened_string() for ctx in self.structured_contexts
             ],
-            additional_metadata={"structured_contexts": self.structured_contexts},
+            additional_metadata={
+                "structured_contexts": self.structured_contexts,
+                "expected_opensearch_index": self.expected_opensearch_index,
+                "actual_opensearch_index": self.actual_opensearch_index,
+            },
         )
