@@ -22,6 +22,7 @@ class EvaluationResult(BaseModel):
     expected_secondary_topic: str | None
     actual_secondary_topic: str | None
     error_message: str | None = None
+    model: str
 
     @property
     def expected_topics(self) -> set[str]:
@@ -75,6 +76,7 @@ class AggregateResults:
         self.error_evaluation_results = [
             r for r in evaluation_results if r.status == TopicStatus.ERROR
         ]
+        self.model = evaluation_results[0].model if evaluation_results else ""
         self.correct_primary_and_secondary = sum(
             r.correct_primary_and_secondary() for r in self.success_evaluation_results
         )
@@ -97,6 +99,7 @@ class AggregateResults:
         return {
             "Evaluated": len(self.success_evaluation_results),
             "Errored": len(self.error_evaluation_results),
+            "Model": self.model,
             "Correct Primary and Secondary": self.correct_primary_and_secondary,
             "Correct Topics (any order)": self.correct_topics_any_order,
             "Matched True primary with primary": self.matched_true_primary_with_primary,

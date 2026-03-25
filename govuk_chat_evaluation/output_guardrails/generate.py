@@ -54,6 +54,7 @@ def generate_inputs_to_evaluation_results(
             actual_triggered=result["triggered"],
             expected_guardrails=input.expected_guardrails,
             actual_guardrails=result["guardrails"],
+            model=result["model"],
         )
 
     return asyncio.run(

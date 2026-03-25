@@ -16,6 +16,7 @@ class EvaluationResult(BaseModel):
     question: str
     expected_outcome: bool
     actual_outcome: bool
+    model: str
 
     @property
     def classification(self) -> str:
@@ -36,6 +37,7 @@ class EvaluationResult(BaseModel):
 class AggregateResults:
     def __init__(self, evaluation_results: list[EvaluationResult]):
         self.evaluation_results = evaluation_results
+        self.model = evaluation_results[0].model if evaluation_results else ""
         counter = Counter(result.classification for result in evaluation_results)
         self.true_positives = counter.get("true_positive", 0)
         self.true_negatives = counter.get("true_negative", 0)
@@ -66,6 +68,7 @@ class AggregateResults:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "Model": self.model,
             "Evaluated": len(self.evaluation_results),
             "Precision": self.precision(),
             "Recall": self.recall(),

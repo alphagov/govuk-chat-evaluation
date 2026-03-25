@@ -48,6 +48,7 @@ def run_rake_task_mock(mocker):
         "message": "An answer",
         "sources": sources,
         "opensearch_index": "test-index-1",
+        "metrics": {"structured_answer": {"model": "model_name"}},
     }
     return mock
 
@@ -80,6 +81,7 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
             structured_contexts=[structured_context],
             expected_opensearch_index=None,
             actual_opensearch_index="test-index-1",
+            model="model_name",
         ),
         EvaluationTestCase(
             id="question-2",
@@ -89,6 +91,7 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
             structured_contexts=[structured_context],
             expected_opensearch_index="test-index-1",
             actual_opensearch_index="test-index-1",
+            model="model_name",
         ),
     ]
     actual_results = generate_inputs_to_evaluation_test_cases(
@@ -107,6 +110,7 @@ def test_generate_models_to_evaluation_test_cases_runs_expected_rake_task(
         "message": "An answer",
         "sources": [],
         "opensearch_index": "test-index-1",
+        "metrics": {"structured_answer": {"model": "model_name"}},
     }
     generate_inputs = [
         GenerateInput(question="Question 1", ideal_answer="Answer"),
@@ -126,6 +130,7 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
         "message": "An answer",
         "sources": [],
         "opensearch_index": "test-index-1",
+        "metrics": {"structured_answer": {"model": "model_name"}},
     }
     generate_inputs = [
         GenerateInput(question="Question 1", ideal_answer="Answer"),
@@ -151,6 +156,7 @@ def test_generate_models_with_opensearch_index_populates_model_env_var_for_rake_
         "message": "An answer",
         "sources": [],
         "opensearch_index": "test-index-1",
+        "metrics": {"structured_answer": {"model": "model_name"}},
     }
     generate_inputs = [
         GenerateInput(

@@ -45,6 +45,7 @@ class EvaluationTestCase(GenerateInput):
     llm_answer: str
     structured_contexts: list[StructuredContext]
     actual_opensearch_index: str
+    model: str
 
     def to_llm_test_case(self) -> LLMTestCase:
         return LLMTestCase(
@@ -59,5 +60,6 @@ class EvaluationTestCase(GenerateInput):
                 "structured_contexts": self.structured_contexts,
                 "expected_opensearch_index": self.expected_opensearch_index,
                 "actual_opensearch_index": self.actual_opensearch_index,
+                "model": self.model,
             },
         )

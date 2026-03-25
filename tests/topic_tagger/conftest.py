@@ -13,6 +13,7 @@ def mock_data():
             "actual_secondary_topic": "tax",
             "status": "success",
             "error_message": None,
+            "model": "model_name",
         },
         {
             "question": "Question 2",
@@ -22,6 +23,7 @@ def mock_data():
             "actual_secondary_topic": None,
             "status": "success",
             "error_message": None,
+            "model": "model_name",
         },
         {
             "question": "Question 3",
@@ -31,6 +33,7 @@ def mock_data():
             "actual_secondary_topic": None,
             "status": "error",
             "error_message": "An error occurred while processing the question",
+            "model": "model_name",
         },
     ]
 

@@ -22,6 +22,7 @@ def result_true_positive() -> EvaluationResult:  # type: ignore
         actual_triggered=True,
         expected_guardrails={"g1": True, "g3": True},
         actual_guardrails={"g1": True, "g3": True},
+        model="model_name",
     )
 
 
@@ -33,6 +34,7 @@ def result_false_positive() -> EvaluationResult:  # type: ignore
         actual_triggered=True,
         expected_guardrails={"g1": False, "g3": False},
         actual_guardrails={"g1": True, "g3": True},
+        model="model_name",
     )
 
 
@@ -44,6 +46,7 @@ def result_false_negative() -> EvaluationResult:  # type: ignore
         actual_triggered=False,
         expected_guardrails={"g1": True, "g3": True},
         actual_guardrails={"g1": False, "g3": False},
+        model="model_name",
     )
 
 
@@ -55,6 +58,7 @@ def result_true_negative() -> EvaluationResult:  # type: ignore
         actual_triggered=False,
         expected_guardrails={"g1": False, "g3": False},
         actual_guardrails={"g1": False, "g3": False},
+        model="model_name",
     )
 
 
@@ -71,6 +75,7 @@ def result_mixed_guardrails() -> EvaluationResult:
             "g3": False,
             "g4": True,
         },  # g1 TP, g2 FP, g3 TN, g4 FP
+        model="model_name",
     )
 
 
@@ -98,6 +103,7 @@ class TestEvaluationResult:
             "actual_triggered": True,
             "expected_guardrails": {"g1": True, "g2": False, "g3": True},
             "actual_guardrails": {"g1": True, "g2": True, "g3": False, "g4": True},
+            "model": "model_name",
             "classification": "true_positive",
         }
         assert result.for_csv() == expected_csv_dict
@@ -163,6 +169,7 @@ class TestAggregateResults:
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": False, "g3": True},
                 actual_guardrails={"g1": True, "g2": False, "g3": True},
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q2",
@@ -170,6 +177,7 @@ class TestAggregateResults:
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": False, "g3": False},
                 actual_guardrails={"g1": True, "g2": True, "g3": False},
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q3",
@@ -177,6 +185,7 @@ class TestAggregateResults:
                 actual_triggered=True,
                 expected_guardrails={"g1": True, "g2": True, "g3": True},
                 actual_guardrails={"g1": True, "g2": True, "g3": False},
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q4",
@@ -184,6 +193,7 @@ class TestAggregateResults:
                 actual_triggered=False,
                 expected_guardrails={"g1": False, "g2": False, "g3": False},
                 actual_guardrails={"g1": False, "g2": False, "g3": False},
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q5",
@@ -191,6 +201,7 @@ class TestAggregateResults:
                 actual_triggered=True,
                 expected_guardrails={"g1": False, "g2": False, "g3": False},
                 actual_guardrails={"g1": True, "g2": False, "g3": False},
+                model="model_name",
             ),
             EvaluationResult(
                 question="Q6",
@@ -198,6 +209,7 @@ class TestAggregateResults:
                 actual_triggered=False,
                 expected_guardrails={"g1": False, "g2": True, "g3": False},
                 actual_guardrails={"g1": False, "g2": False, "g3": False},
+                model="model_name",
             ),
         ]
 
@@ -287,6 +299,7 @@ class TestAggregateResults:
     def test_to_dict(self, per_guardrail_eval_results):
         aggregate = AggregateResults(per_guardrail_eval_results)
         assert aggregate.to_dict() == {
+            "Model": "model_name",
             "Evaluated": 6,
             "Any-triggered False negatives": 1,
             "Any-triggered False positives": 1,
@@ -314,6 +327,7 @@ class TestAggregateResults:
         assert aggregate.for_csv() == expected_csv
 
         assert aggregate.for_csv() == [
+            {"property": "Model", "value": "model_name"},
             {"property": "Evaluated", "value": len(per_guardrail_eval_results)},
             {"property": "Any-triggered Precision", "value": 0.75},
             {"property": "Any-triggered Recall", "value": 0.75},
@@ -343,6 +357,7 @@ def mock_evaluation_data_file(tmp_path):
             "actual_triggered": True,
             "expected_guardrails": {"g1": True, "g2": False},
             "actual_guardrails": {"g1": True, "g2": False},
+            "model": "model_name",
         },
         {
             "question": "Question 2",
@@ -350,6 +365,7 @@ def mock_evaluation_data_file(tmp_path):
             "actual_triggered": False,
             "expected_guardrails": {"g1": False, "g2": True},
             "actual_guardrails": {"g1": False, "g2": False},
+            "model": "model_name",
         },
         {
             "question": "Question 3",
@@ -357,6 +373,7 @@ def mock_evaluation_data_file(tmp_path):
             "actual_triggered": False,
             "expected_guardrails": {"g1": False, "g2": False},
             "actual_guardrails": {"g1": False, "g2": False},
+            "model": "model_name",
         },
         {
             "question": "Question 4",
@@ -364,6 +381,7 @@ def mock_evaluation_data_file(tmp_path):
             "actual_triggered": True,
             "expected_guardrails": {"g1": False, "g2": False},
             "actual_guardrails": {"g1": True, "g2": False},
+            "model": "model_name",
         },
     ]
 

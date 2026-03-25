@@ -12,6 +12,7 @@ def mock_input_data(mock_project_root):
             "actual_triggered": True,
             "expected_guardrails": {"appropriate_language": True, "political": True},
             "actual_guardrails": {"appropriate_language": True, "political": True},
+            "model": "model_name",
         },
         {
             "question": "Question 2",
@@ -19,6 +20,7 @@ def mock_input_data(mock_project_root):
             "actual_triggered": True,
             "expected_guardrails": {"appropriate_language": False},
             "actual_guardrails": {"appropriate_language": True, "political": True},
+            "model": "model_name",
         },
     ]
 

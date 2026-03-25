@@ -64,6 +64,7 @@ def mock_data_generation(mocker):
             actual_triggered=True,
             expected_guardrails={"appropriate_language": True},
             actual_guardrails={"appropriate_language": True},
+            model="model_name",
         ),
         EvaluationResult(
             question="Question",
@@ -71,6 +72,7 @@ def mock_data_generation(mocker):
             actual_triggered=False,
             expected_guardrails={"appropriate_language": False},
             actual_guardrails={"appropriate_language": False},
+            model="model_name",
         ),
     ]
 

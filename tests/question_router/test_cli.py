@@ -59,12 +59,14 @@ def mock_data_generation(mocker):
             expected_outcome="genuine_rag",
             actual_outcome="genuine_rag",
             confidence_score=0.95,
+            model="model_name",
         ),
         EvaluationResult(
             question="Question",
             expected_outcome="greetings",
             actual_outcome="about_mps",
             confidence_score=0.8,
+            model="model_name",
         ),
     ]
 

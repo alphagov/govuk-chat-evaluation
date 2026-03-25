@@ -18,6 +18,7 @@ class EvaluationResult(BaseModel):
     actual_triggered: bool
     expected_guardrails: dict[str, bool]
     actual_guardrails: dict[str, bool]
+    model: str
 
     @property
     def classification_triggered(self) -> str:
@@ -38,6 +39,7 @@ class EvaluationResult(BaseModel):
 class AggregateResults:
     def __init__(self, evaluation_results: list[EvaluationResult]):
         self.evaluation_results = evaluation_results
+        self.model = evaluation_results[0].model if evaluation_results else ""
         counter = Counter(
             result.classification_triggered for result in evaluation_results
         )
@@ -121,6 +123,7 @@ class AggregateResults:
 
     def to_dict(self) -> dict[str, Any]:
         base_metrics = {
+            "Model": self.model,
             "Evaluated": len(self.evaluation_results),
             "Any-triggered Precision": self.precision(),
             "Any-triggered Recall": self.recall(),

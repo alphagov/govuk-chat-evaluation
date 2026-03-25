@@ -19,6 +19,7 @@ def mock_input_data(mock_project_root):
             "structured_contexts": [],
             "expected_opensearch_index": "test-index-1",
             "actual_opensearch_index": "test-index-2",
+            "model": "model_name",
         },
         {
             "question": "Question 2",
@@ -27,6 +28,7 @@ def mock_input_data(mock_project_root):
             "structured_contexts": [],
             "expected_opensearch_index": "test-index-2",
             "actual_opensearch_index": "test-index-2",
+            "model": "model_name",
         },
     ]
 
@@ -99,6 +101,7 @@ def mock_deepeval_results():
             additional_metadata={
                 "expected_opensearch_index": "test-index",
                 "actual_opensearch_index": "test-index",
+                "model": "model_name",
             },
         )
 

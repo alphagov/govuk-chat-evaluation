@@ -22,6 +22,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic="tax",
             actual_secondary_topic="tax",
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q2",
@@ -30,6 +31,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic="tax",
             actual_secondary_topic="benefits",
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q3",
@@ -38,6 +40,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic="tax",
             actual_secondary_topic=None,
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q4",
@@ -46,6 +49,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic="benefits",
             actual_secondary_topic="tax",
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q5",
@@ -54,6 +58,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic="tax",
             actual_secondary_topic=None,
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q6",
@@ -62,6 +67,7 @@ def sample_results() -> list[EvaluationResult]:
             expected_secondary_topic=None,
             actual_secondary_topic="driving",
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="Q7",
@@ -71,6 +77,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_secondary_topic=None,
             status=TopicStatus.ERROR,
             error_message="An error occurred while processing the question",
+            model="model_name",
         ),
     ]
 
@@ -124,6 +131,7 @@ class TestEvaluationResult:
             expected_secondary_topic=None,
             actual_secondary_topic=None,
             status=TopicStatus.SUCCESS,
+            model="model_name",
         )
         assert not result.matched_any_topic()
 
@@ -140,6 +148,7 @@ class TestAggregateResults:
         aggregate = AggregateResults(sample_results)
         result = aggregate.to_dict()
 
+        assert result["Model"] == "model_name"
         assert result["Evaluated"] == 6
         assert result["Errored"] == 1
         assert result["Correct Primary and Secondary"] == 1
@@ -151,6 +160,7 @@ class TestAggregateResults:
     def test_for_csv(self, sample_results):
         aggregate = AggregateResults(sample_results)
         expected_keys = {
+            "Model",
             "Evaluated",
             "Errored",
             "Correct Primary and Secondary",

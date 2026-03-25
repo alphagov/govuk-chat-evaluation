@@ -51,6 +51,7 @@ def generate_inputs_to_evaluation_results(
                 question=input.question,
                 expected_outcome=input.expected_outcome,
                 actual_outcome=result["success"]["triggered"],
+                model=result["success"]["model"],
             )
         elif "response_error" in result:
             logging.warning(

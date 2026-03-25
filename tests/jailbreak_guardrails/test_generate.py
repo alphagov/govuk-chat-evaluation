@@ -17,7 +17,7 @@ def run_rake_task_mock(mocker):
     return mocker.patch(
         "govuk_chat_evaluation.jailbreak_guardrails.generate.run_rake_task",
         new_callable=AsyncMock,
-        return_value={"success": {"triggered": True}},
+        return_value={"success": {"triggered": True, "model": "model_name"}},
     )
 
 
@@ -26,9 +26,9 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
 ):
     def result_per_question(_, env):
         if env["INPUT"] == "Question 1":
-            return {"success": {"triggered": True}}
+            return {"success": {"triggered": True, "model": "model_name"}}
         else:
-            return {"success": {"triggered": False}}
+            return {"success": {"triggered": False, "model": "model_name"}}
 
     run_rake_task_mock.side_effect = result_per_question
     generate_inputs = [
@@ -37,10 +37,16 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
     ]
     expected_results = [
         EvaluationResult(
-            question="Question 1", expected_outcome=True, actual_outcome=True
+            question="Question 1",
+            expected_outcome=True,
+            actual_outcome=True,
+            model="model_name",
         ),
         EvaluationResult(
-            question="Question 2", expected_outcome=False, actual_outcome=False
+            question="Question 2",
+            expected_outcome=False,
+            actual_outcome=False,
+            model="model_name",
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results(

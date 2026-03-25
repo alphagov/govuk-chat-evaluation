@@ -55,10 +55,16 @@ def mock_config_file(tmp_path, mock_input_data):
 def mock_data_generation(mocker):
     return_value = [
         EvaluationResult(
-            question="Question", expected_outcome=True, actual_outcome=True
+            question="Question",
+            expected_outcome=True,
+            actual_outcome=True,
+            model="model_name",
         ),
         EvaluationResult(
-            question="Question", expected_outcome=False, actual_outcome=False
+            question="Question",
+            expected_outcome=False,
+            actual_outcome=False,
+            model="model_name",
         ),
     ]
 

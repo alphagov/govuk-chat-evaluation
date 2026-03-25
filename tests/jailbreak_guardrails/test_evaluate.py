@@ -25,19 +25,26 @@ class TestEvaluationResult:
     )
     def test_classification(self, expected, actual, expected_classification):
         result = EvaluationResult(
-            question="Test question", expected_outcome=expected, actual_outcome=actual
+            question="Test question",
+            expected_outcome=expected,
+            actual_outcome=actual,
+            model="model_name",
         )
         assert result.classification == expected_classification
 
     def test_for_csv(self):
         result = EvaluationResult(
-            question="Test question", expected_outcome=True, actual_outcome=True
+            question="Test question",
+            expected_outcome=True,
+            actual_outcome=True,
+            model="model_name",
         )
 
         assert result.for_csv() == {
             "question": "Test question",
             "expected_outcome": True,
             "actual_outcome": True,
+            "model": "model_name",
             "classification": "true_positive",
         }
 
@@ -47,39 +54,74 @@ class TestAggregateResults:
     def sample_results(self) -> list[EvaluationResult]:
         return [
             EvaluationResult(
-                question="Q1", expected_outcome=True, actual_outcome=True
+                question="Q1",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
             ),  # TP
             EvaluationResult(
-                question="Q2", expected_outcome=True, actual_outcome=True
+                question="Q2",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
             ),  # TP
             EvaluationResult(
-                question="Q3", expected_outcome=True, actual_outcome=True
+                question="Q3",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
             ),  # TP
             EvaluationResult(
-                question="Q4", expected_outcome=True, actual_outcome=True
+                question="Q4",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
             ),  # TP
             EvaluationResult(
-                question="Q5", expected_outcome=False, actual_outcome=False
+                question="Q5",
+                expected_outcome=False,
+                actual_outcome=False,
+                model="model_name",
             ),  # TN
             EvaluationResult(
-                question="Q6", expected_outcome=False, actual_outcome=False
+                question="Q6",
+                expected_outcome=False,
+                actual_outcome=False,
+                model="model_name",
             ),  # TN
             EvaluationResult(
-                question="Q7", expected_outcome=False, actual_outcome=False
+                question="Q7",
+                expected_outcome=False,
+                actual_outcome=False,
+                model="model_name",
             ),  # TN
             EvaluationResult(
-                question="Q8", expected_outcome=False, actual_outcome=True
+                question="Q8",
+                expected_outcome=False,
+                actual_outcome=True,
+                model="model_name",
             ),  # FP
             EvaluationResult(
-                question="Q9", expected_outcome=True, actual_outcome=False
+                question="Q9",
+                expected_outcome=True,
+                actual_outcome=False,
+                model="model_name",
             ),  # FN
         ]
 
     def test_precision_value(self):
         results = [
-            EvaluationResult(question="Q1", expected_outcome=True, actual_outcome=True),
             EvaluationResult(
-                question="Q3", expected_outcome=False, actual_outcome=True
+                question="Q1",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
+            ),
+            EvaluationResult(
+                question="Q3",
+                expected_outcome=False,
+                actual_outcome=True,
+                model="model_name",
             ),
         ]
 
@@ -89,10 +131,16 @@ class TestAggregateResults:
     def test_precision_nan(self):
         results = [
             EvaluationResult(
-                question="Q1", expected_outcome=True, actual_outcome=False
+                question="Q1",
+                expected_outcome=True,
+                actual_outcome=False,
+                model="model_name",
             ),
             EvaluationResult(
-                question="Q3", expected_outcome=False, actual_outcome=False
+                question="Q3",
+                expected_outcome=False,
+                actual_outcome=False,
+                model="model_name",
             ),
         ]
 
@@ -101,9 +149,17 @@ class TestAggregateResults:
 
     def test_recall_value(self):
         results = [
-            EvaluationResult(question="Q1", expected_outcome=True, actual_outcome=True),
             EvaluationResult(
-                question="Q3", expected_outcome=True, actual_outcome=False
+                question="Q1",
+                expected_outcome=True,
+                actual_outcome=True,
+                model="model_name",
+            ),
+            EvaluationResult(
+                question="Q3",
+                expected_outcome=True,
+                actual_outcome=False,
+                model="model_name",
             ),
         ]
 
@@ -113,10 +169,16 @@ class TestAggregateResults:
     def test_recall_nan(self):
         results = [
             EvaluationResult(
-                question="Q1", expected_outcome=False, actual_outcome=False
+                question="Q1",
+                expected_outcome=False,
+                actual_outcome=False,
+                model="model_name",
             ),
             EvaluationResult(
-                question="Q3", expected_outcome=False, actual_outcome=True
+                question="Q3",
+                expected_outcome=False,
+                actual_outcome=True,
+                model="model_name",
             ),
         ]
 
@@ -142,6 +204,7 @@ class TestAggregateResults:
     def test_to_dict(self, sample_results):
         aggregate = AggregateResults(sample_results)
         assert aggregate.to_dict() == {
+            "Model": "model_name",
             "Evaluated": 9,
             "Precision": 0.8,
             "Recall": 0.8,
@@ -159,6 +222,7 @@ class TestAggregateResults:
         assert aggregate.for_csv() == expected_csv
 
         assert aggregate.for_csv() == [
+            {"property": "Model", "value": "model_name"},
             {"property": "Evaluated", "value": 9},
             {"property": "Precision", "value": 0.8},
             {"property": "Recall", "value": 0.8},
@@ -173,8 +237,18 @@ class TestAggregateResults:
 def mock_evaluation_data_file(tmp_path):
     file_path = tmp_path / "evaluation_data.jsonl"
     data = [
-        {"question": "Question", "expected_outcome": True, "actual_outcome": True},
-        {"question": "Question", "expected_outcome": True, "actual_outcome": False},
+        {
+            "question": "Question",
+            "expected_outcome": True,
+            "actual_outcome": True,
+            "model": "model_name",
+        },
+        {
+            "question": "Question",
+            "expected_outcome": True,
+            "actual_outcome": False,
+            "model": "model_name",
+        },
     ]
 
     with open(tmp_path / "evaluation_data.jsonl", "w", encoding="utf8") as file:

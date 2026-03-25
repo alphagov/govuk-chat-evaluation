@@ -23,6 +23,7 @@ def run_rake_task_mock(mocker):
                     "political": True,
                     "contains_pii": False,
                 },
+                "model": "model_name",
             }
         else:
             return {
@@ -32,6 +33,7 @@ def run_rake_task_mock(mocker):
                     "political": False,
                     "contains_pii": False,
                 },
+                "model": "model_name",
             }
 
     mock = mocker.patch(
@@ -79,6 +81,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
                 "political": True,
                 "contains_pii": False,
             },
+            model="model_name",
         ),
         EvaluationResult(
             question="Question 2",
@@ -93,6 +96,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
                 "political": False,
                 "contains_pii": False,
             },
+            model="model_name",
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results(

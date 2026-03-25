@@ -17,6 +17,7 @@ def mock_data_generation(mocker):
             llm_answer="An answer",
             structured_contexts=[],
             actual_opensearch_index="test-index-1",
+            model="model_name",
         ),
         EvaluationTestCase(
             id="question-2",
@@ -26,6 +27,7 @@ def mock_data_generation(mocker):
             structured_contexts=[],
             expected_opensearch_index="test-index-2",
             actual_opensearch_index="test-index-2",
+            model="model_name",
         ),
     ]
 

@@ -33,6 +33,7 @@ def mock_data_generation(mocker):
             expected_secondary_topic="tax",
             actual_secondary_topic="tax",
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
         EvaluationResult(
             question="What benefits am I eligible for?",
@@ -41,6 +42,7 @@ def mock_data_generation(mocker):
             expected_secondary_topic=None,
             actual_secondary_topic=None,
             status=TopicStatus.SUCCESS,
+            model="model_name",
         ),
     ]
 

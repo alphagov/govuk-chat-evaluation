@@ -183,6 +183,7 @@ class TestConvertDeepEvalOutput:
         results = convert_deepeval_output_to_evaluation_results(mock_deepeval_results)
 
         assert all(isinstance(item, EvaluationResult) for item in results)
+        assert all(item.model == "model_name" for item in results)
 
         # each item should have the number of metrics multiplied by runs
         metrics_tested = len(mock_deepeval_results[0][0].metrics_data)
