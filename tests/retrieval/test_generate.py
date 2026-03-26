@@ -83,7 +83,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             question="Question 2",
             expected_exact_paths=["/path1", "/path2"],
             expected_chunk_uids=["uid4", "uid5"],
-            opensearch_index="custom-index",
+            expected_opensearch_index="custom-index",
         ),
     ]
     expected_results = [
@@ -169,7 +169,7 @@ def test_generate_inputs_to_evaluation_results_includes_opensearch_index_in_env_
             question="Question 1",
             expected_exact_paths=["/foo", "/bar"],
             expected_chunk_uids=["uid1", "uid2"],
-            opensearch_index="custom-index",
+            expected_opensearch_index="custom-index",
         ),
     ]
 
