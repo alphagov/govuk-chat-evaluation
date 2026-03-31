@@ -142,6 +142,8 @@ class FactualPrecisionRecall(BaseMetric):
     async def _a_classify_statements(
         self, input: str, actual_output: str, expected_output: str
     ) -> ClassifiedFacts:
+        assert self.model is not None
+
         cached = self.cache.get(self.evaluation_model, actual_output, expected_output)
         if cached is not None:
             self._used_cache_for_last_classification = True
