@@ -192,6 +192,8 @@ class ContextRelevancyMetric(BaseMetric):
     async def _generate_result_from_model(
         self, prompt: str, schema: Type[SchemaType]
     ) -> SchemaType:
+        assert self.model is not None
+
         if self.using_native_model:
             result, cost = cast(
                 tuple[SchemaType, Optional[float]],
