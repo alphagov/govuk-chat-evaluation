@@ -13,7 +13,7 @@ class GenerateInput(BaseModel):
     question: str
     expected_exact_paths: list[str]
     expected_chunk_uids: list[str]
-    opensearch_index: Optional[str] = None
+    expected_opensearch_index: Optional[str] = None
 
 
 def generate_and_write_dataset(
@@ -32,8 +32,8 @@ def generate_inputs_to_evaluation_results(
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
         env = {"INPUT": input.question, "EMBEDDING_PROVIDER": embedding_provider}
-        if input.opensearch_index:
-            env["OPENSEARCH_INDEX"] = input.opensearch_index
+        if input.expected_opensearch_index:
+            env["OPENSEARCH_INDEX"] = input.expected_opensearch_index
 
         result = await run_rake_task(
             "evaluation:search_results_for_question",
@@ -55,7 +55,7 @@ def generate_inputs_to_evaluation_results(
             question=input.question,
             expected_exact_paths=input.expected_exact_paths,
             expected_chunk_uids=input.expected_chunk_uids,
-            expected_opensearch_index=input.opensearch_index,
+            expected_opensearch_index=input.expected_opensearch_index,
             actual_search_results=exact_paths_chunks_and_scores,
             actual_opensearch_index=actual_opensearch_index,
         )
