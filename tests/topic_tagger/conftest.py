@@ -33,7 +33,7 @@ def mock_data():
             "actual_secondary_topic": None,
             "status": "error",
             "error_message": "An error occurred while processing the question",
-            "model": "model_name",
+            "model": None,
         },
     ]
 

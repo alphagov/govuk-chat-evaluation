@@ -77,7 +77,7 @@ def sample_results() -> list[EvaluationResult]:
             actual_secondary_topic=None,
             status=TopicStatus.ERROR,
             error_message="An error occurred while processing the question",
-            model="model_name",
+            model=None,
         ),
     ]
 

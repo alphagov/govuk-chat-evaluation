@@ -33,7 +33,7 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
             "secondary_topic": item["actual_secondary_topic"],
             "status": item["status"],
             "error_message": item["error_message"],
-            "metrics": {"model": item["model"]},
+            "metrics": {"model": item["model"]} if item["model"] is not None else {},
         }
         for item in mock_data
     ]
