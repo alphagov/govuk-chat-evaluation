@@ -1,4 +1,5 @@
 import click
+import os
 from dotenv import load_dotenv
 
 from .file_system import project_root
@@ -11,6 +12,9 @@ from . import topic_tagger
 
 load_dotenv(project_root() / ".env.aws")
 load_dotenv()
+
+# Apply a global configuration to opt-out of Deepeval sending telemetry data
+os.environ["DEEPEVAL_TELEMETRY_OPT_OUT"] = "1"
 
 
 @click.group()
