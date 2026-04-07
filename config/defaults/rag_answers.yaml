@@ -1,6 +1,6 @@
 what: Evaluating RAG answers
 generate: false
-provider: openai
+provider: claude
 input_path: data/rag_answers.jsonl
 claude_generation_model: ~
 metrics:

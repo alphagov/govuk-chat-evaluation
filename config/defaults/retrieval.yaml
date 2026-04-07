@@ -1,4 +1,4 @@
 what: Evaluating retrieval
 generate: true
-embedding_provider: openai
+embedding_provider: titan
 input_path: data/retrieval.jsonl
