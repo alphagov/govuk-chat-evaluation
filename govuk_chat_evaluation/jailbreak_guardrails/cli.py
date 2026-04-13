@@ -1,9 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Self, cast
 
 import click
-from pydantic import model_validator
 
 from ..config import BaseConfig, config_from_cli_args, apply_click_options_to_command
 from ..file_system import write_config_file_for_reuse
@@ -15,13 +13,8 @@ from ..output import initialise_output
 class Config(BaseConfig):
     what: BaseConfig.GenericFields.what
     generate: BaseConfig.GenericFields.generate
-    provider: BaseConfig.GenericFields.provider_openai_or_claude
     input_path: BaseConfig.GenericFields.input_path
     claude_generation_model: BaseConfig.GenericFields.claude_generation_model
-
-    @model_validator(mode="after")
-    def run_validatons(self) -> Self:
-        return self._validate_fields_required_for_generate("provider")
 
 
 @click.command(name="jailbreak_guardrails")
@@ -46,7 +39,6 @@ def main(**cli_args):
     if config.generate:
         evaluate_path = generate_and_write_dataset(
             config.input_path,
-            cast(str, config.provider),
             config.claude_generation_model,
             output_dir=output_dir,
         )

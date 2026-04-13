@@ -49,9 +49,7 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
             model="model_name",
         ),
     ]
-    actual_results = generate_inputs_to_evaluation_results(
-        "openai", None, generate_inputs
-    )
+    actual_results = generate_inputs_to_evaluation_results(None, generate_inputs)
 
     assert sorted(expected_results, key=lambda r: r.question) == sorted(
         actual_results, key=lambda r: r.question
@@ -68,9 +66,7 @@ def test_generate_models_to_evaluation_results_copes_with_response_errors(
     generate_inputs = [
         GenerateInput(question="Question 1", expected_outcome=True),
     ]
-    actual_results = generate_inputs_to_evaluation_results(
-        "claude", None, generate_inputs
-    )
+    actual_results = generate_inputs_to_evaluation_results(None, generate_inputs)
 
     log_message = (
         "Invalid response for 'Question 1', returned: "
@@ -89,7 +85,7 @@ def test_generate_models_to_evaluation_results_raises_on_unexpected_key(
         GenerateInput(question="Question 1", expected_outcome=True),
     ]
     with pytest.raises(RuntimeError) as exc_info:
-        generate_inputs_to_evaluation_results("claude", None, generate_inputs)
+        generate_inputs_to_evaluation_results(None, generate_inputs)
 
     assert "Unexpected result structure {'what': {'triggered': True}}" in str(
         exc_info.value
@@ -102,10 +98,10 @@ def test_generate_models_to_evaluation_models_runs_expected_rake_task(
     generate_inputs = [
         GenerateInput(question="Question 1", expected_outcome=True),
     ]
-    generate_inputs_to_evaluation_results("openai", None, generate_inputs)
+    generate_inputs_to_evaluation_results(None, generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_jailbreak_guardrail_response[openai]",
+        "evaluation:generate_jailbreak_guardrail_response",
         {"INPUT": "Question 1"},
     )
 
@@ -116,12 +112,10 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
     generate_inputs = [
         GenerateInput(question="Question 1", expected_outcome=True),
     ]
-    generate_inputs_to_evaluation_results(
-        "claude", "claude_sonnet_4_0", generate_inputs
-    )
+    generate_inputs_to_evaluation_results("claude_sonnet_4_0", generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_jailbreak_guardrail_response[claude]",
+        "evaluation:generate_jailbreak_guardrail_response",
         {
             "INPUT": "Question 1",
             "BEDROCK_CLAUDE_JAILBREAK_GUARDRAILS_MODEL": "claude_sonnet_4_0",
@@ -131,9 +125,7 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
 
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
-    path = generate_and_write_dataset(
-        mock_input_data, "openai", None, mock_project_root
-    )
+    path = generate_and_write_dataset(mock_input_data, None, mock_project_root)
     assert path.exists()
     with open(path, "r") as file:
         for line in file:

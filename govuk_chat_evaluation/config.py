@@ -40,8 +40,9 @@ class BaseConfig(BaseModel):
             Field(
                 None,
                 description=(
-                    "Which Claude model to use for generating the data when the provider is Claude, e.g. "
-                    "claude_sonnet_4_0 or claude_haiku_4_5. If not specified, the default model will be used."
+                    "Which Claude model to use for generating the data e.g. "
+                    "claude_sonnet_4_0 or claude_haiku_4_5. If not specified, "
+                    "the default model will be used."
                 ),
             ),
         ]
