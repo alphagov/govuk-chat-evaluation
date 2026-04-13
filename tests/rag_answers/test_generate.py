@@ -94,9 +94,7 @@ def test_generate_models_to_evaluation_test_cases_returns_evaluation_test_cases(
             model="model_name",
         ),
     ]
-    actual_results = generate_inputs_to_evaluation_test_cases(
-        "openai", None, generate_inputs
-    )
+    actual_results = generate_inputs_to_evaluation_test_cases(None, generate_inputs)
 
     assert sorted(expected_results, key=lambda r: r.question) == sorted(
         actual_results, key=lambda r: r.question
@@ -115,10 +113,10 @@ def test_generate_models_to_evaluation_test_cases_runs_expected_rake_task(
     generate_inputs = [
         GenerateInput(question="Question 1", ideal_answer="Answer"),
     ]
-    generate_inputs_to_evaluation_test_cases("openai", None, generate_inputs)
+    generate_inputs_to_evaluation_test_cases(None, generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_rag_structured_answer_response[openai]",
+        "evaluation:generate_rag_structured_answer_response",
         {"INPUT": "Question 1"},
     )
 
@@ -136,12 +134,10 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
         GenerateInput(question="Question 1", ideal_answer="Answer"),
     ]
 
-    generate_inputs_to_evaluation_test_cases(
-        "claude", "claude_sonnet_4_0", generate_inputs
-    )
+    generate_inputs_to_evaluation_test_cases("claude_sonnet_4_0", generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_rag_structured_answer_response[claude]",
+        "evaluation:generate_rag_structured_answer_response",
         {
             "INPUT": "Question 1",
             "BEDROCK_CLAUDE_STRUCTURED_ANSWER_COMPOSER_MODEL": "claude_sonnet_4_0",
@@ -165,19 +161,17 @@ def test_generate_models_with_opensearch_index_populates_model_env_var_for_rake_
             expected_opensearch_index="test-index",
         ),
     ]
-    generate_inputs_to_evaluation_test_cases("openai", None, generate_inputs)
+    generate_inputs_to_evaluation_test_cases(None, generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_rag_structured_answer_response[openai]",
+        "evaluation:generate_rag_structured_answer_response",
         {"INPUT": "Question 1", "OPENSEARCH_INDEX": "test-index"},
     )
 
 
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
-    path = generate_and_write_dataset(
-        mock_input_data, "openai", None, mock_project_root
-    )
+    path = generate_and_write_dataset(mock_input_data, None, mock_project_root)
     assert path.exists()
     with open(path, "r") as file:
         for line in file:
@@ -192,5 +186,5 @@ def test_generate_and_write_dataset_calls_ensure_unique_model_ids(
         "govuk_chat_evaluation.rag_answers.generate.ensure_unique_model_ids"
     ) as mock:
         mock.side_effect = lambda inputs: inputs
-        generate_and_write_dataset(mock_input_data, "openai", None, mock_project_root)
+        generate_and_write_dataset(mock_input_data, None, mock_project_root)
         mock.assert_called_once()

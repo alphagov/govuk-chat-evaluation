@@ -65,7 +65,7 @@ def test_main_passes_claude_generation_model_to_generate_and_write_dataset(
 ):
     runner = CliRunner()
     runner.invoke(main, [mock_config_file])
-    claude_generation_model = mock_data_generation.call_args[0][1]
+    claude_generation_model = mock_data_generation.call_args[0][0]
 
     mock_data_generation.assert_called_once()
     assert claude_generation_model == "claude_sonnet_4_0"

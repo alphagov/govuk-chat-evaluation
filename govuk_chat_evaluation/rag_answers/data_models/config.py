@@ -131,15 +131,10 @@ class MetricConfig(BaseModel):
 class TaskConfig(BaseConfig):
     what: BaseConfig.GenericFields.what
     generate: BaseConfig.GenericFields.generate
-    provider: BaseConfig.GenericFields.provider_openai_or_claude
     input_path: BaseConfig.GenericFields.input_path
     claude_generation_model: BaseConfig.GenericFields.claude_generation_model
     metrics: list[MetricConfig]
     n_runs: int
-
-    @model_validator(mode="after")
-    def run_validatons(self):
-        return self._validate_fields_required_for_generate("provider")
 
     def metric_instances(self) -> list[BaseMetric]:
         """Return the list of runtime metric objects for evaluation."""

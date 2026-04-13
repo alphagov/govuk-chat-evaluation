@@ -16,21 +16,19 @@ from typing import Optional
 
 def generate_and_write_dataset(
     input_path: Path,
-    provider: str,
     claude_generation_model: Optional[str],
     output_dir: Path,
 ):
     models = jsonl_to_models(Path(input_path), GenerateInput)
     ensure_unique_model_ids(models)
     generated = generate_inputs_to_evaluation_test_cases(
-        provider, claude_generation_model, models
+        claude_generation_model, models
     )
 
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_test_cases(
-    provider: str,
     claude_generation_model: Optional[str],
     generate_inputs: list[GenerateInput],
 ) -> list[EvaluationTestCase]:
@@ -47,7 +45,7 @@ def generate_inputs_to_evaluation_test_cases(
             env["OPENSEARCH_INDEX"] = input.expected_opensearch_index
 
         result = await run_rake_task(
-            f"evaluation:generate_rag_structured_answer_response[{provider}]",
+            "evaluation:generate_rag_structured_answer_response",
             env,
         )
 
