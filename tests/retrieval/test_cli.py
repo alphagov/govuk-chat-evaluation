@@ -2,38 +2,11 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
-from govuk_chat_evaluation.retrieval.cli import main, Config
+from govuk_chat_evaluation.retrieval.cli import main
 from govuk_chat_evaluation.retrieval.evaluate import (
     EvaluationResult,
     SearchResult,
 )
-
-
-class TestConfig:
-    def test_config_requires_provider_for_generate(self, mock_input_data):
-        with pytest.raises(
-            ValueError, match="embedding_provider is required to generate data"
-        ):
-            Config(
-                what="Test",
-                generate=True,
-                embedding_provider=None,
-                input_path=mock_input_data,
-            )
-
-        Config(
-            what="Test",
-            generate=False,
-            embedding_provider=None,
-            input_path=mock_input_data,
-        )
-
-        Config(
-            what="Test",
-            generate=True,
-            embedding_provider="openai",
-            input_path=mock_input_data,
-        )
 
 
 @pytest.fixture(autouse=True)
@@ -42,7 +15,6 @@ def mock_config_file(tmp_path, mock_input_data):
     data = {
         "what": "Testing question router evaluations",
         "generate": True,
-        "embedding_provider": "titan",
         "input_path": str(mock_input_data),
     }
     file_path = tmp_path / "config.yaml"
@@ -124,9 +96,7 @@ def test_main_generates_results(
     mock_output_directory, mock_config_file, mock_data_generation
 ):
     runner = CliRunner()
-    result = runner.invoke(
-        main, [mock_config_file, "--generate", "--embedding_provider", "titan"]
-    )
+    result = runner.invoke(main, [mock_config_file, "--generate"])
 
     generated_file = mock_output_directory / "generated.jsonl"
 
