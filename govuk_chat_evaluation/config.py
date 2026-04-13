@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import (
     Annotated,
     Any,
-    Literal,
     Optional,
     Self,
     Type,
@@ -25,13 +24,6 @@ class BaseConfig(BaseModel):
 
         what = Annotated[str, Field(..., description="What is being evaluated")]
         generate = Annotated[bool, Field(..., description="Whether to generate data")]
-        provider_openai_or_claude = Annotated[
-            Optional[Literal["openai", "claude"]],
-            Field(
-                None,
-                description="Which provider to use for generating the data, openai or claude",
-            ),
-        ]
         input_path = Annotated[
             FilePath, Field(..., description="Path to the data file used to evaluate")
         ]

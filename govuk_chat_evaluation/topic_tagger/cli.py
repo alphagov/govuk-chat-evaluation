@@ -13,7 +13,6 @@ from ..output import initialise_output
 class Config(BaseConfig):
     what: BaseConfig.GenericFields.what
     generate: BaseConfig.GenericFields.generate
-    provider: BaseConfig.GenericFields.provider_openai_or_claude
     input_path: BaseConfig.GenericFields.input_path
 
 

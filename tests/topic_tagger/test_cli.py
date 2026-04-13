@@ -11,7 +11,6 @@ def mock_config_file(tmp_path, mock_input_data):
     """Write a config file as an input for testing"""
     data = {
         "what": "Testing Topic Tagger evaluations",
-        "provider": "claude",
         "generate": True,
         "input_path": str(mock_input_data),
     }
