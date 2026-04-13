@@ -2,39 +2,8 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
-from govuk_chat_evaluation.output_guardrails.cli import main, Config
+from govuk_chat_evaluation.output_guardrails.cli import main
 from govuk_chat_evaluation.output_guardrails.evaluate import EvaluationResult
-
-
-class TestConfig:
-    def test_config_requires_provider_for_generate(self, mock_input_data):
-        with pytest.raises(ValueError, match="provider is required to generate data"):
-            Config(
-                what="Test",
-                guardrail_type="answer_guardrails",
-                generate=True,
-                provider=None,
-                input_path=mock_input_data,
-                claude_generation_model=None,
-            )
-
-        Config(
-            what="Test",
-            guardrail_type="answer_guardrails",
-            generate=False,
-            provider=None,
-            input_path=mock_input_data,
-            claude_generation_model=None,
-        )
-
-        Config(
-            what="Test",
-            guardrail_type="answer_guardrails",
-            generate=True,
-            provider="openai",
-            input_path=mock_input_data,
-            claude_generation_model=None,
-        )
 
 
 @pytest.fixture(autouse=True)
@@ -44,7 +13,6 @@ def mock_config_file(tmp_path, mock_input_data):
         "what": "Testing Output Guardrail evaluations",
         "guardrail_type": "answer_guardrails",
         "generate": True,
-        "provider": "claude",
         "input_path": str(mock_input_data),
         "claude_generation_model": "claude_sonnet_4_0",
     }
@@ -110,7 +78,7 @@ def test_main_passes_claude_generation_model_to_generate_and_write_dataset(
 ):
     runner = CliRunner()
     runner.invoke(main, [mock_config_file])
-    claude_generation_model = mock_data_generation.call_args[0][2]
+    claude_generation_model = mock_data_generation.call_args[0][1]
 
     mock_data_generation.assert_called_once()
     assert claude_generation_model == "claude_sonnet_4_0"
@@ -120,9 +88,7 @@ def test_main_generates_results(
     mock_output_directory, mock_config_file, mock_data_generation
 ):
     runner = CliRunner()
-    result = runner.invoke(
-        main, [mock_config_file, "--generate", "--provider", "claude"]
-    )
+    result = runner.invoke(main, [mock_config_file, "--generate"])
 
     generated_file = mock_output_directory / "generated.jsonl"
 

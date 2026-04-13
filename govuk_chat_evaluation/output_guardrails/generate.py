@@ -17,20 +17,18 @@ class GenerateInput(BaseModel):
 
 def generate_and_write_dataset(
     input_path: Path,
-    provider: str,
     guardrail_type: str,
     claude_generation_model: Optional[str],
     output_dir: Path,
 ):
     models = jsonl_to_models(input_path, GenerateInput)
     generated = generate_inputs_to_evaluation_results(
-        provider, guardrail_type, claude_generation_model, models
+        guardrail_type, claude_generation_model, models
     )
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_results(
-    provider: str,
     guardrail_type: str,
     claude_generation_model: Optional[str],
     generate_inputs: list[GenerateInput],
@@ -44,7 +42,7 @@ def generate_inputs_to_evaluation_results(
             env["BEDROCK_CLAUDE_GUARDRAILS_MODEL"] = claude_generation_model
 
         result = await run_rake_task(
-            f"evaluation:generate_output_guardrail_response[{provider},{guardrail_type}]",
+            f"evaluation:generate_output_guardrail_response[{guardrail_type}]",
             env,
         )
 
