@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import cast
 
 import click
 
@@ -35,7 +34,6 @@ def main(**cli_args):
     if config.generate:
         evaluate_path = generate_and_write_dataset(
             config.input_path,
-            cast(str, config.provider),
             config.claude_generation_model,
             output_dir,
         )

@@ -16,22 +16,20 @@ class GenerateInput(BaseModel):
     expected_opensearch_index: Optional[str] = None
 
 
-def generate_and_write_dataset(
-    input_path: Path, embedding_provider: str, output_dir: Path
-):
+def generate_and_write_dataset(input_path: Path, output_dir: Path):
     models = jsonl_to_models(Path(input_path), GenerateInput)
-    generated = generate_inputs_to_evaluation_results(embedding_provider, models)
+    generated = generate_inputs_to_evaluation_results(models)
     return write_generated_to_output(output_dir, generated)
 
 
 def generate_inputs_to_evaluation_results(
-    embedding_provider: str, generate_inputs: list[GenerateInput]
+    generate_inputs: list[GenerateInput],
 ) -> list[EvaluationResult]:
     """Asynchronously run rake tasks for each GenerateInput instance to
     generate a result"""
 
     async def generate_input_to_evaluation_result(input: GenerateInput):
-        env = {"INPUT": input.question, "EMBEDDING_PROVIDER": embedding_provider}
+        env = {"INPUT": input.question}
         if input.expected_opensearch_index:
             env["OPENSEARCH_INDEX"] = input.expected_opensearch_index
 

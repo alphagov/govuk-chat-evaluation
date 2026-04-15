@@ -100,7 +100,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
         ),
     ]
     actual_results = generate_inputs_to_evaluation_results(
-        "openai", "answer_guardrails", None, generate_inputs
+        "answer_guardrails", None, generate_inputs
     )
 
     assert sorted(expected_results, key=lambda r: r.question) == sorted(
@@ -118,12 +118,10 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
             expected_guardrails={"appropriate_language": True},
         ),
     ]
-    generate_inputs_to_evaluation_results(
-        "openai", "answer_guardrails", None, generate_inputs
-    )
+    generate_inputs_to_evaluation_results("answer_guardrails", None, generate_inputs)
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_output_guardrail_response[openai,answer_guardrails]",
+        "evaluation:generate_output_guardrail_response[answer_guardrails]",
         {"INPUT": "Question 1"},
     )
 
@@ -139,11 +137,11 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
         ),
     ]
     generate_inputs_to_evaluation_results(
-        "claude", "answer_guardrails", "claude_sonnet_4_0", generate_inputs
+        "answer_guardrails", "claude_sonnet_4_0", generate_inputs
     )
 
     run_rake_task_mock.assert_called_with(
-        "evaluation:generate_output_guardrail_response[claude,answer_guardrails]",
+        "evaluation:generate_output_guardrail_response[answer_guardrails]",
         {"INPUT": "Question 1", "BEDROCK_CLAUDE_GUARDRAILS_MODEL": "claude_sonnet_4_0"},
     )
 
@@ -151,7 +149,7 @@ def test_generate_models_with_claude_generation_model_populates_model_env_var_fo
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
     path = generate_and_write_dataset(
-        mock_input_data, "openai", "answer_guardrails", None, mock_project_root
+        mock_input_data, "answer_guardrails", None, mock_project_root
     )
     assert path.exists()
     with open(path, "r") as file:

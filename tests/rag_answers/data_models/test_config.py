@@ -33,7 +33,6 @@ class TestMetricConfig:
         return TaskConfig(
             what="Test",
             generate=False,
-            provider=None,
             input_path=mock_input_data,
             claude_generation_model=None,
             metrics=[],
@@ -163,44 +162,10 @@ class TestMetricConfig:
 
 
 class TestTaskConfig:
-    def test_config_requires_provider_for_generate(self, mock_input_data):
-        with pytest.raises(ValueError, match="provider is required to generate data"):
-            TaskConfig(
-                what="Test",
-                generate=True,
-                provider=None,
-                input_path=mock_input_data,
-                claude_generation_model=None,
-                metrics=[],
-                n_runs=1,
-            )
-
-        # These should not raise
-        TaskConfig(
-            what="Test",
-            generate=False,
-            provider=None,
-            input_path=mock_input_data,
-            claude_generation_model=None,
-            metrics=[],
-            n_runs=1,
-        )
-
-        TaskConfig(
-            what="Test",
-            generate=True,
-            provider="openai",
-            input_path=mock_input_data,
-            claude_generation_model=None,
-            metrics=[],
-            n_runs=1,
-        )
-
     def test_get_metric_instances(self, mock_input_data):
         config_dict = {
             "what": "Test",
             "generate": False,
-            "provider": None,
             "input_path": mock_input_data,
             "metrics": [
                 {
@@ -231,7 +196,6 @@ class TestTaskConfig:
         config_dict = {
             "what": "Test",
             "generate": False,
-            "provider": None,
             "input_path": mock_input_data,
             "metrics": [
                 {

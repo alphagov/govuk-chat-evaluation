@@ -135,7 +135,7 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             ],
         ),
     ]
-    actual_results = generate_inputs_to_evaluation_results("titan", generate_inputs)
+    actual_results = generate_inputs_to_evaluation_results(generate_inputs)
 
     assert sorted(expected_results, key=lambda r: r.question) == sorted(
         actual_results, key=lambda r: r.question
@@ -153,11 +153,11 @@ def test_generate_inputs_to_evaluation_results_runs_expected_rake_task(
         ),
     ]
 
-    generate_inputs_to_evaluation_results("titan", generate_inputs)
+    generate_inputs_to_evaluation_results(generate_inputs)
 
     run_rake_task_mock.assert_called_with(
         "evaluation:search_results_for_question",
-        {"INPUT": "Question 1", "EMBEDDING_PROVIDER": "titan"},
+        {"INPUT": "Question 1"},
     )
 
 
@@ -173,13 +173,12 @@ def test_generate_inputs_to_evaluation_results_includes_opensearch_index_in_env_
         ),
     ]
 
-    generate_inputs_to_evaluation_results("titan", generate_inputs)
+    generate_inputs_to_evaluation_results(generate_inputs)
 
     run_rake_task_mock.assert_called_with(
         "evaluation:search_results_for_question",
         {
             "INPUT": "Question 1",
-            "EMBEDDING_PROVIDER": "titan",
             "OPENSEARCH_INDEX": "custom-index",
         },
     )
@@ -187,7 +186,7 @@ def test_generate_inputs_to_evaluation_results_includes_opensearch_index_in_env_
 
 @pytest.mark.usefixtures("run_rake_task_mock")
 def test_generate_and_write_dataset(mock_input_data, mock_project_root):
-    path = generate_and_write_dataset(mock_input_data, "titan", mock_project_root)
+    path = generate_and_write_dataset(mock_input_data, mock_project_root)
     assert path.exists()
     with open(path, "r") as file:
         for line in file:

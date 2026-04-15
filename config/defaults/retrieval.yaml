@@ -1,4 +1,3 @@
 what: Evaluating retrieval
 generate: true
-embedding_provider: titan
 input_path: data/retrieval.jsonl

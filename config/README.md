@@ -17,7 +17,7 @@ A couple of usage tips:
 
 ### Configuring the evaluation model
 
-You can configure the model used in evaluation when the `provider` is `claude` and you are running an evaluation related to answer composition.
+You can configure the model when you are running an evaluation related to answer composition.
 
 The model must be one that is supported by the Ruby codebase. You can determine which models are supported by checking the [SUPPORTED_MODELS constant](https://github.com/search?q=repo%3Aalphagov%2Fgovuk-chat+SUPPORTED_MODELS&type=code) for the class related to the type of evaluation you are trying to run.
 
