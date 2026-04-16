@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -42,20 +43,26 @@ def generate_inputs_to_evaluation_results(
             env,
         )
 
-        if "success" in result:
-            return EvaluationResult(
-                question=input.question,
-                expected_outcome=input.expected_outcome,
-                actual_outcome=result["success"]["triggered"],
-                model=result["success"]["model"],
-            )
-        elif "response_error" in result:
+        jailbreak_guardrails_status = result.get("jailbreak_guardrails_status")
+
+        if jailbreak_guardrails_status == "error":
+            parsed_jailbreak_llm_response = json.loads(result["llm_responses"])[
+                "jailbreak_guardrails"
+            ]
+            invalid_llm_response = parsed_jailbreak_llm_response["content"][0]["text"]
+
             logging.warning(
-                f"Invalid response for {input.question!r}, returned: {result['response_error']!r}"
+                f"Invalid response for {input.question!r}, returned: {invalid_llm_response!r}"
             )
             return None
-        else:
-            raise RuntimeError(f"Unexpected result structure {result!r}")
+
+        actual_outcome = False if "pass" in jailbreak_guardrails_status else True
+        return EvaluationResult(
+            question=input.question,
+            expected_outcome=input.expected_outcome,
+            actual_outcome=actual_outcome,
+            model=result["metrics"]["jailbreak_guardrails"]["model"],
+        )
 
     return asyncio.run(
         generate_dataset(generate_inputs, generate_input_to_evaluation_result)
