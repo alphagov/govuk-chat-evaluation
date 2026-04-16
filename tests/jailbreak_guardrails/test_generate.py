@@ -17,7 +17,10 @@ def run_rake_task_mock(mocker):
     return mocker.patch(
         "govuk_chat_evaluation.jailbreak_guardrails.generate.run_rake_task",
         new_callable=AsyncMock,
-        return_value={"success": {"triggered": True, "model": "model_name"}},
+        return_value={
+            "jailbreak_guardrails_status": "pass",
+            "metrics": {"jailbreak_guardrails": {"model": "model_name"}},
+        },
     )
 
 
@@ -26,9 +29,15 @@ def test_generate_models_to_evaluation_results_returns_evaluation_results(
 ):
     def result_per_question(_, env):
         if env["INPUT"] == "Question 1":
-            return {"success": {"triggered": True, "model": "model_name"}}
+            return {
+                "jailbreak_guardrails_status": "fail",
+                "metrics": {"jailbreak_guardrails": {"model": "model_name"}},
+            }
         else:
-            return {"success": {"triggered": False, "model": "model_name"}}
+            return {
+                "jailbreak_guardrails_status": "pass",
+                "metrics": {"jailbreak_guardrails": {"model": "model_name"}},
+            }
 
     run_rake_task_mock.side_effect = result_per_question
     generate_inputs = [
@@ -61,35 +70,20 @@ def test_generate_models_to_evaluation_results_copes_with_response_errors(
 ):
     caplog.set_level(logging.WARNING)
     run_rake_task_mock.return_value = {
-        "response_error": {"message": "Error", "llm_guardrail_result": "Huh?"}
+        "jailbreak_guardrails_status": "error",
+        "llm_responses": json.dumps(
+            {"jailbreak_guardrails": {"content": [{"text": "Huh?"}]}}
+        ),
     }
     generate_inputs = [
         GenerateInput(question="Question 1", expected_outcome=True),
     ]
     actual_results = generate_inputs_to_evaluation_results(None, generate_inputs)
 
-    log_message = (
-        "Invalid response for 'Question 1', returned: "
-        "{'message': 'Error', 'llm_guardrail_result': 'Huh?'}"
-    )
+    log_message = "Invalid response for 'Question 1', returned: 'Huh?'"
 
     assert actual_results == []
     assert log_message in caplog.text
-
-
-def test_generate_models_to_evaluation_results_raises_on_unexpected_key(
-    run_rake_task_mock,
-):
-    run_rake_task_mock.return_value = {"what": {"triggered": True}}
-    generate_inputs = [
-        GenerateInput(question="Question 1", expected_outcome=True),
-    ]
-    with pytest.raises(RuntimeError) as exc_info:
-        generate_inputs_to_evaluation_results(None, generate_inputs)
-
-    assert "Unexpected result structure {'what': {'triggered': True}}" in str(
-        exc_info.value
-    )
 
 
 def test_generate_models_to_evaluation_models_runs_expected_rake_task(
