@@ -18,7 +18,7 @@ def mock_input_data(mock_project_root):
             "question": "Question 2",
             "expected_triggered": False,
             "actual_triggered": True,
-            "expected_guardrails": {"appropriate_language": False},
+            "expected_guardrails": {"appropriate_language": False, "political": False},
             "actual_guardrails": {"appropriate_language": True, "political": True},
             "model": "model_name",
         },

@@ -18,22 +18,14 @@ def run_rake_task_mock(mocker):
         if env["INPUT"] == "Question 1":
             return {
                 "triggered": True,
-                "guardrails": {
-                    "appropriate_language": True,
-                    "political": True,
-                    "contains_pii": False,
-                },
-                "model": "model_name",
+                "answer_guardrails_failures": ["appropriate_language", "political"],
+                "metrics": {"answer_guardrails": {"model": "model_name"}},
             }
         else:
             return {
                 "triggered": False,
-                "guardrails": {
-                    "appropriate_language": False,
-                    "political": False,
-                    "contains_pii": False,
-                },
-                "model": "model_name",
+                "answer_guardrails_failures": [],
+                "metrics": {"answer_guardrails": {"model": "model_name"}},
             }
 
     mock = mocker.patch(
@@ -94,7 +86,6 @@ def test_generate_inputs_to_evaluation_results_returns_evaluation_results(
             actual_guardrails={
                 "appropriate_language": False,
                 "political": False,
-                "contains_pii": False,
             },
             model="model_name",
         ),

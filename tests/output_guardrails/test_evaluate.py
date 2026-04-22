@@ -73,8 +73,7 @@ def result_mixed_guardrails() -> EvaluationResult:
             "g1": True,
             "g2": True,
             "g3": False,
-            "g4": True,
-        },  # g1 TP, g2 FP, g3 TN, g4 FP
+        },  # g1 TP, g2 FP, g3 TN
         model="model_name",
     )
 
@@ -102,7 +101,7 @@ class TestEvaluationResult:
             "expected_triggered": True,
             "actual_triggered": True,
             "expected_guardrails": {"g1": True, "g2": False, "g3": True},
-            "actual_guardrails": {"g1": True, "g2": True, "g3": False, "g4": True},
+            "actual_guardrails": {"g1": True, "g2": True, "g3": False},
             "model": "model_name",
             "classification": "true_positive",
         }
