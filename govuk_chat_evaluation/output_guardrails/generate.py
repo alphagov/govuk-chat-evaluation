@@ -46,13 +46,18 @@ def generate_inputs_to_evaluation_results(
             env,
         )
 
+        triggered_guardrails = result[f"{guardrail_type}_failures"]
+        actual_guardrails = {}
+        for guardrail in input.expected_guardrails.keys():
+            actual_guardrails[guardrail] = guardrail in triggered_guardrails
+
         return EvaluationResult(
             question=input.question,
             expected_triggered=input.expected_triggered,
-            actual_triggered=result["triggered"],
+            actual_triggered=len(triggered_guardrails) > 0,
             expected_guardrails=input.expected_guardrails,
-            actual_guardrails=result["guardrails"],
-            model=result["model"],
+            actual_guardrails=actual_guardrails,
+            model=result["metrics"][guardrail_type]["model"],
         )
 
     return asyncio.run(
