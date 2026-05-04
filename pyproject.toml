@@ -5,7 +5,7 @@ description = "Evaluation tool for GOV.UK Chat"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiobotocore>=3.4.0",
+    "aiobotocore>=3.6.0",
     "botocore>=1.40.18",
     "click>=8.3.3",
     "deepeval>=3.9.7",
