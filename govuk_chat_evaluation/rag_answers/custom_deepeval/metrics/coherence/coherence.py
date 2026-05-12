@@ -10,7 +10,7 @@ from deepeval.metrics.utils import (
 )
 from deepeval.models import DeepEvalBaseLLM
 from deepeval.telemetry import capture_metric_type
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 from .schema import CoherenceJudgement
 from .template import CoherenceTemplate, SCORE_RANGE
@@ -19,9 +19,9 @@ COHERENCE_THRESHOLD = 0.75
 
 
 class CoherenceMetric(BaseMetric):
-    _required_params: list[LLMTestCaseParams] = [
-        LLMTestCaseParams.INPUT,
-        LLMTestCaseParams.ACTUAL_OUTPUT,
+    _required_params: list[SingleTurnParams] = [
+        SingleTurnParams.INPUT,
+        SingleTurnParams.ACTUAL_OUTPUT,
     ]
     evaluation_template: Type[CoherenceTemplate] = CoherenceTemplate
 
