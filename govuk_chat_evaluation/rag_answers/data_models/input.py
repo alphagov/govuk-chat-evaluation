@@ -56,7 +56,7 @@ class EvaluationTestCase(GenerateInput):
             retrieval_context=[
                 ctx.to_flattened_string() for ctx in self.structured_contexts
             ],
-            additional_metadata={
+            metadata={
                 "structured_contexts": self.structured_contexts,
                 "expected_opensearch_index": self.expected_opensearch_index,
                 "actual_opensearch_index": self.actual_opensearch_index,

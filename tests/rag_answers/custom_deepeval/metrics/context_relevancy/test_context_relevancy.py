@@ -69,7 +69,7 @@ def mock_test_case():
     return LLMTestCase(
         input="What is the UK's inflation rate?",
         actual_output="The inflation rate is 3.4%.",
-        additional_metadata={"structured_contexts": [structured_context]},
+        metadata={"structured_contexts": [structured_context]},
     )
 
 
@@ -156,15 +156,15 @@ class TestContextRelevancyMetric:
                 await metric.a_measure(mock_test_case)
 
         @pytest.mark.asyncio
-        async def test_no_additional_metadata_raises_error(self, mock_native_model):
+        async def test_no_metadata_raises_error(self, mock_native_model):
             metric = ContextRelevancyMetric(model=mock_native_model)
             invalid_case = LLMTestCase(
-                input="question", actual_output="answer", additional_metadata=None
+                input="question", actual_output="answer", metadata=None
             )
             with pytest.raises(
                 MissingTestCaseParamsError,
                 match=re.escape(
-                    "additional_metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
+                    "metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
                 ),
             ):
                 await metric.a_measure(invalid_case)
@@ -175,12 +175,12 @@ class TestContextRelevancyMetric:
         ):
             metric = ContextRelevancyMetric(model=mock_native_model)
             invalid_case = LLMTestCase(
-                input="question", actual_output="answer", additional_metadata={}
+                input="question", actual_output="answer", metadata={}
             )
             with pytest.raises(
                 MissingTestCaseParamsError,
                 match=re.escape(
-                    "additional_metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
+                    "metadata['structured_contexts'] cannot be None for ContextRelevancyMetric."
                 ),
             ):
                 await metric.a_measure(invalid_case)

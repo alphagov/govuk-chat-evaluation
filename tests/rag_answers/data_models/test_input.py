@@ -76,16 +76,16 @@ class TestEvaluationTestCase:
         assert all(isinstance(chunk, str) for chunk in llm_test_case.retrieval_context)
         assert "VAT" in llm_test_case.retrieval_context[0]
         assert "Some HTML about VAT" in llm_test_case.retrieval_context[0]
-        assert llm_test_case.additional_metadata is not None
-        assert llm_test_case.additional_metadata["model"] == "model_name"
+        assert llm_test_case.metadata is not None
+        assert llm_test_case.metadata["model"] == "model_name"
 
-        assert isinstance(llm_test_case.additional_metadata, dict)
+        assert isinstance(llm_test_case.metadata, dict)
         assert (
-            llm_test_case.additional_metadata["expected_opensearch_index"]
+            llm_test_case.metadata["expected_opensearch_index"]
             == evaluation_test_case.expected_opensearch_index
         )
         assert (
-            llm_test_case.additional_metadata["actual_opensearch_index"]
+            llm_test_case.metadata["actual_opensearch_index"]
             == evaluation_test_case.actual_opensearch_index
         )
 

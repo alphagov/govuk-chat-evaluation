@@ -170,9 +170,9 @@ def convert_deepeval_output_to_evaluation_results(
 
         # taking the first TestResult for each input to extract static info
         sample_result = run_results[0][0]
-        if sample_result.additional_metadata is None:
+        if sample_result.metadata is None:
             raise RuntimeError(
-                f"DeepEval result for {sample_result.name!r} missing additional_metadata"
+                f"DeepEval result for {sample_result.name!r} missing metadata"
             )
 
         for run_idx, results in run_results.items():
@@ -190,9 +190,9 @@ def convert_deepeval_output_to_evaluation_results(
                         )
                     )
 
-        additional_metadata = sample_result.additional_metadata or {}
-        expected_opensearch_index = additional_metadata["expected_opensearch_index"]
-        actual_opensearch_index = additional_metadata["actual_opensearch_index"]
+        metadata = sample_result.metadata or {}
+        expected_opensearch_index = metadata["expected_opensearch_index"]
+        actual_opensearch_index = metadata["actual_opensearch_index"]
 
         aggregated_results.append(
             EvaluationResult(
@@ -204,7 +204,7 @@ def convert_deepeval_output_to_evaluation_results(
                 run_metric_outputs=evaluation_outputs,
                 expected_opensearch_index=expected_opensearch_index,
                 actual_opensearch_index=actual_opensearch_index,
-                model=sample_result.additional_metadata["model"],
+                model=sample_result.metadata["model"],
             )
         )
 
