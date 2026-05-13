@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 from deepeval.test_case import (
     LLMTestCase,
-    LLMTestCaseParams,
+    SingleTurnParams,
 )
 from deepeval.metrics import BaseMetric
 from deepeval.utils import prettify_list
@@ -31,9 +31,9 @@ SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
 
 class ContextRelevancyMetric(BaseMetric):
-    _required_params: List[LLMTestCaseParams] = [
-        LLMTestCaseParams.INPUT,
-        LLMTestCaseParams.ACTUAL_OUTPUT,
+    _required_params: List[SingleTurnParams] = [
+        SingleTurnParams.INPUT,
+        SingleTurnParams.ACTUAL_OUTPUT,
     ]
     evaluation_template: Type[ContextRelevancyTemplate] = ContextRelevancyTemplate
 
@@ -73,11 +73,11 @@ class ContextRelevancyMetric(BaseMetric):
             self.evaluation_cost = 0.0
 
         if (
-            test_case.additional_metadata is None
-            or test_case.additional_metadata.get("structured_contexts") is None
+            test_case.metadata is None
+            or test_case.metadata.get("structured_contexts") is None
         ):
             raise MissingTestCaseParamsError(
-                "additional_metadata['structured_contexts']"
+                "metadata['structured_contexts']"
                 " cannot be None for ContextRelevancyMetric."
             )
 
@@ -89,7 +89,7 @@ class ContextRelevancyMetric(BaseMetric):
         ):
             structured_contexts = cast(
                 List[StructuredContext],
-                test_case.additional_metadata["structured_contexts"],
+                test_case.metadata["structured_contexts"],
             )
 
             truth_collection = await self._generate_truths(structured_contexts)

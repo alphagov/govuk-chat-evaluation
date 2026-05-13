@@ -1,7 +1,7 @@
 from typing import Optional, List, Type
 from enum import Enum, auto
 
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.test_case import LLMTestCase, SingleTurnParams
 from deepeval.metrics import BaseMetric
 
 from deepeval.metrics.utils import (
@@ -28,10 +28,10 @@ class Mode(Enum):
 
 
 class FactualPrecisionRecall(BaseMetric):
-    _required_params: List[LLMTestCaseParams] = [
-        LLMTestCaseParams.INPUT,
-        LLMTestCaseParams.ACTUAL_OUTPUT,
-        LLMTestCaseParams.EXPECTED_OUTPUT,
+    _required_params: List[SingleTurnParams] = [
+        SingleTurnParams.INPUT,
+        SingleTurnParams.ACTUAL_OUTPUT,
+        SingleTurnParams.EXPECTED_OUTPUT,
     ]
 
     evaluation_template: Type[FactualPrecisionRecallTemplate] = (

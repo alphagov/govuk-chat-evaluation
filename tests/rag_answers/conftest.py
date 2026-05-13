@@ -97,7 +97,7 @@ def mock_deepeval_results():
             ],
             success=True,
             conversational=False,
-            additional_metadata={
+            metadata={
                 "expected_opensearch_index": "test-index",
                 "actual_opensearch_index": "test-index",
                 "model": "model_name",
