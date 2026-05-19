@@ -95,7 +95,7 @@ class LLMJudgeModelConfig(BaseModel):
                     aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
                     generation_kwargs={
                         "temperature": self.temperature,
-                        "maxTokens": 6000,
+                        "maxTokens": 15_000,
                     },
                 )
                 return attach_invalid_json_retry_to_model(model)
