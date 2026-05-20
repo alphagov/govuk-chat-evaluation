@@ -29,7 +29,7 @@ dev = [
     "pytest-freezer>=0.4.9",
     "pytest-mock>=3.14.0",
     "ruff>=0.15.13",
-    "typeguard>=4.4.2",
+    "typeguard>=4.5.2",
 ]
 
 
