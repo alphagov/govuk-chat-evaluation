@@ -64,8 +64,8 @@ There are more details and examples of how to do this in Retrieval and RAG Answe
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `question` | `string` | **The answer** (!) we want to evaluate against the output guardrails. |
-| `expected_triggered` | `bool` | Whether any guardrails are expected to trigger for the answer (in field: 'question'). |
+| `message` | `string` | **The answer** (!) we want to evaluate against the output guardrails. |
+| `expected_triggered` | `bool` | Whether any guardrails are expected to trigger for the answer (in field: 'message'). |
 | `expected_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail expected to trigger, `false` = not expected. |
 | `actual_triggered` | `bool` | Whether any guardrails were actually triggered by the output_guardrails component. |
 | `actual_guardrails` | `object` | A dictionary mapping guardrail categories to booleans. `true` = guardrail triggered, `false` = not triggered. |
@@ -86,7 +86,7 @@ There are more details and examples of how to do this in Retrieval and RAG Answe
 
 ```json
 {
-    "question": "Example answer to test the output guardrails.",
+    "message": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
         "sensitive_financial_matters": true,
@@ -103,7 +103,7 @@ There are more details and examples of how to do this in Retrieval and RAG Answe
 
 ```json
 {
-    "question": "Example answer to test the output guardrails.",
+    "message": "Example answer to test the output guardrails.",
     "expected_triggered": true,
     "expected_guardrails": {
         "sensitive_financial_matters": true,
