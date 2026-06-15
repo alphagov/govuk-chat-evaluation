@@ -150,7 +150,11 @@ class TaskConfig(BaseConfig):
         model = metric.llm_judge.instantiate_llm_judge()
         match metric.name:
             case MetricName.FAITHFULNESS:
-                return FaithfulnessMetric(threshold=metric.threshold, model=model)
+                return FaithfulnessMetric(
+                    threshold=metric.threshold,
+                    model=model,
+                    penalize_ambiguous_claims=True,
+                )
             case MetricName.RELEVANCE:
                 return AnswerRelevancyMetric(threshold=metric.threshold, model=model)
             case MetricName.BIAS:
