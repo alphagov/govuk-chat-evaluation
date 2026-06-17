@@ -1,5 +1,5 @@
 import pytest
-from deepeval.test_case import LLMTestCase
+from deepeval.test_case import LLMTestCase, RetrievedContextData
 from govuk_chat_evaluation.rag_answers.data_models import (
     EvaluationTestCase,
     StructuredContext,
@@ -74,8 +74,16 @@ class TestEvaluationTestCase:
 
         assert isinstance(llm_test_case.retrieval_context, list)
         assert all(isinstance(chunk, str) for chunk in llm_test_case.retrieval_context)
-        assert "VAT" in llm_test_case.retrieval_context[0]
-        assert "Some HTML about VAT" in llm_test_case.retrieval_context[0]
+
+        context_item = llm_test_case.retrieval_context[0]
+        context_text = (
+            context_item.context
+            if isinstance(context_item, RetrievedContextData)
+            else context_item
+        )
+        assert "VAT" in context_text
+        assert "Some HTML about VAT" in context_text
+
         assert llm_test_case.metadata is not None
         assert llm_test_case.metadata["model"] == "model_name"
 
