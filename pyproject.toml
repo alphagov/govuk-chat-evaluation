@@ -28,7 +28,7 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-freezer>=0.4.9",
     "pytest-mock>=3.14.0",
-    "ruff>=0.15.21",
+    "ruff>=0.15.22",
     "typeguard>=4.5.2",
 ]
 
