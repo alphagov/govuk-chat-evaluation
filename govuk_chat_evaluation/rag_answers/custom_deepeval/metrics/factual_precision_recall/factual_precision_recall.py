@@ -109,7 +109,7 @@ class FactualPrecisionRecall(BaseMetric):
         if self.confusion_matrix.has_facts():
             self.score = self._calculate_score()
             self.reason = self._generate_reason()
-            self.success = self.score >= self.threshold
+            self.success = self.threshold is not None and self.score >= self.threshold
             capture_metric_type(
                 self.__name__, async_mode=self.async_mode, in_component=False
             )
@@ -219,7 +219,13 @@ class FactualPrecisionRecall(BaseMetric):
             case Mode.RECALL:
                 score = tp / (tp + fn) if (tp + fn) > 0 else float("nan")
 
-        return 0.0 if self.strict_mode and score < self.threshold else score
+        return (
+            0.0
+            if self.strict_mode
+            and self.threshold is not None
+            and score < self.threshold
+            else score
+        )
 
     def is_successful(self) -> bool:
         if self.error is not None:
