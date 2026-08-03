@@ -1,10 +1,9 @@
 import logging
 from types import MethodType
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
-from pydantic import BaseModel
 from deepeval.models.base_model import DeepEvalBaseLLM
-
+from pydantic import BaseModel
 
 ModelT = TypeVar("ModelT", bound=DeepEvalBaseLLM)
 
@@ -23,7 +22,7 @@ def attach_invalid_json_retry_to_model(
     async def _retrying_a_generate(
         self: DeepEvalBaseLLM,
         prompt: str,
-        schema: Optional[BaseModel] = None,
+        schema: BaseModel | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> Any:

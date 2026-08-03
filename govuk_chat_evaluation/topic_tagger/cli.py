@@ -3,11 +3,11 @@ from pathlib import Path
 
 import click
 
-from ..config import BaseConfig, config_from_cli_args, apply_click_options_to_command
+from ..config import BaseConfig, apply_click_options_to_command, config_from_cli_args
 from ..file_system import write_config_file_for_reuse
+from ..output import initialise_output
 from .evaluate import evaluate_and_output_results
 from .generate import generate_and_write_dataset
-from ..output import initialise_output
 
 
 class Config(BaseConfig):

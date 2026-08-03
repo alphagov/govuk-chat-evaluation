@@ -1,28 +1,26 @@
-from pathlib import Path
+import logging
 from functools import cached_property
-import pandas as pd
+from pathlib import Path
 
+import pandas as pd
 from deepeval.evaluate.configs import (
     AsyncConfig,
-    DisplayConfig,
     CacheConfig,
+    DisplayConfig,
     ErrorConfig,
 )
 
-from .deepeval_evaluate import (
-    run_deepeval_evaluation,
-    convert_deepeval_output_to_evaluation_results,
-)
-from ..file_system import jsonl_to_models
-from .data_models import EvaluationTestCase, TaskConfig
 from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
     ensure_unique_model_ids,
 )
+
+from ..file_system import jsonl_to_models
+from .data_models import EvaluationTestCase, TaskConfig
 from .deepeval_evaluate import (
     EvaluationResult,
+    convert_deepeval_output_to_evaluation_results,
+    run_deepeval_evaluation,
 )
-import logging
-
 
 display_config = DisplayConfig(
     verbose_mode=False,

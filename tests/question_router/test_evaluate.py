@@ -1,8 +1,9 @@
 import csv
 import json
-import re
 import logging
+import re
 from pathlib import Path
+
 import pytest
 
 from govuk_chat_evaluation.question_router.evaluate import (
@@ -152,8 +153,7 @@ class TestAggregateResults:
 def write_mock_evaluation_data_file(tmp_path: Path, data: list[dict]):
     file_path = tmp_path / "evaluation_data.jsonl"
     with open(file_path, "w", encoding="utf8") as file:
-        for item in data:
-            file.write(json.dumps(item) + "\n")
+        file.writelines(json.dumps(item) + "\n" for item in data)
 
     return file_path
 

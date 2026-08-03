@@ -3,13 +3,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from govuk_chat_evaluation.output_guardrails.generate import (
-    generate_inputs_to_evaluation_results,
-    generate_and_write_dataset,
-    GenerateInput,
-)
-
 from govuk_chat_evaluation.output_guardrails.evaluate import EvaluationResult
+from govuk_chat_evaluation.output_guardrails.generate import (
+    GenerateInput,
+    generate_and_write_dataset,
+    generate_inputs_to_evaluation_results,
+)
 
 
 @pytest.fixture

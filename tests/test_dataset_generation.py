@@ -1,9 +1,9 @@
 import json
-from unittest.mock import AsyncMock, ANY
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 
-from govuk_chat_evaluation.dataset_generation import run_rake_task, generate_dataset
+from govuk_chat_evaluation.dataset_generation import generate_dataset, run_rake_task
 
 
 @pytest.mark.asyncio

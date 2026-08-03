@@ -5,11 +5,11 @@ import click
 
 from ..config import apply_click_options_to_command, config_from_cli_args
 from ..file_system import write_config_file_for_reuse
-from .evaluate import evaluate_and_output_results
-from .generate import generate_and_write_dataset
+from ..output import initialise_output
 from .data_models import TaskConfig
 from .data_models.config import BedrockCredentialsError
-from ..output import initialise_output
+from .evaluate import evaluate_and_output_results
+from .generate import generate_and_write_dataset
 
 
 @click.command(name="rag_answers")

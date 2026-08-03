@@ -2,19 +2,19 @@ import csv
 import json
 from datetime import datetime
 from pathlib import Path, PosixPath
-from pydantic import BaseModel
 
 import pytest
 import yaml
+from pydantic import BaseModel
 
 from govuk_chat_evaluation.config import BaseConfig
 from govuk_chat_evaluation.file_system import (
-    project_root,
     create_output_directory,
     jsonl_to_models,
-    write_generated_to_output,
+    project_root,
     write_config_file_for_reuse,
     write_csv_results,
+    write_generated_to_output,
 )
 
 
@@ -33,8 +33,7 @@ def sample_jsonl(tmp_path):
     file_path = tmp_path / "sample.jsonl"
     data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
     with open(file_path, "w", encoding="utf-8") as file:
-        for item in data:
-            file.write(json.dumps(item) + "\n")
+        file.writelines(json.dumps(item) + "\n" for item in data)
     return file_path
 
 

@@ -1,3 +1,4 @@
+import logging
 from collections import Counter
 from functools import cached_property
 from pathlib import Path
@@ -9,7 +10,6 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from tabulate import tabulate
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
 
 
 class EvaluationResult(BaseModel):

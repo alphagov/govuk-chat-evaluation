@@ -1,14 +1,17 @@
-import click
 import os
+
+import click
 from dotenv import load_dotenv
 
+from . import (
+    jailbreak_guardrails,
+    output_guardrails,
+    question_router,
+    rag_answers,
+    retrieval,
+    topic_tagger,
+)
 from .file_system import project_root
-from . import jailbreak_guardrails
-from . import output_guardrails
-from . import question_router
-from . import rag_answers
-from . import retrieval
-from . import topic_tagger
 
 load_dotenv(project_root() / ".env.aws")
 load_dotenv()

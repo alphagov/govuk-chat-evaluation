@@ -1,13 +1,13 @@
+import uuid
+
 from deepeval.test_case import LLMTestCase
 from pydantic import BaseModel, Field
-from typing import Optional
-import uuid
 
 
 class StructuredContext(BaseModel):
     title: str
     heading_hierarchy: list[str]
-    description: Optional[str] = None
+    description: str | None = None
     html_content: str
     exact_path: str
     base_path: str
@@ -37,8 +37,8 @@ class StructuredContext(BaseModel):
 class GenerateInput(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     question: str
-    ideal_answer: Optional[str] = None
-    expected_opensearch_index: Optional[str] = None
+    ideal_answer: str | None = None
+    expected_opensearch_index: str | None = None
 
 
 class EvaluationTestCase(GenerateInput):

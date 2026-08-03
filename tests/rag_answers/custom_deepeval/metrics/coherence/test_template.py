@@ -1,7 +1,7 @@
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence.template import (
-    CoherenceTemplate,
     RUBRIC,
     SCORE_RANGE,
+    CoherenceTemplate,
 )
 
 

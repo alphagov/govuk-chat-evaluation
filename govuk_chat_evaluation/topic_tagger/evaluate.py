@@ -1,12 +1,12 @@
+import logging
+from enum import Enum
 from pathlib import Path
 from typing import Any
-from enum import Enum
 
 from pydantic import BaseModel
 from tabulate import tabulate
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
 
 
 class TopicStatus(str, Enum):

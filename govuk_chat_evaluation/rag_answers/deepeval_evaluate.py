@@ -1,18 +1,18 @@
-from collections import defaultdict
-from pydantic.dataclasses import dataclass
-from typing import Optional
 import json
+import logging
+from collections import defaultdict
+from pathlib import Path
 
 from deepeval import evaluate as deepeval_evaluate
 from deepeval.evaluate.types import TestResult
 from deepeval.test_case import LLMTestCase
-from .data_models.config import TaskConfig
+from deepeval.test_run import global_test_run_manager
+from pydantic.dataclasses import dataclass
+
+from govuk_chat_evaluation import file_system
 
 from ..timing import log_task_duration
-import logging
-from deepeval.test_run import global_test_run_manager
-from pathlib import Path
-import govuk_chat_evaluation.file_system as file_system
+from .data_models.config import TaskConfig
 
 
 @dataclass
@@ -35,8 +35,8 @@ class EvaluationResult:
     run_metric_outputs: list[RunMetricOutput]
     actual_opensearch_index: str
     model: str
-    expected_opensearch_index: Optional[str] = None
-    expected_output: Optional[str] = None
+    expected_opensearch_index: str | None = None
+    expected_output: str | None = None
 
 
 def run_deepeval_evaluation(

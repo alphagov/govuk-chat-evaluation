@@ -1,6 +1,6 @@
+import logging
 import time
 from contextlib import contextmanager
-import logging
 
 
 @contextmanager

@@ -1,11 +1,12 @@
 import asyncio
 import json
+import logging
 import os
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from tqdm.asyncio import tqdm
-import logging
 
 MAX_CONCURRENT_TASKS = 5
 

@@ -1,7 +1,7 @@
+from .cache import FactClassificationCache
 from .factual_precision_recall import (
     FactualPrecisionRecall,
     Mode,
 )
-from .cache import FactClassificationCache
 
-__all__ = ["FactualPrecisionRecall", "Mode", "FactClassificationCache"]
+__all__ = ["FactClassificationCache", "FactualPrecisionRecall", "Mode"]

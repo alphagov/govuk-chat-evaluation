@@ -1,14 +1,14 @@
 import csv
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TypeVar, Type, Any
+from typing import Any, TypeVar
 
 import yaml
 from pydantic import BaseModel
 
 from .config import BaseConfig
-import logging
 
 Model = TypeVar("Model", bound=BaseModel)
 
@@ -37,7 +37,7 @@ def create_output_directory(prefix: str, time: datetime) -> Path:
     return path
 
 
-def jsonl_to_models(file_path: Path, model_class: Type[Model]) -> list[Model]:
+def jsonl_to_models(file_path: Path, model_class: type[Model]) -> list[Model]:
     """Open a JSONL file and iterate through the contents, using them to
     hydrate pydantic models"""
 
@@ -56,8 +56,7 @@ def write_generated_to_output(output_dir: Path, generated: list[Model]) -> Path:
 
     output_path = output_dir / "generated.jsonl"
     with open(output_path, "w", encoding="utf8") as file:
-        for model in generated:
-            file.write(model.model_dump_json() + "\n")
+        file.writelines(model.model_dump_json() + "\n" for model in generated)
 
     relative_path = output_path.relative_to(project_root())
     logging.info(f"Wrote generated data to {relative_path}")

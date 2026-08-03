@@ -1,23 +1,23 @@
+import logging
 from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 from pydantic import BaseModel
 from sklearn.metrics import (
     accuracy_score,
-    precision_score,
-    recall_score,
+    confusion_matrix,
     f1_score,
     fbeta_score,
-    confusion_matrix,
+    precision_score,
+    recall_score,
 )
 from tabulate import tabulate
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
 
 
 class EvaluationResult(BaseModel):

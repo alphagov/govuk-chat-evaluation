@@ -1,6 +1,7 @@
-from .data_models import GenerateInput
 from collections import Counter
-from typing import Sequence
+from collections.abc import Sequence
+
+from .data_models import GenerateInput
 
 
 def ensure_unique_model_ids(inputs: Sequence[GenerateInput]):

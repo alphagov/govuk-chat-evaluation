@@ -1,41 +1,43 @@
-from typing import List, Type, TypeVar, cast, Optional
-from pydantic import BaseModel
+from typing import TypeVar, cast
 
+from deepeval.errors import MissingTestCaseParamsError
+from deepeval.metrics import BaseMetric
+from deepeval.metrics.indicator import metric_progress_indicator
+from deepeval.metrics.utils import (
+    check_llm_test_case_params,
+    construct_verbose_logs,
+    initialize_model,
+    trimAndLoadJson,
+)
+from deepeval.models import DeepEvalBaseLLM
 from deepeval.test_case import (
     LLMTestCase,
     SingleTurnParams,
 )
-from deepeval.metrics import BaseMetric
 from deepeval.utils import prettify_list
-from deepeval.metrics.utils import (
-    construct_verbose_logs,
-    trimAndLoadJson,
-    check_llm_test_case_params,
-    initialize_model,
-)
-from deepeval.models import DeepEvalBaseLLM
-from .template import ContextRelevancyTemplate
-from deepeval.metrics.indicator import metric_progress_indicator
-from .schema import (
-    TruthCollection,
-    InformationNeedsCollection,
-    VerdictCollection,
-    ScoreReason,
-)
+from pydantic import BaseModel
+
 from govuk_chat_evaluation.rag_answers.data_models import (
     StructuredContext,
 )
-from deepeval.errors import MissingTestCaseParamsError
+
+from .schema import (
+    InformationNeedsCollection,
+    ScoreReason,
+    TruthCollection,
+    VerdictCollection,
+)
+from .template import ContextRelevancyTemplate
 
 SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
 
 class ContextRelevancyMetric(BaseMetric):
-    _required_params: List[SingleTurnParams] = [
+    _required_params: list[SingleTurnParams] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
     ]
-    evaluation_template: Type[ContextRelevancyTemplate] = ContextRelevancyTemplate
+    evaluation_template: type[ContextRelevancyTemplate] = ContextRelevancyTemplate
 
     def __init__(
         self,
@@ -88,7 +90,7 @@ class ContextRelevancyMetric(BaseMetric):
             _in_component=_in_component,
         ):
             structured_contexts = cast(
-                List[StructuredContext],
+                list[StructuredContext],
                 test_case.metadata["structured_contexts"],
             )
 
@@ -190,13 +192,13 @@ class ContextRelevancyMetric(BaseMetric):
         return result.reason if isinstance(result.reason, str) else str(result.reason)
 
     async def _generate_result_from_model(
-        self, prompt: str, schema: Type[SchemaType]
+        self, prompt: str, schema: type[SchemaType]
     ) -> SchemaType:
         assert self.model is not None
 
         if self.using_native_model:
             result, cost = cast(
-                tuple[SchemaType, Optional[float]],
+                tuple[SchemaType, float | None],
                 await self.model.a_generate(prompt, schema=schema),
             )
             if isinstance(cost, float):

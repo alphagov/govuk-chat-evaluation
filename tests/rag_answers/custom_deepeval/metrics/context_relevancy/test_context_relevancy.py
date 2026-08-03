@@ -1,23 +1,23 @@
-import pytest
 import json
-from unittest.mock import Mock, AsyncMock, patch
-
-from deepeval.test_case import LLMTestCase
-from deepeval.models import GPTModel, DeepEvalBaseLLM
-from deepeval.errors import MissingTestCaseParamsError
-from deepeval.utils import prettify_list
 import re
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from deepeval.errors import MissingTestCaseParamsError
+from deepeval.models import DeepEvalBaseLLM, GPTModel
+from deepeval.test_case import LLMTestCase
+from deepeval.utils import prettify_list
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy import (
     ContextRelevancyMetric,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.context_relevancy.schema import (
+    InformationNeedsCollection,
+    ScoreReason,
     Truth,
     TruthCollection,
-    InformationNeedsCollection,
     Verdict,
     VerdictCollection,
-    ScoreReason,
 )
 from govuk_chat_evaluation.rag_answers.data_models import (
     StructuredContext,

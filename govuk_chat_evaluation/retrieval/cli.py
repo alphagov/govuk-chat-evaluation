@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from ..config import BaseConfig, config_from_cli_args, apply_click_options_to_command
+from ..config import BaseConfig, apply_click_options_to_command, config_from_cli_args
 from ..file_system import create_output_directory, write_config_file_for_reuse
 from .evaluate import evaluate_and_output_results
 from .generate import generate_and_write_dataset

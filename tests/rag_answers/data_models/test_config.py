@@ -1,30 +1,32 @@
-import pytest
-from pydantic import ValidationError
-from deepeval.metrics import (
-    FaithfulnessMetric,
-    BiasMetric,
-)
-from deepeval.models.llms.openai_model import GPTModel
-from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
-
 from typing import cast
 
-from govuk_chat_evaluation.rag_answers.data_models import (
-    MetricName,
-    LLMJudgeModel,
-    LLMJudgeModelConfig,
-    MetricConfig,
-    TaskConfig,
-    config as config_module,
+import pytest
+from deepeval.metrics import (
+    BiasMetric,
+    FaithfulnessMetric,
 )
+from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
+from deepeval.models.llms.openai_model import GPTModel
+from pydantic import ValidationError
+
+from govuk_chat_evaluation.aws_credentials import AwsCredentialCheckResult
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics import (
-    FactualPrecisionRecall,
     FactClassificationCache,
+    FactualPrecisionRecall,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.coherence import (
     CoherenceMetric,
 )
-from govuk_chat_evaluation.aws_credentials import AwsCredentialCheckResult
+from govuk_chat_evaluation.rag_answers.data_models import (
+    LLMJudgeModel,
+    LLMJudgeModelConfig,
+    MetricConfig,
+    MetricName,
+    TaskConfig,
+)
+from govuk_chat_evaluation.rag_answers.data_models import (
+    config as config_module,
+)
 
 
 class TestMetricConfig:

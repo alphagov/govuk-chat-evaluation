@@ -3,9 +3,9 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .evaluate import EvaluationResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
+from .evaluate import EvaluationResult
 
 
 class GenerateInput(BaseModel):

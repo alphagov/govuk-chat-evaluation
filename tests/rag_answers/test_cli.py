@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from govuk_chat_evaluation.rag_answers.cli import main
 from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 from govuk_chat_evaluation.rag_answers.data_models.config import BedrockCredentialsError
+
 # ─── Fixtures
 
 

@@ -1,11 +1,13 @@
-import pytest
 import json
 from unittest.mock import AsyncMock
+
+import pytest
+
 from govuk_chat_evaluation.topic_tagger.generate import (
-    generate_inputs_to_evaluation_results,
-    generate_and_write_dataset,
-    GenerateInput,
     EvaluationResult,
+    GenerateInput,
+    generate_and_write_dataset,
+    generate_inputs_to_evaluation_results,
 )
 
 
