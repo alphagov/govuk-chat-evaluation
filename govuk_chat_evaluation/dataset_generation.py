@@ -9,6 +9,7 @@ from typing import Any
 from tqdm.asyncio import tqdm
 
 MAX_CONCURRENT_TASKS = 5
+logger = logging.getLogger(__name__)
 
 
 async def run_rake_task(task_name: str, env_vars: dict[str, str] | None = None) -> Any:
@@ -59,7 +60,7 @@ async def generate_dataset(
     ]
     evaluations = []
 
-    logging.info("Generating dataset")
+    logger.info("Generating dataset")
     for future in tqdm.as_completed(tasks, total=len(tasks)):
         try:
             evaluation = await future

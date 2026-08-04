@@ -19,6 +19,8 @@ from .template import (
     FactualPrecisionRecallTemplate,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class Mode(Enum):
     PRECISION = auto()
@@ -97,7 +99,7 @@ class FactualPrecisionRecall(BaseMetric):
                 test_case.actual_output or "",
                 test_case.expected_output or "",
             )
-            logging.debug(
+            logger.debug(
                 f"Confusion matrix for test input: '{test_case.input}': \n{self.confusion_matrix}"
             )
             return self._finalise_evaluation(test_case.input)
@@ -129,7 +131,7 @@ class FactualPrecisionRecall(BaseMetric):
             return self.score
         else:
             self.error = f"Error: no facts were classified. confusion_matrix is empty for input: {input}."
-            logging.error(self.error)
+            logger.error(self.error)
             return float("nan")
 
     def _generate_reason(self) -> str | None:
@@ -174,7 +176,7 @@ class FactualPrecisionRecall(BaseMetric):
                     data_model = FactClassificationResult(**data)
                     classified_facts = data_model.classified_facts
                 except Exception as inner_e:
-                    logging.error(
+                    logger.error(
                         f"Failed to parse fallback JSON for test input: {input}",
                         exc_info=inner_e,
                     )

@@ -14,6 +14,8 @@ from govuk_chat_evaluation import file_system
 from ..timing import log_task_duration
 from .data_models.config import TaskConfig
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class RunMetricOutput:
@@ -61,12 +63,12 @@ def run_deepeval_evaluation(
     """
 
     with log_task_duration("Running DeepEval Evaluation"):
-        logging.info("Running DeepEval evaluation")
+        logger.info("Running DeepEval evaluation")
 
         all_evaluation_runs = []
 
         for i in range(n_runs):
-            logging.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
+            logger.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
 
             metrics = config.metric_instances()
 
@@ -91,9 +93,9 @@ def run_deepeval_evaluation(
                 json.dump(body, f)
 
             relative_path = path.relative_to(file_system.project_root())
-            logging.info(f"Run {i + 1} done. written to {relative_path}")
+            logger.info(f"Run {i + 1} done. written to {relative_path}")
 
-    logging.info("Deepval evaluation complete")
+    logger.info("Deepval evaluation complete")
 
     return all_evaluation_runs
 

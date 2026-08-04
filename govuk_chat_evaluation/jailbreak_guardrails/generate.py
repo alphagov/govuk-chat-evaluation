@@ -9,6 +9,8 @@ from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
 from .evaluate import EvaluationResult
 
+logger = logging.getLogger(__name__)
+
 
 class GenerateInput(BaseModel):
     question: str
@@ -50,7 +52,7 @@ def generate_inputs_to_evaluation_results(
             ]
             invalid_llm_response = parsed_jailbreak_llm_response["content"][0]["text"]
 
-            logging.warning(
+            logger.warning(
                 f"Invalid response for {input.question!r}, returned: {invalid_llm_response!r}"
             )
             return None

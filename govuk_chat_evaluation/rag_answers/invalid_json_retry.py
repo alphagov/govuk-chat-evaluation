@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 from deepeval.models.base_model import DeepEvalBaseLLM
 from pydantic import BaseModel
 
+logger = logging.getLogger(__name__)
 ModelT = TypeVar("ModelT", bound=DeepEvalBaseLLM)
 
 
@@ -41,7 +42,7 @@ def attach_invalid_json_retry_to_model(
                 else:
                     detail = "last attempt remaining"
 
-                logging.warning(
+                logger.warning(
                     "LLM judge emitted invalid JSON; retrying (%s)",
                     detail,
                 )
