@@ -1,4 +1,4 @@
-from typing import cast
+from typing import ClassVar, cast
 
 from deepeval.metrics import BaseMetric
 from deepeval.metrics.indicator import metric_progress_indicator
@@ -19,7 +19,7 @@ COHERENCE_THRESHOLD = 0.75
 
 
 class CoherenceMetric(BaseMetric):
-    _required_params: list[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
     ]

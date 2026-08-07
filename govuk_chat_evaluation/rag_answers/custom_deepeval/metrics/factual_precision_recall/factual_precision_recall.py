@@ -1,5 +1,6 @@
 import logging
 from enum import Enum, auto
+from typing import ClassVar
 
 from deepeval.metrics import BaseMetric
 from deepeval.metrics.indicator import metric_progress_indicator
@@ -28,7 +29,7 @@ class Mode(Enum):
 
 
 class FactualPrecisionRecall(BaseMetric):
-    _required_params: list[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
         SingleTurnParams.EXPECTED_OUTPUT,

@@ -1,4 +1,4 @@
-from typing import TypeVar, cast
+from typing import ClassVar, TypeVar, cast
 
 from deepeval.errors import MissingTestCaseParamsError
 from deepeval.metrics import BaseMetric
@@ -33,7 +33,7 @@ SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
 
 class ContextRelevancyMetric(BaseMetric):
-    _required_params: list[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
     ]

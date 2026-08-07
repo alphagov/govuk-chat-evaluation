@@ -23,7 +23,7 @@ class SampleConfig(BaseConfig):
 
 
 class ComplexConfig(SampleConfig):
-    values: list[int] = [1, 2, 3]
+    values: list[int]
     settings: dict[str, str]
     nested: NestedConfig
 

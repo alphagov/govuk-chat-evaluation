@@ -1,4 +1,4 @@
-from typing import TypeVar, cast
+from typing import ClassVar, TypeVar, cast
 
 from deepeval.metrics import BaseMetric
 from deepeval.metrics.indicator import metric_progress_indicator
@@ -28,7 +28,7 @@ SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
 
 class AbsenceOfFactualContradictions(BaseMetric):
-    _required_params: list[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
         SingleTurnParams.EXPECTED_OUTPUT,
