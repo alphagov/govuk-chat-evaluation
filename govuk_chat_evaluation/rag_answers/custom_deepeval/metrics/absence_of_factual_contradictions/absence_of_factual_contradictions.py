@@ -152,7 +152,13 @@ class AbsenceOfFactualContradictions(BaseMetric):
 
     def _calculate_score(self, verdicts: VerdictCollection) -> float:
         score = verdicts.score_verdicts()
-        return 0 if self.strict_mode and score < self.threshold else score
+        return (
+            0
+            if self.strict_mode
+            and self.threshold is not None
+            and score < self.threshold
+            else score
+        )
 
     async def _generate_result_from_model(
         self, prompt: str, schema: Type[SchemaType]
@@ -180,7 +186,7 @@ class AbsenceOfFactualContradictions(BaseMetric):
                 return model
 
     def is_successful(self) -> bool:
-        if self.score is None:
+        if self.score is None or self.threshold is None:
             return False
         return self.score >= self.threshold
 

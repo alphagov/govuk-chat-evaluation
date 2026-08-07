@@ -129,7 +129,7 @@ class CoherenceMetric(BaseMetric):
         return (rubric_score - lo) / (hi - lo)
 
     def is_successful(self) -> bool:
-        if self.score is None:
+        if self.score is None or self.threshold is None:
             return False
         return self.score >= self.threshold
 
