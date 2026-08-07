@@ -17,7 +17,7 @@ from deepeval.test_case import (
 from deepeval.utils import prettify_list
 from pydantic import BaseModel
 
-from govuk_chat_evaluation.rag_answers.data_models import (
+from govuk_chat_evaluation.rag_answers.data_models.input import (
     StructuredContext,
 )
 
