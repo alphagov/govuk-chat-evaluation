@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
 import yaml
 from pydantic import BaseModel
@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from .config import BaseConfig
 
 logger = logging.getLogger(__name__)
-Model = TypeVar("Model", bound=BaseModel)
 
 # Timestamps are formatted rather than isoformat()'d so that timezone aware
 # datetimes don't introduce a UTC offset into output directory names
@@ -42,7 +41,9 @@ def create_output_directory(prefix: str, time: datetime) -> Path:
     return path
 
 
-def jsonl_to_models(file_path: Path, model_class: type[Model]) -> list[Model]:
+def jsonl_to_models[Model: BaseModel](
+    file_path: Path, model_class: type[Model]
+) -> list[Model]:
     """Open a JSONL file and iterate through the contents, using them to
     hydrate pydantic models"""
 
@@ -55,7 +56,9 @@ def jsonl_to_models(file_path: Path, model_class: type[Model]) -> list[Model]:
     return models
 
 
-def write_generated_to_output(output_dir: Path, generated: list[Model]) -> Path:
+def write_generated_to_output[Model: BaseModel](
+    output_dir: Path, generated: list[Model]
+) -> Path:
     """Write a JSONL file in the output directory that contains the JSON contents
     of each pydantic model in the generated list"""
 

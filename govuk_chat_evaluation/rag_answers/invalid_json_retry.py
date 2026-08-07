@@ -1,15 +1,14 @@
 import logging
 from types import MethodType
-from typing import Any, TypeVar
+from typing import Any
 
 from deepeval.models.base_model import DeepEvalBaseLLM
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
-ModelT = TypeVar("ModelT", bound=DeepEvalBaseLLM)
 
 
-def attach_invalid_json_retry_to_model(
+def attach_invalid_json_retry_to_model[ModelT: DeepEvalBaseLLM](
     model: ModelT,
     max_attempts: int = 3,
 ) -> ModelT:
