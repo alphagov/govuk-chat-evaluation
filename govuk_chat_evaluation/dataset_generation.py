@@ -66,13 +66,13 @@ async def generate_dataset(
             evaluation = await future
             if evaluation is not None:
                 evaluations.append(evaluation)
-        except Exception as e:
+        except Exception:
             # Cancel all remaining tasks to ensure clean termination
             for task in tasks:
                 if not task.done():
                     task.cancel()
             # Wait for all tasks to be cancelled
             await asyncio.gather(*tasks, return_exceptions=True)
-            raise e
+            raise
 
     return evaluations

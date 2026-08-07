@@ -41,9 +41,7 @@ class AggregateResults:
 
     @cached_property
     def classification_labels(self) -> list[str]:
-        return sorted(
-            list(set(item for lst in self._expected_actual_lists for item in lst))
-        )
+        return sorted({item for lst in self._expected_actual_lists for item in lst})
 
     @cached_property
     def _expected_actual_lists(self) -> tuple[list[str], list[str]]:
@@ -92,7 +90,7 @@ class AggregateResults:
     def confusion_matrix_data(self) -> list[list[int]]:
         return confusion_matrix(
             *self._expected_actual_lists,
-            labels=sorted(list(set(self.classification_labels))),  # type: ignore
+            labels=self.classification_labels,  # type: ignore
         )
 
     def miscategorised_cases(self) -> list[dict[str, Any]]:
@@ -132,7 +130,7 @@ def generate_and_output_confusion_matrix(
     """Takes confusion matrix data (a 2D list) calculated by sklearn
     and a list of labels (strings representing the question routing labels)
     and outputs an confusion matrix PNG image to the output directory"""
-    fig, ax = plt.subplots(figsize=(6, 6))
+    _fig, ax = plt.subplots(figsize=(6, 6))
     sns.heatmap(
         confusion_matrix_data,  # type: ignore
         annot=True,

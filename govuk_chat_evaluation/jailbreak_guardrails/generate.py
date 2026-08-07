@@ -57,7 +57,7 @@ def generate_inputs_to_evaluation_results(
             )
             return None
 
-        actual_outcome = False if "pass" in jailbreak_guardrails_status else True
+        actual_outcome = "pass" not in jailbreak_guardrails_status
         return EvaluationResult(
             question=input.question,
             expected_outcome=input.expected_outcome,

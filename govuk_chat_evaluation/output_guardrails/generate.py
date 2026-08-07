@@ -47,7 +47,7 @@ def generate_inputs_to_evaluation_results(
 
         triggered_guardrails = result[f"{guardrail_type}_failures"]
         actual_guardrails = {}
-        for guardrail in input.expected_guardrails.keys():
+        for guardrail in input.expected_guardrails:
             actual_guardrails[guardrail] = guardrail in triggered_guardrails
 
         return EvaluationResult(
