@@ -26,7 +26,7 @@ class Config(BaseConfig):
 @apply_click_options_to_command(Config)
 def main(**cli_args):
     """Run jailbreak guardrails evaluation"""
-    start_time = datetime.now()
+    start_time = datetime.now().astimezone()
 
     config: Config = config_from_cli_args(
         config_path=cli_args["config_path"],

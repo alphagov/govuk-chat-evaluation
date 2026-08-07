@@ -13,6 +13,10 @@ from .config import BaseConfig
 logger = logging.getLogger(__name__)
 Model = TypeVar("Model", bound=BaseModel)
 
+# Timestamps are formatted rather than isoformat()'d so that timezone aware
+# datetimes don't introduce a UTC offset into output directory names
+OUTPUT_DIR_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
 
 def project_root() -> Path:
     """Return root directory of this project, used for storing data relative
@@ -25,7 +29,7 @@ def create_output_directory(prefix: str, time: datetime) -> Path:
     """Create a directory for an evaluation based on a directory of the prefix
     and the timestamp this job was run at"""
 
-    time_path = time.replace(microsecond=0).isoformat()
+    time_path = time.strftime(OUTPUT_DIR_TIME_FORMAT)
 
     path = project_root() / "results" / prefix / time_path
 

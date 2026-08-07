@@ -1,6 +1,6 @@
 import csv
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path, PosixPath
 
 import pytest
@@ -43,7 +43,7 @@ def test_project_root():
 
 
 def test_create_output_directory(mock_project_root):
-    time = datetime(2023, 2, 4, 8, 30, 0)
+    time = datetime(2023, 2, 4, 8, 30, 0, tzinfo=UTC)
     output_dir = create_output_directory("test_prefix", time)
     assert output_dir.exists()
     assert output_dir.relative_to(mock_project_root) == PosixPath(

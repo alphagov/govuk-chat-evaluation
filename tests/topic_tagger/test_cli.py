@@ -2,6 +2,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from govuk_chat_evaluation.file_system import OUTPUT_DIR_TIME_FORMAT
 from govuk_chat_evaluation.topic_tagger.cli import main
 from govuk_chat_evaluation.topic_tagger.evaluate import EvaluationResult, TopicStatus
 
@@ -53,7 +54,12 @@ def mock_data_generation(mocker):
 
 @pytest.fixture
 def mock_output_directory(mock_project_root, frozen_time):
-    return mock_project_root / "results" / "topic_tagger" / frozen_time.isoformat()
+    return (
+        mock_project_root
+        / "results"
+        / "topic_tagger"
+        / frozen_time.strftime(OUTPUT_DIR_TIME_FORMAT)
+    )
 
 
 @pytest.mark.usefixtures("mock_data_generation")

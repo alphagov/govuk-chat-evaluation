@@ -1,6 +1,7 @@
 import pytest
 from click.testing import CliRunner
 
+from govuk_chat_evaluation.file_system import OUTPUT_DIR_TIME_FORMAT
 from govuk_chat_evaluation.rag_answers.cli import main
 from govuk_chat_evaluation.rag_answers.data_models import EvaluationTestCase
 from govuk_chat_evaluation.rag_answers.data_models.config import BedrockCredentialsError
@@ -40,7 +41,12 @@ def mock_data_generation(mocker):
 
 @pytest.fixture
 def mock_output_directory(mock_project_root, frozen_time):
-    return mock_project_root / "results" / "rag_answers" / frozen_time.isoformat()
+    return (
+        mock_project_root
+        / "results"
+        / "rag_answers"
+        / frozen_time.strftime(OUTPUT_DIR_TIME_FORMAT)
+    )
 
 
 # ─── Main CLI Tests

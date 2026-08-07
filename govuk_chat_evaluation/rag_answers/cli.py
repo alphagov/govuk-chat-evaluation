@@ -21,7 +21,7 @@ from .generate import generate_and_write_dataset
 @apply_click_options_to_command(TaskConfig)
 def main(**cli_args):
     """Run RAG answers evaluation"""
-    start_time = datetime.now()
+    start_time = datetime.now().astimezone()
 
     config: TaskConfig = config_from_cli_args(
         config_path=cli_args["config_path"],

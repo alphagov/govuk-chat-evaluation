@@ -2,6 +2,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from govuk_chat_evaluation.file_system import OUTPUT_DIR_TIME_FORMAT
 from govuk_chat_evaluation.retrieval.cli import main
 from govuk_chat_evaluation.retrieval.evaluate import (
     EvaluationResult,
@@ -71,7 +72,12 @@ def mock_data_generation(mocker):
 
 @pytest.fixture
 def mock_output_directory(mock_project_root, frozen_time):
-    return mock_project_root / "results" / "retrieval" / frozen_time.isoformat()
+    return (
+        mock_project_root
+        / "results"
+        / "retrieval"
+        / frozen_time.strftime(OUTPUT_DIR_TIME_FORMAT)
+    )
 
 
 def test_main_creates_output_files(

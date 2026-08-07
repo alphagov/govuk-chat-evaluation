@@ -1,6 +1,6 @@
 import csv
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from inspect import signature
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -12,7 +12,7 @@ from typeguard import TypeCheckError, check_type
 load_dotenv(".env.aws")
 load_dotenv()
 
-FROZEN_TIME = datetime.now().replace(microsecond=0)
+FROZEN_TIME = datetime.now(tz=UTC)
 
 
 @pytest.fixture
