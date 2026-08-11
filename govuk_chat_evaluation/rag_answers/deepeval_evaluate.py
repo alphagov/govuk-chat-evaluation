@@ -1,18 +1,20 @@
-from collections import defaultdict
-from pydantic.dataclasses import dataclass
-from typing import Optional
 import json
+import logging
+from collections import defaultdict
+from pathlib import Path
 
 from deepeval import evaluate as deepeval_evaluate
 from deepeval.evaluate.types import TestResult
 from deepeval.test_case import LLMTestCase
-from .data_models.config import TaskConfig
+from deepeval.test_run import global_test_run_manager
+from pydantic.dataclasses import dataclass
+
+from govuk_chat_evaluation import file_system
 
 from ..timing import log_task_duration
-import logging
-from deepeval.test_run import global_test_run_manager
-from pathlib import Path
-import govuk_chat_evaluation.file_system as file_system
+from .data_models.config import TaskConfig
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,8 +37,8 @@ class EvaluationResult:
     run_metric_outputs: list[RunMetricOutput]
     actual_opensearch_index: str
     model: str
-    expected_opensearch_index: Optional[str] = None
-    expected_output: Optional[str] = None
+    expected_opensearch_index: str | None = None
+    expected_output: str | None = None
 
 
 def run_deepeval_evaluation(
@@ -61,12 +63,12 @@ def run_deepeval_evaluation(
     """
 
     with log_task_duration("Running DeepEval Evaluation"):
-        logging.info("Running DeepEval evaluation")
+        logger.info("Running DeepEval evaluation")
 
         all_evaluation_runs = []
 
         for i in range(n_runs):
-            logging.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
+            logger.info(f"Running evaluation iteration {i + 1}/{n_runs}...")
 
             metrics = config.metric_instances()
 
@@ -91,9 +93,9 @@ def run_deepeval_evaluation(
                 json.dump(body, f)
 
             relative_path = path.relative_to(file_system.project_root())
-            logging.info(f"Run {i + 1} done. written to {relative_path}")
+            logger.info(f"Run {i + 1} done. written to {relative_path}")
 
-    logging.info("Deepval evaluation complete")
+    logger.info("Deepval evaluation complete")
 
     return all_evaluation_runs
 
@@ -165,7 +167,7 @@ def convert_deepeval_output_to_evaluation_results(
 
     aggregated_results: list[EvaluationResult] = []
 
-    for _input_name, run_results in grouped_by_input_and_run.items():
+    for run_results in grouped_by_input_and_run.values():
         evaluation_outputs: list[RunMetricOutput] = []
 
         # taking the first TestResult for each input to extract static info

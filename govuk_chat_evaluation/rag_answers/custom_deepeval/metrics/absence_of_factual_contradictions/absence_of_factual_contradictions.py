@@ -1,38 +1,39 @@
-from typing import List, Type, TypeVar, cast, Optional
-from pydantic import BaseModel
+from typing import ClassVar, TypeVar, cast
 
+from deepeval.metrics import BaseMetric
+from deepeval.metrics.indicator import metric_progress_indicator
+from deepeval.metrics.utils import (
+    check_llm_test_case_params,
+    construct_verbose_logs,
+    initialize_model,
+    trimAndLoadJson,
+)
+from deepeval.models import DeepEvalBaseLLM
 from deepeval.test_case import (
     LLMTestCase,
     SingleTurnParams,
 )
-from deepeval.metrics import BaseMetric
 from deepeval.utils import prettify_list
-from deepeval.metrics.utils import (
-    construct_verbose_logs,
-    trimAndLoadJson,
-    check_llm_test_case_params,
-    initialize_model,
-)
-from deepeval.models import DeepEvalBaseLLM
-from .template import ContradictionsTemplate
-from deepeval.metrics.indicator import metric_progress_indicator
+from pydantic import BaseModel
+
 from .schema import (
-    TruthCollection,
     ClaimCollection,
-    VerdictCollection,
     ScoreReason,
+    TruthCollection,
+    VerdictCollection,
 )
+from .template import ContradictionsTemplate
 
 SchemaType = TypeVar("SchemaType", bound=BaseModel)
 
 
 class AbsenceOfFactualContradictions(BaseMetric):
-    _required_params: List[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
         SingleTurnParams.EXPECTED_OUTPUT,
     ]
-    evaluation_template: Type[ContradictionsTemplate] = ContradictionsTemplate
+    evaluation_template: type[ContradictionsTemplate] = ContradictionsTemplate
 
     def __init__(
         self,
@@ -161,13 +162,13 @@ class AbsenceOfFactualContradictions(BaseMetric):
         )
 
     async def _generate_result_from_model(
-        self, prompt: str, schema: Type[SchemaType]
+        self, prompt: str, schema: type[SchemaType]
     ) -> SchemaType:
         assert self.model is not None
 
         if self.using_native_model:
             result, cost = cast(
-                tuple[SchemaType, Optional[float]],
+                tuple[SchemaType, float | None],
                 await self.model.a_generate(prompt, schema=schema),
             )
             if isinstance(cost, float):

@@ -1,8 +1,9 @@
-import pytest
 import csv
 import json
-import re
 import logging
+import re
+
+import pytest
 
 from govuk_chat_evaluation.topic_tagger.evaluate import (
     AggregateResults,
@@ -91,7 +92,7 @@ class TestEvaluationResult:
     def test_correct_primary_and_secondary_no_match(self, sample_results, index):
         assert not sample_results[index].correct_primary_and_secondary()
 
-    @pytest.mark.parametrize("index", range(0, 1))
+    @pytest.mark.parametrize("index", range(1))
     def test_correct_topics_any_order_match(self, sample_results, index):
         assert sample_results[index].correct_topics_any_order()
 
@@ -107,7 +108,7 @@ class TestEvaluationResult:
     def test_match_true_primary_with_primary_no_match(self, sample_results, index):
         assert not sample_results[index].matched_true_primary_with_primary()
 
-    @pytest.mark.parametrize("index", range(0, 3))
+    @pytest.mark.parametrize("index", range(3))
     def test_true_primary_with_either_match(self, sample_results, index):
         assert sample_results[index].matched_true_primary_with_either()
 
@@ -115,7 +116,7 @@ class TestEvaluationResult:
     def test_true_primary_with_either_no_match(self, sample_results, index):
         assert not sample_results[index].matched_true_primary_with_either()
 
-    @pytest.mark.parametrize("index", range(0, 4))
+    @pytest.mark.parametrize("index", range(4))
     def test_matched_any_topic_match(self, sample_results, index):
         assert sample_results[index].matched_any_topic()
 
@@ -179,8 +180,7 @@ def mock_evaluation_data_file(tmp_path, sample_results):
     payloads = [item.model_dump() for item in sample_results]
 
     with open(file_path, "w", encoding="utf8") as file:
-        for payload in payloads:
-            file.write(json.dumps(payload) + "\n")
+        file.writelines(json.dumps(payload) + "\n" for payload in payloads)
 
     return file_path
 

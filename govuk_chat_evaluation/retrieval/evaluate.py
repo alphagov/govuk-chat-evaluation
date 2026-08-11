@@ -1,21 +1,22 @@
+import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
+import numpy as np
 from pydantic import BaseModel
 from sklearn.metrics import (
-    precision_score,
-    recall_score,
     f1_score,
     fbeta_score,
+    precision_score,
+    recall_score,
 )
 from tabulate import tabulate
-import numpy as np
-from collections.abc import Callable
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
 
 DECIMAL_PLACES = 4
+logger = logging.getLogger(__name__)
 
 
 class SearchResult(BaseModel):
@@ -31,7 +32,7 @@ class EvaluationResult(BaseModel):
     # than using chunk_uids, but all calculations are done using expected_chunk_uids and actual_chunk_uids.
     expected_exact_paths: list[str]
     expected_chunk_uids: list[str]
-    expected_opensearch_index: Optional[str] = None
+    expected_opensearch_index: str | None = None
     actual_opensearch_index: str
     actual_search_results: list[SearchResult]
 
@@ -234,10 +235,10 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
     models = jsonl_to_models(evaluation_data_path, EvaluationResult)
 
     if not models:
-        logging.error("\nThere is no data to evaluate")
+        logger.error("\nThere is no data to evaluate")
         return
 
-    logging.info("\nEvaluation complete")
+    logger.info("\nEvaluation complete")
     write_csv_results(output_dir, [model.for_csv() for model in models])
 
     aggregate_results = AggregateResults(models)
@@ -250,5 +251,5 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
     )
 
     table = [[k, v] for k, v in aggregate_results.to_dict().items()]
-    logging.info("\nAggregate Results")
-    logging.info(tabulate(table) + "\n")
+    logger.info("\nAggregate Results")
+    logger.info(tabulate(table) + "\n")

@@ -1,4 +1,4 @@
-from typing import Type, cast, Optional
+from typing import ClassVar, cast
 
 from deepeval.metrics import BaseMetric
 from deepeval.metrics.indicator import metric_progress_indicator
@@ -13,17 +13,17 @@ from deepeval.telemetry import capture_metric_type
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 from .schema import CoherenceJudgement
-from .template import CoherenceTemplate, SCORE_RANGE
+from .template import SCORE_RANGE, CoherenceTemplate
 
 COHERENCE_THRESHOLD = 0.75
 
 
 class CoherenceMetric(BaseMetric):
-    _required_params: list[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
     ]
-    evaluation_template: Type[CoherenceTemplate] = CoherenceTemplate
+    evaluation_template: type[CoherenceTemplate] = CoherenceTemplate
 
     def __init__(
         self,
@@ -100,13 +100,13 @@ class CoherenceMetric(BaseMetric):
             return self.score
 
     async def _generate_result_from_model(
-        self, prompt: str, schema: Type[CoherenceJudgement]
+        self, prompt: str, schema: type[CoherenceJudgement]
     ) -> CoherenceJudgement:
         assert self.model is not None
 
         if self.using_native_model:
             result, cost = cast(
-                tuple[CoherenceJudgement, Optional[float]],
+                tuple[CoherenceJudgement, float | None],
                 await self.model.a_generate(prompt, schema=schema),
             )
             if isinstance(cost, float):

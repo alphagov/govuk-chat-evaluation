@@ -1,19 +1,18 @@
-import pytest
 import json
-import math
 import logging
+import math
+from unittest.mock import AsyncMock, Mock, patch
 
-from unittest.mock import Mock, AsyncMock, patch
-from deepeval.test_case import LLMTestCase
-from deepeval.models import GPTModel, DeepEvalBaseLLM
+import pytest
 from deepeval.errors import MissingTestCaseParamsError
+from deepeval.models import DeepEvalBaseLLM, GPTModel
+from deepeval.test_case import LLMTestCase
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall import (
+    FactClassificationCache,
     FactualPrecisionRecall,
     Mode,
-    FactClassificationCache,
 )
-
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.factual_precision_recall.schema import (
     ClassifiedFacts,
     FactClassificationResult,

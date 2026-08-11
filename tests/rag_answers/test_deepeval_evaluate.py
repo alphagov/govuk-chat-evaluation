@@ -1,14 +1,17 @@
-import pytest
+import json
+import logging
 from unittest.mock import MagicMock
 
+import pytest
 from deepeval import evaluate as deepeval_evaluate
-from deepeval.metrics import BaseMetric
 from deepeval.evaluate.configs import (
     AsyncConfig,
-    DisplayConfig,
     CacheConfig,
+    DisplayConfig,
     ErrorConfig,
 )
+from deepeval.metrics import BaseMetric
+from deepeval.test_run import TestRun as DeepevalTestRun
 
 from govuk_chat_evaluation.file_system import jsonl_to_models
 from govuk_chat_evaluation.rag_answers.data_models import (
@@ -17,13 +20,10 @@ from govuk_chat_evaluation.rag_answers.data_models import (
 )
 from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
     EvaluationResult,
-    run_deepeval_evaluation,
     convert_deepeval_output_to_evaluation_results,
+    run_deepeval_evaluation,
 )
 from tests.conftest import assert_mock_call_matches_signature
-import json
-import logging
-from deepeval.test_run import TestRun as DeepevalTestRun
 
 
 @pytest.mark.usefixtures("mock_deepeval_evaluate")

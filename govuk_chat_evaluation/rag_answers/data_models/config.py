@@ -1,29 +1,29 @@
-from pydantic import BaseModel, model_validator
+import os
 from enum import Enum
 from typing import Any
-import os
 
-from ...config import BaseConfig
-from ...file_system import project_root
-from ...aws_credentials import check_aws_credentials
 from deepeval.metrics import (
-    FaithfulnessMetric,
-    BiasMetric,
     BaseMetric,
+    BiasMetric,
+    FaithfulnessMetric,
 )
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
-from deepeval.models.llms.openai_model import GPTModel
 from deepeval.models.llms.amazon_bedrock_model import AmazonBedrockModel
+from deepeval.models.llms.openai_model import GPTModel
+from pydantic import BaseModel, model_validator
 
-from ..invalid_json_retry import attach_invalid_json_retry_to_model
+from ...aws_credentials import check_aws_credentials
+from ...config import BaseConfig
+from ...file_system import project_root
 from ..custom_deepeval.metrics import (
+    AbsenceOfFactualContradictions,
+    CoherenceMetric,
+    ContextRelevancyMetric,
+    FactClassificationCache,
     FactualPrecisionRecall,
     FactualPrecisionRecallMode,
-    AbsenceOfFactualContradictions,
-    ContextRelevancyMetric,
-    CoherenceMetric,
-    FactClassificationCache,
 )
+from ..invalid_json_retry import attach_invalid_json_retry_to_model
 
 
 class MetricName(str, Enum):

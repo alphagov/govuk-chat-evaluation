@@ -5,8 +5,6 @@ from typing import (
     Any,
     Optional,
     Self,
-    Type,
-    TypeVar,
     get_args,
     get_origin,
 )
@@ -14,8 +12,6 @@ from typing import (
 import click
 import yaml
 from pydantic import BaseModel, Field, FilePath
-
-GenericConfig = TypeVar("GenericConfig", bound="BaseConfig")
 
 
 class BaseConfig(BaseModel):
@@ -28,7 +24,7 @@ class BaseConfig(BaseModel):
             FilePath, Field(..., description="Path to the data file used to evaluate")
         ]
         claude_generation_model = Annotated[
-            Optional[str],
+            str | None,
             Field(
                 None,
                 description=(
@@ -71,15 +67,15 @@ class BaseConfig(BaseModel):
         return command
 
 
-def apply_click_options_to_command(config_cls: Type[GenericConfig]):
+def apply_click_options_to_command(config_cls: type[BaseConfig]):
     def decorator(command):
         return config_cls.apply_click_options(command)
 
     return decorator
 
 
-def config_from_cli_args(
-    config_path: Path, config_cls: Type[GenericConfig], cli_args: dict[str, Any]
+def config_from_cli_args[GenericConfig: BaseConfig](
+    config_path: Path, config_cls: type[GenericConfig], cli_args: dict[str, Any]
 ) -> GenericConfig:
     filtered_args = {k: v for k, v in cli_args.items() if v is not None}
 

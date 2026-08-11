@@ -1,4 +1,5 @@
-from typing import List, Literal
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -8,13 +9,13 @@ class Verdict(BaseModel):
 
 
 class VerdictCollection(BaseModel):
-    verdicts: List[Verdict]
+    verdicts: list[Verdict]
 
     def score_verdicts(self) -> float:
         quality_count = sum(1 for verdict in self.verdicts if verdict.verdict != "no")
         return float(quality_count / len(self.verdicts))
 
-    def unmet_needs(self) -> List[str]:
+    def unmet_needs(self) -> list[str]:
         unmet_needs = []
 
         for verdict in self.verdicts:
@@ -26,15 +27,15 @@ class VerdictCollection(BaseModel):
 
 class Truth(BaseModel):
     context: str
-    facts: List[str]
+    facts: list[str]
 
 
 class TruthCollection(BaseModel):
-    truths: List[Truth]
+    truths: list[Truth]
 
 
 class InformationNeedsCollection(BaseModel):
-    information_needs: List[str]
+    information_needs: list[str]
 
 
 class ScoreReason(BaseModel):

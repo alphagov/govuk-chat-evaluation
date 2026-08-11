@@ -1,12 +1,14 @@
-import pytest
-from deepeval.test_case import LLMTestCase, RetrievedContextData
-from govuk_chat_evaluation.rag_answers.data_models import (
-    EvaluationTestCase,
-    StructuredContext,
-    GenerateInput,
-)
 import uuid
 from unittest.mock import patch
+
+import pytest
+from deepeval.test_case import LLMTestCase, RetrievedContextData
+
+from govuk_chat_evaluation.rag_answers.data_models import (
+    EvaluationTestCase,
+    GenerateInput,
+    StructuredContext,
+)
 
 
 class TestStructuredContext:

@@ -1,3 +1,4 @@
+import logging
 from collections import Counter
 from functools import cached_property
 from pathlib import Path
@@ -9,7 +10,8 @@ from sklearn.metrics import precision_score, recall_score
 from tabulate import tabulate
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EvaluationResult(BaseModel):
@@ -89,10 +91,10 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
     models = jsonl_to_models(evaluation_data_path, EvaluationResult)
 
     if not models:
-        logging.error("\nThere is no data to evaluate")
+        logger.error("\nThere is no data to evaluate")
         return
 
-    logging.info("\nEvaluation complete")
+    logger.info("\nEvaluation complete")
     write_csv_results(output_dir, [model.for_csv() for model in models])
 
     aggregate_results = AggregateResults(models)
@@ -104,5 +106,5 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
         data_label="aggregates",
     )
     table = [[k, v] for k, v in aggregate_results.to_dict().items()]
-    logging.info("\nAggregate Results")
-    logging.info(tabulate(table) + "\n")
+    logger.info("\nAggregate Results")
+    logger.info(tabulate(table) + "\n")

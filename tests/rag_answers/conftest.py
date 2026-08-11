@@ -3,8 +3,10 @@ import json
 import pytest
 import yaml
 from deepeval.evaluate.types import (
-    TestResult as DeepevalTestResult,
     EvaluationResult as DeepevalEvaluationResult,
+)
+from deepeval.evaluate.types import (
+    TestResult as DeepevalTestResult,
 )
 from deepeval.test_run import MetricData
 

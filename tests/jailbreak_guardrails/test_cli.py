@@ -2,6 +2,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from govuk_chat_evaluation.file_system import OUTPUT_DIR_TIME_FORMAT
 from govuk_chat_evaluation.jailbreak_guardrails.cli import main
 from govuk_chat_evaluation.jailbreak_guardrails.evaluate import EvaluationResult
 
@@ -48,7 +49,10 @@ def mock_data_generation(mocker):
 @pytest.fixture
 def mock_output_directory(mock_project_root, frozen_time):
     return (
-        mock_project_root / "results" / "jailbreak_guardrails" / frozen_time.isoformat()
+        mock_project_root
+        / "results"
+        / "jailbreak_guardrails"
+        / frozen_time.strftime(OUTPUT_DIR_TIME_FORMAT)
     )
 
 

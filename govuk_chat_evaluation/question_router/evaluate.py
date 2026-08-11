@@ -1,23 +1,25 @@
+import logging
 from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 from pydantic import BaseModel
 from sklearn.metrics import (
     accuracy_score,
-    precision_score,
-    recall_score,
+    confusion_matrix,
     f1_score,
     fbeta_score,
-    confusion_matrix,
+    precision_score,
+    recall_score,
 )
 from tabulate import tabulate
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 
 from ..file_system import jsonl_to_models, write_csv_results
-import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EvaluationResult(BaseModel):
@@ -39,9 +41,7 @@ class AggregateResults:
 
     @cached_property
     def classification_labels(self) -> list[str]:
-        return sorted(
-            list(set(item for lst in self._expected_actual_lists for item in lst))
-        )
+        return sorted({item for lst in self._expected_actual_lists for item in lst})
 
     @cached_property
     def _expected_actual_lists(self) -> tuple[list[str], list[str]]:
@@ -90,7 +90,7 @@ class AggregateResults:
     def confusion_matrix_data(self) -> list[list[int]]:
         return confusion_matrix(
             *self._expected_actual_lists,
-            labels=sorted(list(set(self.classification_labels))),  # type: ignore
+            labels=self.classification_labels,  # type: ignore
         )
 
     def miscategorised_cases(self) -> list[dict[str, Any]]:
@@ -130,7 +130,7 @@ def generate_and_output_confusion_matrix(
     """Takes confusion matrix data (a 2D list) calculated by sklearn
     and a list of labels (strings representing the question routing labels)
     and outputs an confusion matrix PNG image to the output directory"""
-    fig, ax = plt.subplots(figsize=(6, 6))
+    _fig, ax = plt.subplots(figsize=(6, 6))
     sns.heatmap(
         confusion_matrix_data,  # type: ignore
         annot=True,
@@ -160,10 +160,10 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
     models = jsonl_to_models(evaluation_data_path, EvaluationResult)
 
     if not models:
-        logging.error("\nThere is no data to evaluate")
+        logger.error("\nThere is no data to evaluate")
         return
 
-    logging.info("\nEvaluation complete")
+    logger.info("\nEvaluation complete")
     write_csv_results(output_dir, [model.for_csv() for model in models])
 
     aggregate_results = AggregateResults(models)
@@ -190,8 +190,8 @@ def evaluate_and_output_results(output_dir: Path, evaluation_data_path: Path):
         )
 
     else:
-        logging.info("There are no miscategorised cases to write to file.")
+        logger.info("There are no miscategorised cases to write to file.")
 
     table = [[k, v] for k, v in aggregate_results.to_dict().items()]
-    logging.info("\nAggregate Results")
-    logging.info(tabulate(table) + "\n")
+    logger.info("\nAggregate Results")
+    logger.info(tabulate(table) + "\n")

@@ -3,17 +3,16 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from .evaluate import EvaluationResult, SearchResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
-from typing import Optional
+from .evaluate import EvaluationResult, SearchResult
 
 
 class GenerateInput(BaseModel):
     question: str
     expected_exact_paths: list[str]
     expected_chunk_uids: list[str]
-    expected_opensearch_index: Optional[str] = None
+    expected_opensearch_index: str | None = None
 
 
 def generate_and_write_dataset(input_path: Path, output_dir: Path):

@@ -10,7 +10,6 @@ from govuk_chat_evaluation.rag_answers.data_models import (
     StructuredContext,
 )
 
-
 PROVIDERS = [
     pytest.param(
         LLMJudgeModelConfig(model=LLMJudgeModel.GPT_OSS_120B, temperature=0.0),

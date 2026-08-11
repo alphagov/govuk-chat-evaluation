@@ -1,18 +1,17 @@
 import json
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from govuk_chat_evaluation.rag_answers.generate import (
-    generate_inputs_to_evaluation_test_cases,
-    generate_and_write_dataset,
-)
 from govuk_chat_evaluation.rag_answers.data_models import (
-    GenerateInput,
     EvaluationTestCase,
+    GenerateInput,
     StructuredContext,
 )
-from unittest.mock import patch
+from govuk_chat_evaluation.rag_answers.generate import (
+    generate_and_write_dataset,
+    generate_inputs_to_evaluation_test_cases,
+)
 
 
 @pytest.fixture

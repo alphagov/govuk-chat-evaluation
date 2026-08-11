@@ -1,19 +1,18 @@
 import csv
-from datetime import datetime
-from pathlib import Path
+from collections.abc import Callable
+from datetime import UTC, datetime
 from inspect import signature
-from typing import Callable
-from dotenv import load_dotenv
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from typeguard import check_type, TypeCheckError
-
+from dotenv import load_dotenv
+from typeguard import TypeCheckError, check_type
 
 load_dotenv(".env.aws")
 load_dotenv()
 
-FROZEN_TIME = datetime.now().replace(microsecond=0)
+FROZEN_TIME = datetime.now(tz=UTC)
 
 
 @pytest.fixture

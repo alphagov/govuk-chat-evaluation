@@ -1,25 +1,26 @@
-from typing import Optional, List, Type
+import logging
 from enum import Enum, auto
+from typing import ClassVar
 
-from deepeval.test_case import LLMTestCase, SingleTurnParams
 from deepeval.metrics import BaseMetric
-
+from deepeval.metrics.indicator import metric_progress_indicator
 from deepeval.metrics.utils import (
     check_llm_test_case_params,
     construct_verbose_logs,
-    trimAndLoadJson,
     initialize_model,
+    trimAndLoadJson,
 )
 from deepeval.models import DeepEvalBaseLLM
-from deepeval.metrics.indicator import metric_progress_indicator
 from deepeval.telemetry import capture_metric_type
+from deepeval.test_case import LLMTestCase, SingleTurnParams
 
+from .cache import FactClassificationCache
+from .schema import ClassifiedFacts, FactClassificationResult
 from .template import (
     FactualPrecisionRecallTemplate,
 )
-from .schema import ClassifiedFacts, FactClassificationResult
-from .cache import FactClassificationCache
-import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Mode(Enum):
@@ -28,13 +29,13 @@ class Mode(Enum):
 
 
 class FactualPrecisionRecall(BaseMetric):
-    _required_params: List[SingleTurnParams] = [
+    _required_params: ClassVar[list[SingleTurnParams]] = [
         SingleTurnParams.INPUT,
         SingleTurnParams.ACTUAL_OUTPUT,
         SingleTurnParams.EXPECTED_OUTPUT,
     ]
 
-    evaluation_template: Type[FactualPrecisionRecallTemplate] = (
+    evaluation_template: type[FactualPrecisionRecallTemplate] = (
         FactualPrecisionRecallTemplate
     )
     async_mode: bool = True
@@ -99,7 +100,7 @@ class FactualPrecisionRecall(BaseMetric):
                 test_case.actual_output or "",
                 test_case.expected_output or "",
             )
-            logging.debug(
+            logger.debug(
                 f"Confusion matrix for test input: '{test_case.input}': \n{self.confusion_matrix}"
             )
             return self._finalise_evaluation(test_case.input)
@@ -131,10 +132,10 @@ class FactualPrecisionRecall(BaseMetric):
             return self.score
         else:
             self.error = f"Error: no facts were classified. confusion_matrix is empty for input: {input}."
-            logging.error(self.error)
+            logger.error(self.error)
             return float("nan")
 
-    def _generate_reason(self) -> Optional[str]:
+    def _generate_reason(self) -> str | None:
         if not self.include_reason or not self.confusion_matrix.has_facts():
             return None
         return f'{{"true_positive_statements": {self.confusion_matrix.TP}, "false_positive_statements": {self.confusion_matrix.FP}}}'
@@ -176,7 +177,7 @@ class FactualPrecisionRecall(BaseMetric):
                     data_model = FactClassificationResult(**data)
                     classified_facts = data_model.classified_facts
                 except Exception as inner_e:
-                    logging.error(
+                    logger.error(
                         f"Failed to parse fallback JSON for test input: {input}",
                         exc_info=inner_e,
                     )

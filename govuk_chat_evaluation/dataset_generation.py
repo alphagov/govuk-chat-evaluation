@@ -1,13 +1,15 @@
 import asyncio
 import json
+import logging
 import os
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from tqdm.asyncio import tqdm
-import logging
 
 MAX_CONCURRENT_TASKS = 5
+logger = logging.getLogger(__name__)
 
 
 async def run_rake_task(task_name: str, env_vars: dict[str, str] | None = None) -> Any:
@@ -58,19 +60,19 @@ async def generate_dataset(
     ]
     evaluations = []
 
-    logging.info("Generating dataset")
+    logger.info("Generating dataset")
     for future in tqdm.as_completed(tasks, total=len(tasks)):
         try:
             evaluation = await future
             if evaluation is not None:
                 evaluations.append(evaluation)
-        except Exception as e:
+        except Exception:
             # Cancel all remaining tasks to ensure clean termination
             for task in tasks:
                 if not task.done():
                     task.cancel()
             # Wait for all tasks to be cancelled
             await asyncio.gather(*tasks, return_exceptions=True)
-            raise e
+            raise
 
     return evaluations

@@ -1,24 +1,25 @@
-import pytest
-import pandas as pd
-import re
-import yaml
 import logging
+import re
+from unittest.mock import patch
+
 import numpy as np
+import pandas as pd
+import pytest
+import yaml
 from pandas.testing import assert_series_equal
 
 from govuk_chat_evaluation.rag_answers.data_models import (
     TaskConfig,
 )
-from govuk_chat_evaluation.rag_answers.evaluate import (
-    AggregatedResults,
-    evaluate_and_output_results,
-)
 from govuk_chat_evaluation.rag_answers.deepeval_evaluate import (
     EvaluationResult,
     RunMetricOutput,
 )
+from govuk_chat_evaluation.rag_answers.evaluate import (
+    AggregatedResults,
+    evaluate_and_output_results,
+)
 from tests.conftest import assert_csv_exists_with_headers
-from unittest.mock import patch
 
 
 @pytest.fixture

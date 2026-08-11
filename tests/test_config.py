@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 import click
 import pytest
@@ -23,7 +23,7 @@ class SampleConfig(BaseConfig):
 
 
 class ComplexConfig(SampleConfig):
-    values: list[int] = [1, 2, 3]
+    values: list[int]
     settings: dict[str, str]
     nested: NestedConfig
 

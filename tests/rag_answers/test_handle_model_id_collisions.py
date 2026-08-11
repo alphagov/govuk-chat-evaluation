@@ -1,4 +1,5 @@
 import pytest
+
 from govuk_chat_evaluation.rag_answers.data_models import GenerateInput
 from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
     ensure_unique_model_ids,

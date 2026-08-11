@@ -1,14 +1,15 @@
 import asyncio
-import logging
 import json
+import logging
 from pathlib import Path
 
 from pydantic import BaseModel
 
-from .evaluate import EvaluationResult
 from ..dataset_generation import generate_dataset, run_rake_task
 from ..file_system import jsonl_to_models, write_generated_to_output
-from typing import Optional
+from .evaluate import EvaluationResult
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateInput(BaseModel):
@@ -18,7 +19,7 @@ class GenerateInput(BaseModel):
 
 def generate_and_write_dataset(
     input_path: Path,
-    claude_generation_model: Optional[str],
+    claude_generation_model: str | None,
     output_dir: Path,
 ):
     models = jsonl_to_models(input_path, GenerateInput)
@@ -27,7 +28,7 @@ def generate_and_write_dataset(
 
 
 def generate_inputs_to_evaluation_results(
-    claude_generation_model: Optional[str],
+    claude_generation_model: str | None,
     generate_inputs: list[GenerateInput],
 ) -> list[EvaluationResult]:
     """Asynchronously run rake tasks for each GenerateInput instance to
@@ -51,12 +52,12 @@ def generate_inputs_to_evaluation_results(
             ]
             invalid_llm_response = parsed_jailbreak_llm_response["content"][0]["text"]
 
-            logging.warning(
+            logger.warning(
                 f"Invalid response for {input.question!r}, returned: {invalid_llm_response!r}"
             )
             return None
 
-        actual_outcome = False if "pass" in jailbreak_guardrails_status else True
+        actual_outcome = "pass" not in jailbreak_guardrails_status
         return EvaluationResult(
             question=input.question,
             expected_outcome=input.expected_outcome,

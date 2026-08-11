@@ -1,28 +1,28 @@
-from pathlib import Path
+import logging
 from functools import cached_property
-import pandas as pd
+from pathlib import Path
 
+import pandas as pd
 from deepeval.evaluate.configs import (
     AsyncConfig,
-    DisplayConfig,
     CacheConfig,
+    DisplayConfig,
     ErrorConfig,
 )
 
-from .deepeval_evaluate import (
-    run_deepeval_evaluation,
-    convert_deepeval_output_to_evaluation_results,
-)
-from ..file_system import jsonl_to_models
-from .data_models import EvaluationTestCase, TaskConfig
 from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
     ensure_unique_model_ids,
 )
+
+from ..file_system import jsonl_to_models
+from .data_models import EvaluationTestCase, TaskConfig
 from .deepeval_evaluate import (
     EvaluationResult,
+    convert_deepeval_output_to_evaluation_results,
+    run_deepeval_evaluation,
 )
-import logging
 
+logger = logging.getLogger(__name__)
 
 display_config = DisplayConfig(
     verbose_mode=False,
@@ -58,7 +58,7 @@ def evaluate_and_output_results(
     models = jsonl_to_models(evaluation_data_path, EvaluationTestCase)
 
     if not models:
-        logging.error("\nThere is no data to evaluate")
+        logger.error("\nThere is no data to evaluate")
         return
 
     ensure_unique_model_ids(models)
@@ -85,9 +85,9 @@ def evaluate_and_output_results(
     # calculate aggregated results and exports results to CSV files
     aggregation.export_to_csvs(output_dir)
 
-    logging.info("Evaluation Results:")
-    logging.info("Generation model: %s", models[0].model)
-    logging.info(aggregation.summary)
+    logger.info("Evaluation Results:")
+    logger.info("Generation model: %s", models[0].model)
+    logger.info(aggregation.summary)
 
 
 class AggregatedResults:
@@ -176,7 +176,7 @@ def _log_metric_errors(evaluation_results: list[EvaluationResult]) -> None:
     for er in evaluation_results:
         for out in er.run_metric_outputs:
             if out.error:
-                logging.warning(
+                logger.warning(
                     "Metric error (id=%s, metric=%s, run=%s): %s",
                     er.id,
                     out.metric,

@@ -1,21 +1,21 @@
-import pytest
 import json
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-from deepeval.test_case import LLMTestCase
-from deepeval.models import GPTModel, DeepEvalBaseLLM
+import pytest
 from deepeval.errors import MissingTestCaseParamsError
+from deepeval.models import DeepEvalBaseLLM, GPTModel
+from deepeval.test_case import LLMTestCase
 from deepeval.utils import prettify_list
 
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.absence_of_factual_contradictions.absence_of_factual_contradictions import (
     AbsenceOfFactualContradictions,
 )
 from govuk_chat_evaluation.rag_answers.custom_deepeval.metrics.absence_of_factual_contradictions.schema import (
-    TruthCollection,
     ClaimCollection,
+    ScoreReason,
+    TruthCollection,
     Verdict,
     VerdictCollection,
-    ScoreReason,
 )
 
 

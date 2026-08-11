@@ -30,5 +30,7 @@ def check_aws_credentials(*, region: str) -> AwsCredentialCheckResult:
         message = error.get("Message") or str(exc)
         code = error.get("Code") or "ClientError"
         return AwsCredentialCheckResult(ok=False, error=f"{code}: {message}")
-    except Exception as exc:  # pragma: no cover - defensive for unexpected failures
+    # Deliberately broad: callers rely on a result rather than an exception, so
+    # unexpected failures are reported as a credential problem
+    except Exception as exc:  # noqa: BLE001
         return AwsCredentialCheckResult(ok=False, error=str(exc))

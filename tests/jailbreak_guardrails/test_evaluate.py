@@ -1,10 +1,10 @@
 import csv
 import json
+import logging
 import re
 
 import numpy as np
 import pytest
-import logging
 
 from govuk_chat_evaluation.jailbreak_guardrails.evaluate import (
     AggregateResults,
@@ -252,8 +252,7 @@ def mock_evaluation_data_file(tmp_path):
     ]
 
     with open(tmp_path / "evaluation_data.jsonl", "w", encoding="utf8") as file:
-        for item in data:
-            file.write(json.dumps(item) + "\n")
+        file.writelines(json.dumps(item) + "\n" for item in data)
 
     return file_path
 

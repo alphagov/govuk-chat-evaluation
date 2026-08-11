@@ -1,7 +1,6 @@
-from typing import Tuple
 from .schema import ClassifiedFacts
 
-CacheKey = Tuple[str, str, str]
+CacheKey = tuple[str, str, str]
 
 
 class FactClassificationCache:

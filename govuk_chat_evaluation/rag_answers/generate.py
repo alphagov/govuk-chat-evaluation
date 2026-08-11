@@ -1,22 +1,22 @@
 import asyncio
 from pathlib import Path
 
-from ..dataset_generation import generate_dataset, run_rake_task
-from ..file_system import jsonl_to_models, write_generated_to_output
-from .data_models import (
-    GenerateInput,
-    EvaluationTestCase,
-    StructuredContext,
-)
 from govuk_chat_evaluation.rag_answers.handle_model_id_collisions import (
     ensure_unique_model_ids,
 )
-from typing import Optional
+
+from ..dataset_generation import generate_dataset, run_rake_task
+from ..file_system import jsonl_to_models, write_generated_to_output
+from .data_models import (
+    EvaluationTestCase,
+    GenerateInput,
+    StructuredContext,
+)
 
 
 def generate_and_write_dataset(
     input_path: Path,
-    claude_generation_model: Optional[str],
+    claude_generation_model: str | None,
     output_dir: Path,
 ):
     models = jsonl_to_models(Path(input_path), GenerateInput)
@@ -29,7 +29,7 @@ def generate_and_write_dataset(
 
 
 def generate_inputs_to_evaluation_test_cases(
-    claude_generation_model: Optional[str],
+    claude_generation_model: str | None,
     generate_inputs: list[GenerateInput],
 ) -> list[EvaluationTestCase]:
     """Asynchronously run rake tasks for each GenerateInput instance to

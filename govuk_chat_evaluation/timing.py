@@ -1,6 +1,8 @@
+import logging
 import time
 from contextlib import contextmanager
-import logging
+
+logger = logging.getLogger(__name__)
 
 
 @contextmanager
@@ -11,4 +13,4 @@ def log_task_duration(label: str = "Execution"):
     finally:
         end_time = time.perf_counter()
         duration = end_time - start_time
-        logging.info(f"[{label}] took {duration:.4f} seconds")
+        logger.info(f"[{label}] took {duration:.4f} seconds")

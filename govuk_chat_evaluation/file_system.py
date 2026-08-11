@@ -1,16 +1,20 @@
 import csv
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TypeVar, Type, Any
+from typing import Any
 
 import yaml
 from pydantic import BaseModel
 
 from .config import BaseConfig
-import logging
 
-Model = TypeVar("Model", bound=BaseModel)
+logger = logging.getLogger(__name__)
+
+# Timestamps are formatted rather than isoformat()'d so that timezone aware
+# datetimes don't introduce a UTC offset into output directory names
+OUTPUT_DIR_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
 def project_root() -> Path:
@@ -24,7 +28,7 @@ def create_output_directory(prefix: str, time: datetime) -> Path:
     """Create a directory for an evaluation based on a directory of the prefix
     and the timestamp this job was run at"""
 
-    time_path = time.replace(microsecond=0).isoformat()
+    time_path = time.strftime(OUTPUT_DIR_TIME_FORMAT)
 
     path = project_root() / "results" / prefix / time_path
 
@@ -32,12 +36,14 @@ def create_output_directory(prefix: str, time: datetime) -> Path:
 
     relative_path = path.relative_to(project_root())
 
-    logging.info(f"Created output directory at {relative_path}/")
+    logger.info(f"Created output directory at {relative_path}/")
 
     return path
 
 
-def jsonl_to_models(file_path: Path, model_class: Type[Model]) -> list[Model]:
+def jsonl_to_models[Model: BaseModel](
+    file_path: Path, model_class: type[Model]
+) -> list[Model]:
     """Open a JSONL file and iterate through the contents, using them to
     hydrate pydantic models"""
 
@@ -50,17 +56,18 @@ def jsonl_to_models(file_path: Path, model_class: Type[Model]) -> list[Model]:
     return models
 
 
-def write_generated_to_output(output_dir: Path, generated: list[Model]) -> Path:
+def write_generated_to_output[Model: BaseModel](
+    output_dir: Path, generated: list[Model]
+) -> Path:
     """Write a JSONL file in the output directory that contains the JSON contents
     of each pydantic model in the generated list"""
 
     output_path = output_dir / "generated.jsonl"
     with open(output_path, "w", encoding="utf8") as file:
-        for model in generated:
-            file.write(model.model_dump_json() + "\n")
+        file.writelines(model.model_dump_json() + "\n" for model in generated)
 
     relative_path = output_path.relative_to(project_root())
-    logging.info(f"Wrote generated data to {relative_path}")
+    logger.info(f"Wrote generated data to {relative_path}")
 
     return output_path
 
@@ -72,7 +79,7 @@ def write_config_file_for_reuse(output_dir: Path, config: BaseConfig) -> Path:
         yaml.dump(config.model_dump(mode="json"), file, default_flow_style=False)
 
     relative_path = config_path.relative_to(project_root())
-    logging.info(f"Wrote used config to {relative_path}")
+    logger.info(f"Wrote used config to {relative_path}")
 
     return config_path
 
@@ -95,6 +102,6 @@ def write_csv_results(
             writer.writerow(record)
 
     relative_path = csv_path.relative_to(project_root())
-    logging.info(f"Wrote {data_label} to {relative_path}")
+    logger.info(f"Wrote {data_label} to {relative_path}")
 
     return csv_path

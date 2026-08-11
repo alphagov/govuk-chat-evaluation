@@ -1,15 +1,13 @@
-from collections.abc import Sequence
-from typing import Callable
+import logging
+from collections.abc import Callable, Sequence
 from unittest.mock import AsyncMock
 
-import logging
 import pytest
 from deepeval.models.base_model import DeepEvalBaseLLM
 
 from govuk_chat_evaluation.rag_answers.invalid_json_retry import (
     attach_invalid_json_retry_to_model,
 )
-
 
 INVALID_JSON_ERROR = (
     "Evaluation LLM outputted an invalid JSON. Please use a better evaluation model."
