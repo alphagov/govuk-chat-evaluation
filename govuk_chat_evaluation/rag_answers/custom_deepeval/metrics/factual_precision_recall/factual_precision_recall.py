@@ -11,7 +11,7 @@ from deepeval.metrics.utils import (
     trimAndLoadJson,
 )
 from deepeval.models import DeepEvalBaseLLM
-from deepeval.telemetry import capture_metric_type
+from deepeval.telemetry import record_metric
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 from .cache import FactClassificationCache
@@ -111,9 +111,7 @@ class FactualPrecisionRecall(BaseMetric):
             self.score = self._calculate_score()
             self.reason = self._generate_reason()
             self.success = self.threshold is not None and self.score >= self.threshold
-            capture_metric_type(
-                self.__name__, async_mode=self.async_mode, in_component=False
-            )
+            record_metric(self.__name__, async_mode=self.async_mode, in_component=False)
             self.verbose_logs = construct_verbose_logs(
                 self,
                 steps=[

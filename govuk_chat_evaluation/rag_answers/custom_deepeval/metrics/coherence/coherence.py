@@ -9,7 +9,7 @@ from deepeval.metrics.utils import (
     trimAndLoadJson,
 )
 from deepeval.models import DeepEvalBaseLLM
-from deepeval.telemetry import capture_metric_type
+from deepeval.telemetry import record_metric
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 from .schema import CoherenceJudgement
@@ -83,9 +83,7 @@ class CoherenceMetric(BaseMetric):
             self.reason = cleaned_reason if self.include_reason else None
             self.success = self.is_successful()
 
-            capture_metric_type(
-                self.__name__, async_mode=True, in_component=_in_component
-            )
+            record_metric(self.__name__, async_mode=True, in_component=_in_component)
 
             verbose_reason = cleaned_reason if self.include_reason else "Reason omitted"
             self.verbose_logs = construct_verbose_logs(
