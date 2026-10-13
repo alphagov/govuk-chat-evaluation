@@ -39,6 +39,7 @@ class CoherenceMetric(BaseMetric):
         self.verbose_mode = verbose_mode
 
         self.model, self.using_native_model = initialize_model(model)
+        assert self.model is not None
         self.evaluation_model = self.model.get_model_name()
         self.rubric_score: int | None = None
 
