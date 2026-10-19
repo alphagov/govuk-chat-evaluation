@@ -51,6 +51,7 @@ class FactualPrecisionRecall(BaseMetric):
         verbose_mode: bool = False,
     ):
         self.model, self.using_native_model = initialize_model(model)
+        assert self.model is not None
         self.mode = mode
         self.threshold = 1 if strict_mode else threshold
         self.evaluation_model = self.model.get_model_name()
