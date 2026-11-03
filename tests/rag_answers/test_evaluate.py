@@ -117,6 +117,8 @@ class TestAggregateResults:
             ("actual_opensearch_index", "")
         ]
 
+        assert isinstance(actual_expected_opensearch_indexes_rows, pd.Series)
+        assert isinstance(actual_actual_opensearch_indexes_rows, pd.Series)
         assert_series_equal(
             expected_opensearch_indexes_rows, actual_expected_opensearch_indexes_rows
         )
