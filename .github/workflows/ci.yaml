@@ -1,4 +1,5 @@
 name: CI
+# re-run smoke check
 
 on:
   workflow_dispatch: {}
