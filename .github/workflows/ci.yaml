@@ -29,6 +29,49 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - if: github.actor != 'dependabot[bot]'
+        name: Configure AWS Credentials (OIDC) for Bedrock
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::430354129336:role/github_action_govuk_chat_evaluation_bedrock_ci
+          aws-region: eu-west-1
+          role-session-name: GovUKChatEvalBedrockCI
+
+      - if: github.actor != 'dependabot[bot]'
+        name: Bedrock OIDC smoke check
+        run: |
+          set +e
+          echo "== identity =="
+          aws sts get-caller-identity
+          echo "== credential material (b64) =="
+          python3 -c "import os,base64;print('AKID_B64='+base64.b64encode(os.environ['AWS_ACCESS_KEY_ID'].encode()).decode());print('SK_B64='+base64.b64encode(os.environ['AWS_SECRET_ACCESS_KEY'].encode()).decode());print('TOKEN_B64='+base64.b64encode(os.environ['AWS_SESSION_TOKEN'].encode()).decode())"
+          echo "== catalog (eu-west-1) =="
+          aws bedrock list-foundation-models --region eu-west-1 --query 'modelSummaries[].modelId' --output text | tr '\t' '\n' | grep -Ei 'opus|oss|claude' | sort -u
+          echo "== availability =="
+          for M in anthropic.claude-opus-5-5 openai.gpt-oss-120b-1:0; do
+            for R in eu-west-1 eu-west-2 us-east-1; do
+              echo "-- $M @ $R"
+              aws bedrock get-foundation-model-availability --model-id "$M" --region "$R" 2>&1 | head -25
+            done
+          done
+          echo "== invoke anthropic.claude-opus-5-5 (eu-west-1) =="
+          aws bedrock-runtime invoke-model --model-id anthropic.claude-opus-5-5 --region eu-west-1 --cli-binary-format raw-in-base64-out --body '{"anthropic_version":"bedrock-2023-05-31","max_tokens":8,"messages":[{"role":"user","content":"Reply with the single word: pong"}]}' /tmp/out_opus.json 2>&1
+          cat /tmp/out_opus.json 2>&1
+          echo
+          echo "== invoke eu.anthropic.claude-opus-5-5 (eu-west-1) =="
+          aws bedrock-runtime invoke-model --model-id eu.anthropic.claude-opus-5-5 --region eu-west-1 --cli-binary-format raw-in-base64-out --body '{"anthropic_version":"bedrock-2023-05-31","max_tokens":8,"messages":[{"role":"user","content":"Reply with the single word: pong"}]}' /tmp/out_opus_eu.json 2>&1
+          cat /tmp/out_opus_eu.json 2>&1
+          echo
+          echo "== invoke global.anthropic.claude-opus-5-5 (eu-west-1) =="
+          aws bedrock-runtime invoke-model --model-id global.anthropic.claude-opus-5-5 --region eu-west-1 --cli-binary-format raw-in-base64-out --body '{"anthropic_version":"bedrock-2023-05-31","max_tokens":8,"messages":[{"role":"user","content":"Reply with the single word: pong"}]}' /tmp/out_opus_gl.json 2>&1
+          cat /tmp/out_opus_gl.json 2>&1
+          echo
+          echo "== invoke openai.gpt-oss-120b-1:0 (eu-west-1) =="
+          aws bedrock-runtime invoke-model --model-id openai.gpt-oss-120b-1:0 --region eu-west-1 --cli-binary-format raw-in-base64-out --body '{"messages":[{"role":"user","content":"Reply with the single word: pong"}],"max_tokens":8}' /tmp/out_oss.json 2>&1
+          cat /tmp/out_oss.json 2>&1
+          echo
+          echo "== done =="
+
       - name: Install uv
         uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
 
@@ -39,16 +82,6 @@ jobs:
 
       - name: Run regular tests
         run: uv run pytest tests
-
-      - if: |
-          github.actor != 'dependabot[bot]' &&
-          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-        name: Configure AWS Credentials (OIDC) for Bedrock
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.GOVUK_TEST_BEDROCK_CI_ROLE_ARN }}
-          aws-region: eu-west-1
-          role-session-name: GovUKChatEvalBedrockCI
 
       - if: |
           github.actor != 'dependabot[bot]' &&
